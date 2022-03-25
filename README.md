@@ -5,6 +5,8 @@ data sources:
 
 * yfinance                          |   https://github.com/ranaroussi/yfinance
 * Sharadar Core US Equities Bundle  |   https://data.nasdaq.com/databases/SFA/data  |   nasdaq data link (quandl)
+* yahoo_fin                         |   http://theautomatic.net/yahoo_fin-documentation/
+
 </br>
 
 *collection* --> aws ec2 | lambda functions --> daily pulls from above vendors  </br>
@@ -48,9 +50,9 @@ model/
         institutional v retail activity
 
     options/
-        implied volitilities & put to call spreads
+        implied volitilities & put to call ratio's
 
-    screens/
+    moodys_methodologies/
 
 
 
