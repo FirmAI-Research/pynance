@@ -1,13 +1,14 @@
-import tkinter as tk
-import ttkbootstrap as ttk
-from ttkbootstrap.constants import *
+
+
+
+from tkinter import *
+from tkinter import ttk
 
 from view.widgets import Widgets
 
 class MoodysMethodologies():
 
-    def __init__(self, root, frame:ttk.Frame):
-        self.app = root
+    def __init__(self, frame:ttk.Frame):
         self.root = frame
 
         self.top_frame =  ttk.Frame(self.root)
@@ -20,9 +21,10 @@ class MoodysMethodologies():
 
 
     def draw_widgets(self):
+        print('drawing widgets')
 
         # Widgets().combobox(self.top_frame, ["Semiconductor", "Information Technology", "Financials"]).pack(side=LEFT)
 
-        # Widgets().pt_table(self.bottom_frame)
+        Widgets().pt_table(self.bottom_frame)
 
-        Widgets().table(self.app)
+        # Widgets().table(self.app)

@@ -1,24 +1,26 @@
+from ttkthemes import ThemedTk
+
+from tkinter import *
+from tkinter import ttk
 
 from view.moodys_methodologies import MoodysMethodologies
 from view.menubar import MenuBar
 from view.widgets import Widgets
 
 
-
-import tkinter as tk
-import ttkbootstrap as ttk
-from ttkbootstrap.constants import *
-
-
-class Gui(Widgets):
+class Gui():
 
     def __init__(self):    
-        root = ttk.Window(themename="flatly")
+
+
+        root = ThemedTk(theme="breeze")
+
+
+        # root = ttk.Window(themename="darkly")
 
         root.geometry("{0}x{1}+0+0".format(root.winfo_screenwidth()-3, root.winfo_screenheight()-3))
-
         root.title("PortRebOpAly")
-        tabControl = ttk.Notebook(root, bootstyle="info")
+        tabControl = ttk.Notebook(root)
         
         self.tab_moodys = ttk.Frame(tabControl)
         self.tab2 = ttk.Frame(tabControl)
@@ -40,9 +42,9 @@ class Gui(Widgets):
         ttk.Label(self.tab3, text ="Portfolio").pack() 
         ttk.Label(self.tab4, text ="Market").pack() 
 
-        # widgets
-        MoodysMethodologies(root = root, frame = self.tab_moodys)
+        # # widgets
+        MoodysMethodologies(frame = self.tab_moodys)
 
-        root.mainloop()  
+        root.mainloop()
 
 

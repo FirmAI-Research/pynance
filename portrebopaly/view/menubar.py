@@ -1,5 +1,5 @@
-from tkinter import * 
-from tkinter.ttk import * 
+from tkinter import *
+from tkinter import ttk
 
 class MenuBar():
     
