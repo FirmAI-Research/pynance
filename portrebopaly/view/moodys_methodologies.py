@@ -1,6 +1,3 @@
-
-
-
 from tkinter import *
 from tkinter import ttk
 
@@ -23,8 +20,8 @@ class MoodysMethodologies():
     def draw_widgets(self):
         print('drawing widgets')
 
-        # Widgets().combobox(self.top_frame, ["Semiconductor", "Information Technology", "Financials"]).pack(side=LEFT)
+        Widgets().combobox(self.top_frame, ["Semiconductor", "Information Technology", "Financials"]).pack(side=LEFT)
 
-        Widgets().pt_table(self.bottom_frame)
+        Widgets().table(self.bottom_frame)
 
-        # Widgets().table(self.app)
+    

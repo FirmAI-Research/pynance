@@ -1,9 +1,7 @@
-
-from pandastable import Table, TableModel
-
-
 from tkinter import *
 from tkinter import ttk
+
+from pandastable import Table, TableModel
 
 
 class Widgets():
@@ -18,8 +16,8 @@ class Widgets():
         return cb
 
 
-    def pt_table(self, root:ttk.Frame):
+    def table(self, root:ttk.Frame):
         df = TableModel.getSampleData()
-        self.table = pt = Table(root, dataframe=df,showtoolbar=True, showstatusbar=True)
-        self.table.show()
-        self.table.redraw()
+        table = pt = Table(root, dataframe=df,showtoolbar=True, showstatusbar=True)
+        table.show()
+        table.redraw()

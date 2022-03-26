@@ -12,11 +12,7 @@ class Gui():
 
     def __init__(self):    
 
-
         root = ThemedTk(theme="breeze")
-
-
-        # root = ttk.Window(themename="darkly")
 
         root.geometry("{0}x{1}+0+0".format(root.winfo_screenwidth()-3, root.winfo_screenheight()-3))
         root.title("PortRebOpAly")
