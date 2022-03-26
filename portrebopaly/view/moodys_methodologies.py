@@ -20,8 +20,15 @@ class MoodysMethodologies():
     def draw_widgets(self):
         print('drawing widgets')
 
-        Widgets().combobox(self.top_frame, ["Semiconductor", "Information Technology", "Financials"]).pack(side=LEFT)
+        Widgets().combobox( root  = self.top_frame, 
+                            values = ["Semiconductor", "Information Technology", "Financials"], 
+                            func = self.populate_table
+                            ).pack(side=LEFT)
+
 
         Widgets().table(self.bottom_frame)
 
+
+    def populate_table(self, sector:str):
+        print(f'populating table with {sector}')
     

@@ -8,7 +8,7 @@ def test_api_call():
     core = CoreUsFundamentals()
     df = core.get()
     print(df)
-
+# test_api_call()
 
 # -- CoreUsFundamentals sample export -- 
 def test_core_us_fundamentals():
@@ -17,10 +17,7 @@ def test_core_us_fundamentals():
     df = core.merge_meta_data(df_core)
     df = df.loc[df.sector=='Technology']
     print(df)
-    
     return df
-
-
 test_core_us_fundamentals()
 
 

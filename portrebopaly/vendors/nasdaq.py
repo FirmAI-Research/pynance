@@ -32,16 +32,10 @@ class Nasdaq:
     def authenticate(self):        
         with open('../secrets.json') as f:
             data = json.load(f)
+        #nasdaqdatalink.read_key() 
         os.environ["NASDAQ_DATA_LINK_API_KEY"] =  data['nasdaq_api_key']  # NOTE options: nasdaqdatalink.ApiConfig.api_key = data['nasdaq_api_key']   |     nasdaqdatalink.read_key()     
 
 
-    def get(self, name, ticker=None, date = None):
-        # if ticker is None:
-        #     return nasdaqdatalink.get_table(name, paginate=True)
-        # else:
-        #     return nasdaqdatalink.get_table(name, ticker=ticker)
-        df = nasdaqdatalink.get_table('SHARADAR/SF1', calendardate='2021-12-31', ticker = 'AMZN', paginate=True)
-        df.to_csv('.\\vendors\\exports')
 
 
 
@@ -73,7 +67,7 @@ class CoreUsFundamentals(Nasdaq):
 
     def __init__(self):
         super().__init__()
-        #self.authenticate()
+        self.authenticate()
 
 
     def get(self):
