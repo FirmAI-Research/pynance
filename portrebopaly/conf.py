@@ -1,3 +1,5 @@
 import sys, os
 
-fp_user = os.expanduser()
+class Conf:
+    
+    fp_user = os.expanduser()
