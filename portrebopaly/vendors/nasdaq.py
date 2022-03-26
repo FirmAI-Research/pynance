@@ -94,6 +94,8 @@ class CoreUsFundamentals(Nasdaq):
         df = df_core.merge(df_tickers, how='left', on='ticker')
         return df
 
+    def parse_seector_industry(self, sector:str=None, industry:str=None):
+        pass
 
 
 

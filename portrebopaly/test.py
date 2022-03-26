@@ -17,6 +17,7 @@ def test_core_us_fundamentals():
     df = core.merge_meta_data(df_core)
     df = df.loc[df.sector=='Technology']
     print(df)
+    
     return df
 
 
