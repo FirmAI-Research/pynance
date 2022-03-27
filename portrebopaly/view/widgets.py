@@ -10,10 +10,20 @@ class Widgets():
         pass
 
 
-    def reset(self,cb):
-        """ reset combobox selections
+
+    def check_for_back_selection(self, frame, event_widget):
+        """ check if widget event occured on a combobox widget that was not the last combobox widget to be packed to a frame
+        
         """
-        pass
+        widgets_on_window = [entry for entry in frame.winfo_children()]
+        event_widget_index = [i  for i, e in enumerate(widgets_on_window) if e.winfo_name() == event_widget.winfo_name()][0]
+        if event_widget.winfo_name() == widgets_on_window[-1].winfo_name():
+            return False
+        else:
+            for ix, widget in enumerate(widgets_on_window):
+                if ix > event_widget_index:
+                    frame.nametowidget(widget).pack_forget()                 # remove widgets were packed before the event widget
+            return True
 
 
     def combobox(self, root:ttk.Frame, values:list, func=None, call_name=None):
@@ -31,7 +41,7 @@ class Widgets():
         """
         cb = ttk.Combobox(root, state='readonly', values=values)
         cb.current()
-        cb.bind('<<ComboboxSelected>>', lambda event: func(call_name, event.widget.get()))
+        cb.bind('<<ComboboxSelected>>', lambda event: func(cb, call_name, event.widget.get()))
         return cb
 
 
