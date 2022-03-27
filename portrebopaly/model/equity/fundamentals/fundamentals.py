@@ -1,6 +1,22 @@
 from vendors.nasdaq import Nasdaq, CoreUsFundamentals,  Tickers
 
 
+class Semiconductors(Nasdaq):
+
+    def __init__(self):
+        super().__init__()
+
+        self.colnames = ['revenue', 'ebitda', 'ebit', 'capex', 'debt', 'fcf', 'intexp']  # debt = total debt; intexp = interest expense
+
+
+    def build_table(self, sector:str=None, industry:str=None):
+        df = filter_by_sector_and_industry(sector, industry)[self.colnames]
+        return df
+
+
+
+########### Utility functions
+
 def list_sectors():
     """ list Core US Equity fundamentals sectors
     """
@@ -34,3 +50,7 @@ def filter_by_sector_and_industry(sector:str, industry:str):
     df_core =  core.get_export()
     df = core.merge_meta_data(df_core)
     return  df.loc[(df.sector==sector) & (df.industry==industry)]
+
+
+
+    

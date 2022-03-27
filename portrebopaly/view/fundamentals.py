@@ -1,9 +1,10 @@
+import importlib
+
 from subprocess import call
 from tkinter import *
 from tkinter import ttk
 
 from view.widgets import Widgets
-
 from model.equity.fundamentals import fundamentals
 
 class Fundamentals():
@@ -57,7 +58,10 @@ class Fundamentals():
         back_selection = self.widgets.check_for_back_selection(self.drop_down_frame, event_widget)
 
         if back_selection == True:
-            delattr(self, 'industry')
+            try:
+                delattr(self, 'industry')
+            except:
+                pass
             
         self.draw_widgets()
 
@@ -66,6 +70,14 @@ class Fundamentals():
 
         if hasattr(self, 'sector') and hasattr(self, 'industry'):
 
-            self.df = fundamentals.filter_by_sector_and_industry(self.sector, self.industry)
+            # NOTE: use getattr to dynamicaly instantiate a class based on string selected in drop down
+            class_ = getattr(importlib.import_module("model.equity.fundamentals.fundamentals"), self.industry) #__import__('model.equity.fundamentals.fundamentals')
+            instance = class_() # NOTE: instance refers to an object of the fundamentals class with the name of the user's industry selection
+            print(instance.colnames)
+            df = instance.build_table(self.sector, self.industry)
 
-            Widgets().table(root = self.table_frame, df = self.df)
+            # NOTE: handle exceptions if user industry selection does not have a class associated with it
+            try:
+                Widgets().table(root = self.table_frame, df = df)
+            except:
+                print('[FAIL] Unable to populate table. Does a fundamental class exist for the selected industry?')
