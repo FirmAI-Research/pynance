@@ -31,7 +31,7 @@ model/
         pricing fixed income instruments
 
     optimization/
-        portfolio optimization using my forked version of PyPortfolioOpt
+        portfolio optimization using a forked version of PyPortfolioOpt
 
     performance/
         calculating performance
