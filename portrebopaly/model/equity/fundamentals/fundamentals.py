@@ -6,7 +6,7 @@ class Semiconductors(Nasdaq):
     def __init__(self):
         super().__init__()
 
-        self.colnames = ['revenue', 'ebitda', 'ebit', 'capex', 'debt', 'fcf', 'intexp']  # debt = total debt; intexp = interest expense
+        self.colnames = static_cols + ['revenue', 'ebitda', 'ebit', 'capex', 'debt', 'fcf', 'intexp']  # debt = total debt; intexp = interest expense
 
 
     def build_table(self, sector:str=None, industry:str=None):
@@ -15,7 +15,9 @@ class Semiconductors(Nasdaq):
 
 
 
-########### Utility functions
+########### utility & helper functions
+
+static_cols = ['ticker', 'name','sector','industry']
 
 def list_sectors():
     """ list Core US Equity fundamentals sectors

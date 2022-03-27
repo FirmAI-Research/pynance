@@ -71,13 +71,14 @@ class Fundamentals():
         if hasattr(self, 'sector') and hasattr(self, 'industry'):
 
             # NOTE: use getattr to dynamicaly instantiate a class based on string selected in drop down
-            class_ = getattr(importlib.import_module("model.equity.fundamentals.fundamentals"), self.industry) #__import__('model.equity.fundamentals.fundamentals')
-            instance = class_() # NOTE: instance refers to an object of the fundamentals class with the name of the user's industry selection
-            print(instance.colnames)
-            df = instance.build_table(self.sector, self.industry)
-
-            # NOTE: handle exceptions if user industry selection does not have a class associated with it
-            try:
+            try:        
+                class_ = getattr(importlib.import_module("model.equity.fundamentals.fundamentals"), self.industry) #__import__('model.equity.fundamentals.fundamentals')
+                instance = class_() # NOTE: instance here refers to an object of the fundamentals class with the name of the user's industry selection
+                print(instance.colnames)
+                df = instance.build_table(self.sector, self.industry)
                 Widgets().table(root = self.table_frame, df = df)
-            except:
+            
+            # NOTE: handle exceptions if user industry selection does not have a class associated with it
+            except:      
                 print('[FAIL] Unable to populate table. Does a fundamental class exist for the selected industry?')
+                # TODO: populate a template/default table view...
