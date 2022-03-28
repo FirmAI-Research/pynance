@@ -1,7 +1,9 @@
 from tkinter import *
 from tkinter import ttk
 
+import pandastable
 from pandastable import Table, TableModel
+
 import pandas as pd
 
 class Widgets():
@@ -45,8 +47,32 @@ class Widgets():
         return cb
 
 
-    def table(self, root:ttk.Frame, df:pd.DataFrame):
-        # df = TableModel.getSampleData()
+    def table(self, root:ttk.Frame, df:pd.DataFrame, color_columns:list=None):
+        pd.options.display.float_format = '{:,.2f}'.format
+        print(df)
+        
         table = pt = Table(root, dataframe=df,showtoolbar=True, showstatusbar=True)
         table.show()
+
+        options = {'align': 'w',
+        'cellbackgr': '#F4F4F3',
+        'cellwidth': 80,
+        'colheadercolor': '#535b71',
+        'floatprecision': 1,
+        'font': 'Arial',
+        'fontsize': 12,
+        'fontstyle': '',
+        'grid_color': '#ABB1AD',
+        'linewidth': 1,
+        'rowheight': 22,
+        'rowselectedcolor': '#E4DED4',
+        'textcolor': 'black'}
+        pandastable.config.apply_options(options, table)
+
+        # color a subset of columns
+        for c in color_columns:
+            table.columncolors[c] = '#dcf1fc' #color a specific column
+            
         table.redraw()
+
+   

@@ -13,11 +13,20 @@ class Fundamentals():
     def __init__(self, frame:ttk.Frame):
         self.root = frame
 
+        # drop down selection frame
         self.drop_down_frame =  ttk.Frame(self.root)
         self.drop_down_frame.pack(side=TOP, expand=False, fill=X)
 
+        # pandastable frame
         self.table_frame =  ttk.Frame(self.root)
         self.table_frame.pack(side=BOTTOM, expand=False, fill=X)
+
+        self.table_header = ttk.Frame(self.table_frame)
+        self.table_header.pack(side=TOP, expand=False, fill=X)
+ 
+        self.table_table = ttk.Frame(self.table_frame)
+        self.table_table.pack(side=BOTTOM, expand=False, fill=X)
+
 
         self.widgets = Widgets()
 
@@ -68,19 +77,21 @@ class Fundamentals():
 
     def display_table(self):
 
+
         if hasattr(self, 'sector') and hasattr(self, 'industry'):
             print(f'Sector: {self.sector}, Industry: {self.industry}')
 
             # NOTE: use getattr to dynamicaly instantiate a class based on string selected in drop down
             try:        
-                
+                ttk.Label(self.table_header, text='All values reported in millions ($, M)').pack(side=BOTTOM, anchor = W)
+
                 class_ = getattr(importlib.import_module("model.equity.fundamentals.fundamentals"), self.industry) #__import__('model.equity.fundamentals.fundamentals')
                 instance = class_() # NOTE: instance here refers to an object of the fundamentals class with the name of the user's industry selection
                 print(instance.colnames)
                 df = instance.build_table(self.sector, self.industry)
-                Widgets().table(root = self.table_frame, df = df)
+                Widgets().table(root = self.table_table, df = df, color_columns = instance.calc_colnames)
 
             # NOTE: handle exceptions if user industry selection does not have a class associated with it
-            except:      
-                print('[FAIL] Unable to populate table. Does a fundamental class exist for the selected industry?')
+            except AttributeError:      
+                print('[FAIL] Unable to populate table. Does a class exist for the selected industry in model/equity/fundamentals?')
                 # TODO: populate a template/default table view...
