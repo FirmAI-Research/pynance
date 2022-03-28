@@ -3,14 +3,33 @@ import pandas as pd
 
 from vendors.nasdaq import Nasdaq, CoreUsFundamentals,  Tickers
 
-class Semiconductors(Nasdaq):
+
+class Moodys(Nasdaq):
+
+    moody_ratings = ['Aaa', 'Aa', 'A', 'Baa', 'Ba', 'B', 'Caa', 'Ca']
 
     def __init__(self):
         super().__init__()
 
+    def map_score(self, df_scorecard:pd.DataFrame, df_fundamentals:pd.DataFrame) -> pd.DataFrame:
+        """takes a scorecard dataframe and US Core fundamentals df to returns the Moodys rating for associated fundamentals values
+        
+        :param [df_scorecard]: a df with fundamental metrics labels as indexes, and moodys rating as columns. values represent breakpoints for each metric to be assigned a given rating
+        :param [df_fundamentals]: a df with fundamental data with rows representing fundamental data of an individual company and columns containing fundamental metrics.
+            all fundamental metrics listed in the df scorecard index must be contained as a subset with in the df fundamentals columns
+
+        :raises [ErrorType]: 
+        """
+
+
+
+class Semiconductors(Moodys):
+
+    def __init__(self):
+        super().__init__() # TODO inherit Moodys
+
         self.colnames = ['revenue', 'ebitda', 'ebit', 'capex', 'debt', 'fcf', 'intexp']  # Core US Fundamentals columns:    debt = total debt; intexp = interest expense
         self.calc_colnames = ['ebitda_margin', 'ebitda_less_capex_margin', 'debt_to_ebitda', 'fcf_to_debt', 'ebit_to_interest_expense']
-        self.moody_ratings = ['Aaa', 'Aa', 'A', 'Baa', 'Ba', 'B', 'Caa', 'Ca']
         self.moodys_weights = [0.2, 0.05, 0.05, 0.1, 0.1, 0.05]
 
 
@@ -49,7 +68,10 @@ class Semiconductors(Nasdaq):
         return scorecard.reset_index(drop=False)
 
 
-########### utility & helper functions
+
+
+########### utility & helper functions for retreiving fundamental data from vendors
+
 
 static_cols = ['ticker', 'name', 'calendardate', 'reportperiod','sector','industry']
 

@@ -17,7 +17,7 @@ class Fundamentals():
         self.drop_down_frame =  ttk.Frame(self.root)
         self.drop_down_frame.pack(side=TOP, anchor=W, expand=False)
 
-        # pandastable frame's
+        # alt pandastable frame's
         self.alt_frame =  ttk.Frame(self.root)
         self.alt_frame.pack(side=TOP, expand=True, fill=X)
 
@@ -27,7 +27,7 @@ class Fundamentals():
         self.graphics_table = ttk.Frame(self.alt_frame)  # Side half table for scorecard
         self.graphics_table.pack(side=RIGHT,  expand=False, fill=Y)
 
-        # pandastable frame's
+        # main pandastable frame's
         self.main_table_frame =  ttk.Frame(self.root)
         self.main_table_frame.pack(side=BOTTOM, expand=False, fill=X)
 
@@ -36,8 +36,6 @@ class Fundamentals():
  
         self.main_table = ttk.Frame(self.main_table_frame) # Main raw fundamentals data table
         self.main_table.pack(side=BOTTOM, expand=False, fill=X)
-
-
 
         self.widgets = Widgets()
 
@@ -87,7 +85,6 @@ class Fundamentals():
 
 
     def display_table(self):
-
 
         if hasattr(self, 'sector') and hasattr(self, 'industry'):
             print(f'Sector: {self.sector}, Industry: {self.industry}')
