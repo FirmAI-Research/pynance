@@ -8,8 +8,10 @@ class Semiconductors(Nasdaq):
     def __init__(self):
         super().__init__()
 
-        self.colnames = static_cols + ['revenue', 'ebitda', 'ebit', 'capex', 'debt', 'fcf', 'intexp']  # Core US Fundamentals columns:    debt = total debt; intexp = interest expense
+        self.colnames = ['revenue', 'ebitda', 'ebit', 'capex', 'debt', 'fcf', 'intexp']  # Core US Fundamentals columns:    debt = total debt; intexp = interest expense
         self.calc_colnames = ['ebitda_margin', 'ebitda_less_capex_margin', 'debt_to_ebitda', 'fcf_to_debt', 'ebit_to_interest_expense']
+        self.moody_ratings = ['Aaa', 'Aa', 'A', 'Baa', 'Ba', 'B', 'Caa', 'Ca']
+        self.moodys_weights = [0.2, 0.05, 0.05, 0.1, 0.1, 0.05]
 
 
     def calculate(self):
@@ -26,12 +28,25 @@ class Semiconductors(Nasdaq):
         ''' filters US Core Fundamentals data by sector and industry. applies number formatting to report in millions. performs calculations on the raw fundamentals
         returns an dataframe with a concatenation of the static, raw, and calculated columns.
         '''
-        self.df = filter_by_sector_and_industry(sector, industry)[self.colnames]
+        self.df = filter_by_sector_and_industry(sector, industry)[static_cols + self.colnames]
         self.df = number_format(self.df)
         self.calculate()
-        self.df = self.df[static_cols + self.calc_colnames + [c for c in self.colnames if c not in static_cols] ].reset_index(drop=True)
+        self.df = self.df[static_cols + self.calc_colnames + self.colnames ].reset_index(drop=True)
         return self.df
 
+
+    def build_scorecard(self):
+        scorecard = pd.DataFrame(columns = self.moody_ratings, index = ['revenue'] + self.calc_colnames)
+        scorecard.loc['revenue', :]                     = [50, 30, 15, 5, 2, 0.75, 0.25, '<']   # ($, B)
+        scorecard.loc['ebitda_margin', :]               = [0.5, 0.35, 0.3, 0.25, 0.2, 0.15, 0.10, '<']   # %
+        scorecard.loc['ebitda_less_capex_margin', :]    = [0.35, 0.3, 0.25, 0.20, 0.15, 0.10, 0.05, '<']   # %
+        scorecard.loc['debt_to_ebitda', :]              = [0.5, 1, 1.5, 2.5, 3.5, 5, 7, '>']   # 0x
+        scorecard.loc['fcf_to_debt', :]                 = [0.5, 0.4, 0.3, 0.2, 0.1, 0.05, 0.0, '<']   # %
+        scorecard.loc['ebit_to_interest_expense', :]    = [30, 20, 10, 5, 3, 1.5, 0.0, '<']   # ($, B)
+        moodys_weights = [0.2, 0.05, 0.05, 0.1, 0.1, 0.05] # buisness profile & financial policy are excluded as currently non-quantifiable
+        scorecard['weights'] = moodys_weights
+        print(scorecard)
+        return scorecard.reset_index(drop=False)
 
 
 ########### utility & helper functions

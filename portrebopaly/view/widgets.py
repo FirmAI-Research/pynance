@@ -1,5 +1,7 @@
 from tkinter import *
 from tkinter import ttk
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 import pandastable
 from pandastable import Table, TableModel
@@ -70,9 +72,24 @@ class Widgets():
         pandastable.config.apply_options(options, table)
 
         # color a subset of columns
-        for c in color_columns:
-            table.columncolors[c] = '#dcf1fc' #color a specific column
-            
+        if color_columns is not None:
+            for c in color_columns:
+                table.columncolors[c] = '#dcf1fc' #color a specific column
+
         table.redraw()
 
-   
+    
+    def chart(self,  root:ttk.Frame, df:pd.DataFrame,):
+        fig = Figure(figsize = (5, 5),
+                    dpi = 100)
+    
+        y = [i**2 for i in range(101)]
+    
+        plot1 = fig.add_subplot(111)
+        plot1.plot(y)
+        canvas = FigureCanvasTkAgg(fig, master = root)  
+        canvas.draw()
+        canvas.get_tk_widget().pack()
+        toolbar = NavigationToolbar2Tk(canvas, root)
+        toolbar.update()
+        canvas.get_tk_widget().pack()

@@ -15,17 +15,28 @@ class Fundamentals():
 
         # drop down selection frame
         self.drop_down_frame =  ttk.Frame(self.root)
-        self.drop_down_frame.pack(side=TOP, expand=False, fill=X)
+        self.drop_down_frame.pack(side=TOP, anchor=W, expand=False)
 
-        # pandastable frame
-        self.table_frame =  ttk.Frame(self.root)
-        self.table_frame.pack(side=BOTTOM, expand=False, fill=X)
+        # pandastable frame's
+        self.alt_frame =  ttk.Frame(self.root)
+        self.alt_frame.pack(side=TOP, expand=True, fill=X)
 
-        self.table_header = ttk.Frame(self.table_frame)
+        self.side_table = ttk.Frame(self.alt_frame)  # Side half table for scorecard
+        self.side_table.pack(side=RIGHT,  expand=True, fill=X )
+
+        self.graphics_table = ttk.Frame(self.alt_frame)  # Side half table for scorecard
+        self.graphics_table.pack(side=RIGHT,  expand=False, fill=Y)
+
+        # pandastable frame's
+        self.main_table_frame =  ttk.Frame(self.root)
+        self.main_table_frame.pack(side=BOTTOM, expand=False, fill=X)
+
+        self.table_header = ttk.Frame(self.main_table_frame)
         self.table_header.pack(side=TOP, expand=False, fill=X)
  
-        self.table_table = ttk.Frame(self.table_frame)
-        self.table_table.pack(side=BOTTOM, expand=False, fill=X)
+        self.main_table = ttk.Frame(self.main_table_frame) # Main raw fundamentals data table
+        self.main_table.pack(side=BOTTOM, expand=False, fill=X)
+
 
 
         self.widgets = Widgets()
@@ -87,9 +98,14 @@ class Fundamentals():
 
                 class_ = getattr(importlib.import_module("model.equity.fundamentals.fundamentals"), self.industry) #__import__('model.equity.fundamentals.fundamentals')
                 instance = class_() # NOTE: instance here refers to an object of the fundamentals class with the name of the user's industry selection
-                print(instance.colnames)
-                df = instance.build_table(self.sector, self.industry)
-                Widgets().table(root = self.table_table, df = df, color_columns = instance.calc_colnames)
+
+                df_main = instance.build_table(self.sector, self.industry)
+                Widgets().table(root = self.main_table, df = df_main, color_columns = instance.calc_colnames)
+
+                df_side = instance.build_scorecard()
+                Widgets().table(root = self.side_table, df = df_side) 
+
+                Widgets().chart(root = self.graphics_table, df = df_side) 
 
             # NOTE: handle exceptions if user industry selection does not have a class associated with it
             except AttributeError:      
