@@ -22,10 +22,10 @@ class Fundamentals():
         self.alt_frame.pack(side=TOP, expand=True, fill=X)
 
         self.side_table = ttk.Frame(self.alt_frame)  # Side half table for scorecard
-        self.side_table.pack(side=RIGHT,  expand=True, fill=X )
+        self.side_table.pack(side=RIGHT,  expand=False, fill=X )
 
         self.graphics_table = ttk.Frame(self.alt_frame)  # Side half table for scorecard
-        self.graphics_table.pack(side=RIGHT,  expand=False, fill=Y)
+        self.graphics_table.pack(side=RIGHT,  expand=False)
 
         # main pandastable frame's
         self.main_table_frame =  ttk.Frame(self.root)
@@ -84,6 +84,11 @@ class Fundamentals():
         self.draw_widgets()
 
 
+    def build_bar_chart(self, df):
+        df = df.sort_values(by=['revenue'], ascending=False)
+        return df[['ticker', 'revenue', 'debt']].iloc[:5]
+
+
     def display_table(self):
 
         if hasattr(self, 'sector') and hasattr(self, 'industry'):
@@ -102,9 +107,10 @@ class Fundamentals():
                 df_side = instance.build_scorecard()
                 Widgets().table(root = self.side_table, df = df_side) 
 
-                Widgets().chart(root = self.graphics_table, df = df_side) 
 
             # NOTE: handle exceptions if user industry selection does not have a class associated with it
             except AttributeError:      
                 print('[FAIL] Unable to populate table. Does a class exist for the selected industry in model/equity/fundamentals?')
                 # TODO: populate a template/default table view...
+
+            Widgets().chart(root = self.graphics_table, df = self.build_bar_chart(df_main))

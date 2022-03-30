@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
@@ -7,6 +8,7 @@ import pandastable
 from pandastable import Table, TableModel
 
 import pandas as pd
+import seaborn as sns
 
 class Widgets():
 
@@ -26,7 +28,7 @@ class Widgets():
         else:
             for ix, widget in enumerate(widgets_on_window):
                 if ix > event_widget_index:
-                    frame.nametowidget(widget).pack_forget()                 # remove widgets were packed before the event widget
+                    frame.nametowidget(widget).pack_forget()                 # remove widgets that were packed before the event widget
             return True
 
 
@@ -74,19 +76,23 @@ class Widgets():
         # color a subset of columns
         if color_columns is not None:
             for c in color_columns:
-                table.columncolors[c] = '#dcf1fc' #color a specific column
+                table.columncolors[c] = '#dcf1fc' 
 
         table.redraw()
 
     
     def chart(self,  root:ttk.Frame, df:pd.DataFrame,):
-        fig = Figure(figsize = (5, 5),
-                    dpi = 100)
-    
-        y = [i**2 for i in range(101)]
-    
-        plot1 = fig.add_subplot(111)
-        plot1.plot(y)
+
+        sns.set() # Setting seaborn as default style 
+        fig, axes = plt.subplots(1, 2)
+        fig.suptitle('some charts')
+
+        sns.barplot(ax=axes[0], x=df.ticker, y=df.revenue)
+        axes[0].set_title('title')
+
+        sns.barplot(ax=axes[1], x=df.ticker, y=df.debt)
+        axes[1].set_title('title')
+
         canvas = FigureCanvasTkAgg(fig, master = root)  
         canvas.draw()
         canvas.get_tk_widget().pack()
