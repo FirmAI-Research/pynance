@@ -1,7 +1,7 @@
 
 import pandas as pd
 import nasdaqdatalink
-from vendors.nasdaq import Nasdaq, CoreUsFundamentals,  Tickers
+from vendors.nasdaq import Nasdaq, CoreUsFundamentals,  CoreUSInstitutionalInvestors,  Tickers
 
 # -- NasdaqDataLink Api Call --
 def test_api_call():
@@ -26,7 +26,29 @@ def test_tickers():
     tickers = Tickers()
     df =  tickers.get_export()
     print(df.columns)
-test_tickers()
+# test_tickers()
+
+
+
+# -- CoreUSInstitutionalInvestors sample export -- 
+def test_institutions():
+    core = CoreUSInstitutionalInvestors()
+    core.get_export()
+    # print(core.get())
+    # print(df.calendardate.value_counts())
+    # print(df.columns)
+    # print(raw_df.tail())
+    # print(raw_df.shape)
+    # print(core.group_by_ticker(raw_df))
+    # core.group_by_institution()
+
+
+    core.qtr_over_qtr_change(qtr_start = '2021-12-31', qtr_end = '2020-09-30')
+
+
+test_institutions()
+
+
 
 
 
@@ -44,4 +66,4 @@ def test_build_scorecard():
     scorecard['weights'] = moodys_weights
     print(scorecard)
 
-test_build_scorecard()
+# test_build_scorecard()

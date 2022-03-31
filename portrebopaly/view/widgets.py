@@ -32,7 +32,7 @@ class Widgets():
             return True
 
 
-    def combobox(self, root:ttk.Frame, values:list, func=None, call_name=None):
+    def combobox(self, root:ttk.Frame, values:list, func=None, call_name=None, state='readonly'):
         """ create a dropdown menu
 
         :param root: Frame for table to appear on
@@ -45,7 +45,7 @@ class Widgets():
         :return: combobox object
             pack() or grid() the combobox using the returned object
         """
-        cb = ttk.Combobox(root, state='readonly', values=values)
+        cb = ttk.Combobox(root, state=state, values=values)
         cb.current()
         cb.bind('<<ComboboxSelected>>', lambda event: func(cb, call_name, event.widget.get()))
         return cb
@@ -55,8 +55,8 @@ class Widgets():
         pd.options.display.float_format = '{:,.2f}'.format
         print(df)
         
-        table = pt = Table(root, dataframe=df,showtoolbar=False, showstatusbar=True)
-        table.show()
+        self.table = pt = Table(root, dataframe=df,showtoolbar=False, showstatusbar=True)
+        self.table.show()
 
         options = {'align': 'w',
         'cellbackgr': '#F4F4F3',
@@ -71,14 +71,14 @@ class Widgets():
         'rowheight': 22,
         'rowselectedcolor': '#E4DED4',
         'textcolor': 'black'}
-        pandastable.config.apply_options(options, table)
+        pandastable.config.apply_options(options, self.table)
 
         # color a subset of columns
         if color_columns is not None:
             for c in color_columns:
-                table.columncolors[c] = '#dcf1fc' 
+                self.table.columncolors[c] = '#dcf1fc' 
 
-        table.redraw()
+        self.table.redraw()
 
     
     def chart(self,  root:ttk.Frame, chart_data:list):

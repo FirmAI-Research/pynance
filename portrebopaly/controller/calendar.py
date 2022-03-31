@@ -15,3 +15,6 @@ class Calendar:
         rr = rrule.rrule(rrule.DAILY,bymonth=(3,6,9,12), bymonthday=-1, dtstart = dt_obj-datetime.timedelta(days=100))
         result = rr.before(dt_obj, inc=False) 
         return result.date()
+
+    def prior_quarter_end(self):
+        return self.previous_quarter_end() - datetime.timedelta(months=3)
