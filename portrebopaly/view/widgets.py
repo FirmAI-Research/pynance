@@ -55,7 +55,7 @@ class Widgets():
         pd.options.display.float_format = '{:,.2f}'.format
         print(df)
         
-        table = pt = Table(root, dataframe=df,showtoolbar=True, showstatusbar=True)
+        table = pt = Table(root, dataframe=df,showtoolbar=False, showstatusbar=True)
         table.show()
 
         options = {'align': 'w',
@@ -81,17 +81,15 @@ class Widgets():
         table.redraw()
 
     
-    def chart(self,  root:ttk.Frame, df:pd.DataFrame,):
-
-        sns.set() # Setting seaborn as default style 
-        fig, axes = plt.subplots(1, 2)
+    def chart(self,  root:ttk.Frame, chart_data:list):
+        
+        sns.set() 
+        fig, axes = plt.subplots(1, len(chart_data), figsize=(14,4))
         fig.suptitle('some charts')
-
-        sns.barplot(ax=axes[0], x=df.ticker, y=df.revenue)
-        axes[0].set_title('title')
-
-        sns.barplot(ax=axes[1], x=df.ticker, y=df.debt)
-        axes[1].set_title('title')
+        
+        for i, l in enumerate(chart_data):
+            sns.barplot(ax=axes[i], x=l[0], y=l[1])
+            axes[i].set_title(l[2])
 
         canvas = FigureCanvasTkAgg(fig, master = root)  
         canvas.draw()

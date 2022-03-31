@@ -26,16 +26,16 @@ class Fundamentals():
 
         self.graphics_table = ttk.Frame(self.alt_frame)  # Side half table for scorecard
         self.graphics_table.pack(side=RIGHT,  expand=False)
-
+        
         # main pandastable frame's
         self.main_table_frame =  ttk.Frame(self.root)
-        self.main_table_frame.pack(side=BOTTOM, expand=False, fill=X)
+        self.main_table_frame.pack(side=BOTTOM, expand=True, fill=BOTH)
 
         self.table_header = ttk.Frame(self.main_table_frame)
         self.table_header.pack(side=TOP, expand=False, fill=X)
  
         self.main_table = ttk.Frame(self.main_table_frame) # Main raw fundamentals data table
-        self.main_table.pack(side=BOTTOM, expand=False, fill=X)
+        self.main_table.pack(side=BOTTOM, expand=True, fill=BOTH)
 
         self.widgets = Widgets()
 
@@ -86,7 +86,13 @@ class Fundamentals():
 
     def build_bar_chart(self, df):
         df = df.sort_values(by=['revenue'], ascending=False)
-        return df[['ticker', 'revenue', 'debt']].iloc[:5]
+        df = df.loc[df.currency == 'USD']
+        df = df[['ticker', 'revenue', 'debt']].iloc[:5]
+        chart_data = [ 
+                        [df.ticker, df.revenue, 'revenue'], 
+                        [df.ticker, df.debt, 'debt']   
+                     ]
+        return chart_data
 
 
     def display_table(self):
@@ -107,10 +113,10 @@ class Fundamentals():
                 df_side = instance.build_scorecard()
                 Widgets().table(root = self.side_table, df = df_side) 
 
+                Widgets().chart(root = self.graphics_table, chart_data = self.build_bar_chart(df = df_main))
 
             # NOTE: handle exceptions if user industry selection does not have a class associated with it
             except AttributeError:      
                 print('[FAIL] Unable to populate table. Does a class exist for the selected industry in model/equity/fundamentals?')
                 # TODO: populate a template/default table view...
 
-            Widgets().chart(root = self.graphics_table, df = self.build_bar_chart(df_main))

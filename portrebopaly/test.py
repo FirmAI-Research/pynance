@@ -25,8 +25,8 @@ def test_core_us_fundamentals():
 def test_tickers():
     tickers = Tickers()
     df =  tickers.get_export()
-    print(df)
-# test_tickers()
+    print(df.columns)
+test_tickers()
 
 
 

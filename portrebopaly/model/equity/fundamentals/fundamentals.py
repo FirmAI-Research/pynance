@@ -26,7 +26,7 @@ class Moodys(Nasdaq):
 class Semiconductors(Moodys):
 
     def __init__(self):
-        super().__init__() # TODO inherit Moodys
+        super().__init__() 
 
         self.colnames = ['revenue', 'ebitda', 'ebit', 'capex', 'debt', 'fcf', 'intexp']  # Core US Fundamentals columns:    debt = total debt; intexp = interest expense
         self.calc_colnames = ['ebitda_margin', 'ebitda_less_capex_margin', 'debt_to_ebitda', 'fcf_to_debt', 'ebit_to_interest_expense']
@@ -68,12 +68,36 @@ class Semiconductors(Moodys):
         return scorecard.reset_index(drop=False)
 
 
+class Insurance(Moodys):
+    pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ########### utility & helper functions for retreiving fundamental data from vendors
 
 
-static_cols = ['ticker', 'name', 'calendardate', 'reportperiod','sector','industry']
+static_cols = ['ticker', 'name', 'currency', 'calendardate', 'reportperiod','sector','industry']
 
 def number_format(df):
     for c in df.columns:
