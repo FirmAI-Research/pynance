@@ -97,3 +97,22 @@ class Widgets():
         toolbar = NavigationToolbar2Tk(canvas, root)
         toolbar.update()
         canvas.get_tk_widget().pack()
+
+
+    def single_chart(self, root:ttk.Frame, df, x, y, h, chart_type, title):
+        fig, axes = plt.subplots(1, 1, figsize=(40,20))
+        fig.suptitle(title)
+        chart_type(data=df, x=x, y=y, hue=h)
+        canvas = FigureCanvasTkAgg(fig, master = root)  
+        canvas.draw()
+        canvas.get_tk_widget().pack()
+        toolbar = NavigationToolbar2Tk(canvas, root)
+        toolbar.update()
+        canvas.get_tk_widget().pack()
+
+
+    def new_window(self, root:ttk.Frame):
+        newWindow = Toplevel(root)
+        newWindow.title("New Window")    
+        newWindow.geometry("1500x1000")    
+        return newWindow

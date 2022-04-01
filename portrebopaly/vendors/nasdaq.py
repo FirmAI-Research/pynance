@@ -81,11 +81,13 @@ class CoreUsFundamentals(Nasdaq):
         df = df.loc[(df.dimension == dimension) & (df.calendardate == prev_qtr)]
         return df
 
+
     def merge_meta_data(self, df_core):
         tickers = Tickers()
         df_tickers =  tickers.get_export().dropna(subset=['ticker'])
         df = df_core.merge(df_tickers, how='left', on='ticker')
         return df
+
 
     def parse_seector_industry(self, sector:str=None, industry:str=None):
         pass
@@ -160,21 +162,22 @@ class CoreUSInstitutionalInvestors(Nasdaq):
         return df
 
 
-    def qtr_over_qtr_change(self, qtr_start, qtr_end):
-        # quarter over quarter
-        dates =  Calendar().quarter_end_list('2020-12-31', '2021-12-31')
-
-        frames = []
-        for date in dates:
-            df = self.get(date = date, institution='BLACKROCK INC')
-            df = df.sort_values(by=['value'], ascending=False)
-            df = df.iloc[:11]
-            frames.append(df)
-            print(df.head())
-            print(df.shape)
-        df = pd.concat(frames)
-        # sns.lineplot(data=df, x="calendardate", y="value", hue='ticker')
-        # plt.show()
+    def qtr_over_qtr_change(self, institution, qtr_start, qtr_end):
+        # dates =  Calendar().quarter_end_list('2020-12-31', '2021-12-31')
+        # frames = []
+        # for date in dates:
+        #     df = self.get(date = date, institution=institution)
+        #     df = df.sort_values(by=['value'], ascending=False)
+        #     df = df.iloc[:11]
+        #     frames.append(df)
+        #     print(df.head())
+        #     print(df.shape)
+        # df = pd.concat(frames)
+        # df.to_csv(f'./vendors/output/{institution}.csv') 
+        # TODO: ValueError("cannot reindex on an axis with duplicate labels") when calling with .get() instead of reading file
+        df = pd.read_csv(f'./vendors/output/{institution}.csv')
+        df.calendardate = pd.to_datetime(df.calendardate)
+        return df
 
 
 
