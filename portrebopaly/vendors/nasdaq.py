@@ -145,7 +145,16 @@ class CoreUSInstitutionalInvestors(Nasdaq):
     def list_all_institutions(self):
         if not hasattr(self, 'df'):
             self.get_export()
+        self.df.investorname.to_csv('./vendors/output/institution names.csv')
         return sorted(self.df.investorname.unique().tolist(), reverse=False)
+
+
+    def favorite_institutions(self):
+        return [ 'BLACKROCK INC','VANGUARD GROUP INC','JANUS HENDERSON GROUP PLC','CITADEL ADVISORS LLC',
+            'UBS ASSET MANAGEMENT AMERICAS INC','GOLDMAN SACHS GROUP INC','MORGAN STANLEY','BARCLAYS PLC',
+            'SUSQUEHANNA INTERNATIONAL GROUP LLP', 'TWO SIGMA INVESTMENTS LP','ELLIOTT INVESTMENT MANAGEMENT LP',
+            'BROOKFIELD ASSET MANAGEMENT INC','BERKSHIRE ASSET MANAGEMENT LLC','BERKSHIRE HATHAWAY INC',
+            'OAKTREE CAPITAL MANAGEMENT LP' ]
 
 
     def group_by_ticker(self):
@@ -163,18 +172,18 @@ class CoreUSInstitutionalInvestors(Nasdaq):
 
 
     def qtr_over_qtr_change(self, institution, qtr_start, qtr_end):
-        # dates =  Calendar().quarter_end_list('2020-12-31', '2021-12-31')
-        # frames = []
-        # for date in dates:
-        #     df = self.get(date = date, institution=institution)
-        #     df = df.sort_values(by=['value'], ascending=False)
-        #     df = df.iloc[:11]
-        #     frames.append(df)
-        #     print(df.head())
-        #     print(df.shape)
-        # df = pd.concat(frames)
-        # df.to_csv(f'./vendors/output/{institution}.csv') 
-        # TODO: ValueError("cannot reindex on an axis with duplicate labels") when calling with .get() instead of reading file
+        dates =  Calendar().quarter_end_list('2020-12-31', '2021-12-31')
+        frames = []
+        for date in dates:
+            df = self.get(date = date, institution=institution)
+            df = df.sort_values(by=['value'], ascending=False)
+            df = df.iloc[:11]
+            frames.append(df)
+            print(df.head())
+            print(df.shape)
+        df = pd.concat(frames)
+        df.to_csv(f'./vendors/output/{institution}.csv') 
+        # TODO: ValueError("cannot reindex on an axis with duplicate labels") when calling with .get() directly instead of reading file
         df = pd.read_csv(f'./vendors/output/{institution}.csv')
         df.calendardate = pd.to_datetime(df.calendardate)
         return df

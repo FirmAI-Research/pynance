@@ -71,9 +71,18 @@ class Institution:
 
         # by Institution
         if not hasattr(self, 'institution'): # dont draw again if box 
+            
+
             ttk.Label(self.institution_table_head, text='All values reported in millions ($, M)').pack(side=BOTTOM, anchor = W)
             cb = self.widgets.combobox( root  = self.institution_table_head, 
                                 values = self.core.list_all_institutions(), 
+                                func = self._setattr,
+                                call_name = 'institution',
+                                state = 'enable')
+            cb.pack(side=TOP)
+
+            cb = self.widgets.combobox( root  = self.institution_table_head, 
+                                values = self.core.favorite_institutions(), 
                                 func = self._setattr,
                                 call_name = 'institution',
                                 state = 'enable')

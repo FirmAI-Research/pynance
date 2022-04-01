@@ -59,14 +59,17 @@ def test_institutions():
     #     print(df.shape)
     # df = pd.concat(frames)
     # df.to_csv('./vendors/output/blackrock.csv')
-    df = pd.read_csv('./vendors/output/blackrock.csv')
+    fig, axes = plt.subplots(1, 1, figsize=(15,8))
+    df = pd.read_csv('./vendors/output/BRIDGEWATER ASSOCIATES LP.csv')
     df.calendardate = pd.to_datetime(df.calendardate)
     print(df.head())
-    sns.lineplot(data=df, x="calendardate", y="value", hue='ticker')
+    line = sns.lineplot(data=df, x="calendardate", y="value", hue='ticker')
+    annotate_txt_df = df.loc[df.calendardate=='2020-12-31'].reset_index()
+    print(annotate_txt_df)
+    for i in range(len(annotate_txt_df.ticker)):
+        line.annotate(annotate_txt_df.ticker[i], xy = (annotate_txt_df.calendardate[i], annotate_txt_df.value[i]) )
+    plt.legend(loc='upper right')
     plt.show()
-
-
-
 
 test_institutions()
 

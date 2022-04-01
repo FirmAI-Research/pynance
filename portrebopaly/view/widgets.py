@@ -100,9 +100,18 @@ class Widgets():
 
 
     def single_chart(self, root:ttk.Frame, df, x, y, h, chart_type, title):
-        fig, axes = plt.subplots(1, 1, figsize=(40,20))
+        fig, axes = plt.subplots(1, 1, figsize=(15,8))
         fig.suptitle(title)
-        chart_type(data=df, x=x, y=y, hue=h)
+        line = chart_type(data=df, x=x, y=y, hue=h)
+
+        annotate_txt_df = df.loc[df.calendardate=='2020-12-31'].reset_index()
+        print(annotate_txt_df)
+        for i in range(len(annotate_txt_df.ticker)):
+            line.annotate(annotate_txt_df.ticker[i], xy = (annotate_txt_df.calendardate[i], annotate_txt_df.value[i]) )
+        plt.legend(loc='upper right')
+
+
+
         canvas = FigureCanvasTkAgg(fig, master = root)  
         canvas.draw()
         canvas.get_tk_widget().pack()
