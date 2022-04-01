@@ -38,6 +38,7 @@ class Institution:
 
         ttk.Label(self.institution_table_head, text='Institution').pack(side=TOP)
         ttk.Label(self.tickers_table_head, text='All values reported in billions ($, B)').pack(side=BOTTOM, anchor = W)
+        ttk.Button(self.tickers_table_head, text = 'Time Series', command = '').pack(side=TOP, anchor = E)
 
         self.draw_widgets()
 
@@ -64,8 +65,6 @@ class Institution:
         # by Ticker
         df_tickers = core.group_by_ticker().reset_index()
         Widgets().table(root = self.tickers_table, df = df_tickers, color_columns = None)
-
-
 
         # by Institution
         if not hasattr(self, 'institution'): # dont draw again if box 

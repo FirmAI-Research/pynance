@@ -1,5 +1,7 @@
 import datetime
 import dateutil.rrule as rrule
+import pandas as pd 
+
 
 class Calendar:
 
@@ -18,3 +20,7 @@ class Calendar:
 
     def prior_quarter_end(self):
         return self.previous_quarter_end() - datetime.timedelta(months=3)
+
+    
+    def quarter_end_list(self, start_date, end_date):
+        return pd.date_range(pd.to_datetime(start_date), pd.to_datetime(end_date) + pd.offsets.QuarterBegin(1), freq='Q').strftime('%Y-%m-%d').tolist()

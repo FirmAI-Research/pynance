@@ -1,7 +1,10 @@
 
 import pandas as pd
 import nasdaqdatalink
+from controller.calendar import Calendar
 from vendors.nasdaq import Nasdaq, CoreUsFundamentals,  CoreUSInstitutionalInvestors,  Tickers
+import matplotlib.pyplot as plt
+import seaborn as sns 
 
 # -- NasdaqDataLink Api Call --
 def test_api_call():
@@ -33,7 +36,6 @@ def test_tickers():
 # -- CoreUSInstitutionalInvestors sample export -- 
 def test_institutions():
     core = CoreUSInstitutionalInvestors()
-    core.get_export()
     # print(core.get())
     # print(df.calendardate.value_counts())
     # print(df.columns)
@@ -42,8 +44,28 @@ def test_institutions():
     # print(core.group_by_ticker(raw_df))
     # core.group_by_institution()
 
+    # df_qe = core.get_export(fp = './vendors/exports/SHARADAR_SF3_Full_Export.csv')
+    # df_prior = core.get_export(fp = './vendors/exports/SHARADAR_SF3_Prior_Qtr.csv')
 
-    core.qtr_over_qtr_change(qtr_start = '2021-12-31', qtr_end = '2020-09-30')
+    # quarter over quarter
+    # dates =  Calendar().quarter_end_list('2020-12-31', '2021-12-31')
+    # frames = []
+    # for date in dates:
+    #     df = core.get(date = date, institution='BLACKROCK INC')
+    #     df = df.sort_values(by=['value'], ascending=False)
+    #     df = df.iloc[:20]
+    #     frames.append(df)
+    #     print(df.head())
+    #     print(df.shape)
+    # df = pd.concat(frames)
+    # df.to_csv('./vendors/output/blackrock.csv')
+    df = pd.read_csv('./vendors/output/blackrock.csv')
+    df.calendardate = pd.to_datetime(df.calendardate)
+    print(df.head())
+    sns.lineplot(data=df, x="calendardate", y="value", hue='ticker')
+    plt.show()
+
+
 
 
 test_institutions()

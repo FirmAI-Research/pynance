@@ -126,15 +126,17 @@ class CoreUSInstitutionalInvestors(Nasdaq):
         self.authenticate()
 
 
-    def get(self):
+    def get(self, date, institution=None):
         # self.df = nasdaqdatalink.bulkdownload("SF3")
-        df = nasdaqdatalink.get_table(self.name, paginate=True, calendardate="2021-12-31", investorname='BLACKROCK INC')
+        df = nasdaqdatalink.get_table(self.name, paginate=True, calendardate=date, investorname=institution)
         return df
         
 
-    def get_export(self):
-
-        self.df = pd.read_csv('./vendors/exports/SHARADAR_SF3_Full_Export.csv')
+    def get_export(self, fp=None):
+        if fp is None:
+            fp = './vendors/exports/SHARADAR_SF3_Full_Export.csv'
+        
+        self.df = pd.read_csv(fp)
         return self.df
 
 
@@ -159,9 +161,20 @@ class CoreUSInstitutionalInvestors(Nasdaq):
 
 
     def qtr_over_qtr_change(self, qtr_start, qtr_end):
-        print(self.df.calendardate.value_counts())
-        # df =  self.group_by_institution()
-        
+        # quarter over quarter
+        dates =  Calendar().quarter_end_list('2020-12-31', '2021-12-31')
+
+        frames = []
+        for date in dates:
+            df = self.get(date = date, institution='BLACKROCK INC')
+            df = df.sort_values(by=['value'], ascending=False)
+            df = df.iloc[:11]
+            frames.append(df)
+            print(df.head())
+            print(df.shape)
+        df = pd.concat(frames)
+        # sns.lineplot(data=df, x="calendardate", y="value", hue='ticker')
+        # plt.show()
 
 
 
