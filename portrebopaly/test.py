@@ -13,12 +13,13 @@ def test_api_call():
 # -- CoreUsFundamentals sample export -- 
 def test_core_us_fundamentals():
     core = CoreUsFundamentals()
-    df_core =  core.get_export()
+    # df_core =  core.get_export()
+    df_core = core.get()
     df = core.merge_meta_data(df_core)
     df = df.loc[df.sector=='Technology']
     print(df)
     return df
-# test_core_us_fundamentals()
+test_core_us_fundamentals()
 
 
 # -- CoreUsFundamentals sample export -- 
@@ -44,4 +45,4 @@ def test_build_scorecard():
     scorecard['weights'] = moodys_weights
     print(scorecard)
 
-test_build_scorecard()
+# test_build_scorecard()
