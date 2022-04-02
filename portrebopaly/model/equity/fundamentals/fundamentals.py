@@ -68,6 +68,8 @@ class Semiconductors(Moodys):
         return scorecard.reset_index(drop=False)
 
 
+
+
 class Insurance(Moodys):
     pass
 

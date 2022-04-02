@@ -32,7 +32,7 @@ class Widgets():
             return True
 
 
-    def combobox(self, root:ttk.Frame, values:list, func=None, call_name=None):
+    def combobox(self, root:ttk.Frame, values:list, func=None, call_name=None, state='readonly'):
         """ create a dropdown menu
 
         :param root: Frame for table to appear on
@@ -45,7 +45,7 @@ class Widgets():
         :return: combobox object
             pack() or grid() the combobox using the returned object
         """
-        cb = ttk.Combobox(root, state='readonly', values=values)
+        cb = ttk.Combobox(root, state=state, values=values)
         cb.current()
         cb.bind('<<ComboboxSelected>>', lambda event: func(cb, call_name, event.widget.get()))
         return cb
@@ -55,8 +55,8 @@ class Widgets():
         pd.options.display.float_format = '{:,.2f}'.format
         print(df)
         
-        table = pt = Table(root, dataframe=df,showtoolbar=False, showstatusbar=True)
-        table.show()
+        self.table = pt = Table(root, dataframe=df,showtoolbar=False, showstatusbar=True)
+        self.table.show()
 
         options = {'align': 'w',
         'cellbackgr': '#F4F4F3',
@@ -71,15 +71,28 @@ class Widgets():
         'rowheight': 22,
         'rowselectedcolor': '#E4DED4',
         'textcolor': 'black'}
-        pandastable.config.apply_options(options, table)
+        pandastable.config.apply_options(options, self.table)
 
         # color a subset of columns
         if color_columns is not None:
             for c in color_columns:
-                table.columncolors[c] = '#dcf1fc' 
+                self.table.columncolors[c] = '#dcf1fc' 
 
-        table.redraw()
+        self.table.redraw()
 
+    
+    def new_window(self, root:ttk.Frame):
+        newWindow = Toplevel(root)
+        newWindow.title("New Window")    
+        newWindow.geometry("1500x1000")    
+        return newWindow
+
+
+
+
+
+
+    # ...class specific charts... TODO: improve
     
     def chart(self,  root:ttk.Frame, chart_data:list):
         
@@ -97,3 +110,24 @@ class Widgets():
         toolbar = NavigationToolbar2Tk(canvas, root)
         toolbar.update()
         canvas.get_tk_widget().pack()
+
+
+    def single_chart(self, root:ttk.Frame, df, x, y, h, chart_type, title):
+        fig, axes = plt.subplots(1, 1, figsize=(15,8))
+        fig.suptitle(title)
+        line = chart_type(data=df, x=x, y=y, hue=h)
+
+        annotate_txt_df = df.loc[df.calendardate=='2020-12-31'].reset_index()
+        print(annotate_txt_df)
+        for i in range(len(annotate_txt_df.ticker)):
+            line.annotate(annotate_txt_df.ticker[i], xy = (annotate_txt_df.calendardate[i], annotate_txt_df.value[i]) )
+        plt.legend(loc='upper right')
+
+        canvas = FigureCanvasTkAgg(fig, master = root)  
+        canvas.draw()
+        canvas.get_tk_widget().pack()
+        toolbar = NavigationToolbar2Tk(canvas, root)
+        toolbar.update()
+        canvas.get_tk_widget().pack()
+
+

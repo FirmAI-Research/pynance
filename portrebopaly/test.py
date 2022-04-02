@@ -1,7 +1,10 @@
 
 import pandas as pd
 import nasdaqdatalink
-from vendors.nasdaq import Nasdaq, CoreUsFundamentals,  Tickers
+from controller.calendar import Calendar
+from vendors.nasdaq import Nasdaq, CoreUsFundamentals,  CoreUSInstitutionalInvestors,  Tickers
+import matplotlib.pyplot as plt
+import seaborn as sns 
 
 # -- NasdaqDataLink Api Call --
 def test_api_call():
@@ -27,11 +30,62 @@ def test_tickers():
     tickers = Tickers()
     df =  tickers.get_export()
     print(df.columns)
-test_tickers()
+# test_tickers()
+
+
+
+# -- CoreUSInstitutionalInvestors sample export -- 
+def test_institutions_groups():
+    core = CoreUSInstitutionalInvestors()
+    df = core.get()
+    print(core.get())
+    print(df.calendardate.value_counts())
+    print(df.columns)
+    print(df.tail())
+    print(df.shape)
+    print(core.group_by_ticker(df))
+    core.group_by_institution()
+
+
+# -- CoreUSInstitutionalInvestors plot -- 
+def test_institutions_plot():
+    core = CoreUSInstitutionalInvestors()
+
+    df_qe = core.get_export(fp = './vendors/exports/SHARADAR_SF3_Full_Export.csv')
+    df_prior = core.get_export(fp = './vendors/exports/SHARADAR_SF3_Prior_Qtr.csv')
+
+    institution='BRIDGEWATER ASSOCIATES LP'
+    df = core.time_series_range(institution=institution,  qtr_start='2021-01-01', qtr_end='2021-12-31')
+    df.to_csv(f'./vendors/output/{institution}.csv')
+    df.calendardate = pd.to_datetime(df.calendardate)
+    print(df.head())
+
+    # plot
+    fig, axes = plt.subplots(1, 1, figsize=(15,8))
+    line = sns.lineplot(data=df, x="calendardate", y="value", hue='ticker')
+    annotate_txt_df = df.loc[df.calendardate=='2020-12-31'].reset_index()
+    print(annotate_txt_df)
+    for i in range(len(annotate_txt_df.ticker)):
+        line.annotate(annotate_txt_df.ticker[i], xy = (annotate_txt_df.calendardate[i], annotate_txt_df.value[i]) )
+    plt.legend(loc='upper right')
+    plt.show()
+    ts = core.time_series_range(institution, qtr_start='2020-12-31', qtr_end='2021-12-31')
+    print(ts)
+    df_increase, df_decrease = core.change()
+    print(df_increase)
+    print(df_decrease)
+
+
+# -- CoreUSInstitutionalInvestors better api calls -- 
+def test_institutions_api_call():
+    core = CoreUSInstitutionalInvestors()
+
+test_institutions_api_call()
 
 
 
 def test_build_scorecard():
+    
     calc_colnames = ['ebitda_margin', 'ebitda_less_capex_margin', 'debt_to_ebitda', 'fcf_to_debt', 'ebit_to_interest_expense']
     moody_ratings = ['Aaa', 'Aa', 'A', 'Baa', 'Ba', 'B', 'Caa', 'Ca']
     scorecard = pd.DataFrame(columns = moody_ratings, index = ['revenue'] + calc_colnames)
