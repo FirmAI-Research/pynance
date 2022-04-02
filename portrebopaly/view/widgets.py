@@ -81,6 +81,19 @@ class Widgets():
         self.table.redraw()
 
     
+    def new_window(self, root:ttk.Frame):
+        newWindow = Toplevel(root)
+        newWindow.title("New Window")    
+        newWindow.geometry("1500x1000")    
+        return newWindow
+
+
+
+
+
+
+    # ...class specific charts... TODO: improve
+    
     def chart(self,  root:ttk.Frame, chart_data:list):
         
         sns.set() 
@@ -110,8 +123,6 @@ class Widgets():
             line.annotate(annotate_txt_df.ticker[i], xy = (annotate_txt_df.calendardate[i], annotate_txt_df.value[i]) )
         plt.legend(loc='upper right')
 
-
-
         canvas = FigureCanvasTkAgg(fig, master = root)  
         canvas.draw()
         canvas.get_tk_widget().pack()
@@ -120,8 +131,3 @@ class Widgets():
         canvas.get_tk_widget().pack()
 
 
-    def new_window(self, root:ttk.Frame):
-        newWindow = Toplevel(root)
-        newWindow.title("New Window")    
-        newWindow.geometry("1500x1000")    
-        return newWindow

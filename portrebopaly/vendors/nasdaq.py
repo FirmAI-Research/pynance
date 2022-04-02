@@ -130,7 +130,11 @@ class CoreUSInstitutionalInvestors(Nasdaq):
 
     def get(self, date, institution=None):
         # self.df = nasdaqdatalink.bulkdownload("SF3")
+        '''
+        TODO; pass multiple dates and specific institution - return df
+        '''
         df = nasdaqdatalink.get_table(self.name, paginate=True, calendardate=date, investorname=institution)
+        print(f'[SUCCEESS] Retrieved {institution} data for {date}: {len(df)} rows')
         return df
         
 
@@ -145,12 +149,11 @@ class CoreUSInstitutionalInvestors(Nasdaq):
     def list_all_institutions(self):
         if not hasattr(self, 'df'):
             self.get_export()
-        self.df.investorname.to_csv('./vendors/output/institution names.csv')
         return sorted(self.df.investorname.unique().tolist(), reverse=False)
 
 
     def favorite_institutions(self):
-        return [ 'BLACKROCK INC','VANGUARD GROUP INC','JANUS HENDERSON GROUP PLC','CITADEL ADVISORS LLC',
+        return [ 'BRIDGEWATER ASSOCIATES LP', 'BLACKROCK INC','VANGUARD GROUP INC','JANUS HENDERSON GROUP PLC','CITADEL ADVISORS LLC',
             'UBS ASSET MANAGEMENT AMERICAS INC','GOLDMAN SACHS GROUP INC','MORGAN STANLEY','BARCLAYS PLC',
             'SUSQUEHANNA INTERNATIONAL GROUP LLP', 'TWO SIGMA INVESTMENTS LP','ELLIOTT INVESTMENT MANAGEMENT LP',
             'BROOKFIELD ASSET MANAGEMENT INC','BERKSHIRE ASSET MANAGEMENT LLC','BERKSHIRE HATHAWAY INC',
@@ -158,9 +161,12 @@ class CoreUSInstitutionalInvestors(Nasdaq):
 
 
     def group_by_ticker(self):
-        df = self.df[['ticker', 'units', 'price']].groupby('ticker').agg({"units":np.sum, "price":np.mean})
+        df =  self.df
+        df['count'] = 0
+        df = df[['ticker', 'units', 'price', 'count']].groupby('ticker').agg({"units":np.sum, "price":np.mean, "count":np.size})
         df['value'] = (df['units'] * df['price']) / 1000000000
         df = df.sort_values(by='value', ascending=False)
+        df =  df[['price', 'units', 'value', 'count']]  #  ticker is index
         df.to_csv('./instituational_investors_qtr_end.csv')
         return df
     
@@ -171,22 +177,43 @@ class CoreUSInstitutionalInvestors(Nasdaq):
         return df
 
 
-    def qtr_over_qtr_change(self, institution, qtr_start, qtr_end):
-        dates =  Calendar().quarter_end_list('2020-12-31', '2021-12-31')
+    def time_series_range(self, institution, qtr_start, qtr_end):
+        self.institution = institution
+        dates =  Calendar().quarter_end_list(qtr_start,  qtr_end)
         frames = []
         for date in dates:
-            df = self.get(date = date, institution=institution)
+            df = self.get(date = date, institution=institution) # FIXME; terrible way to call. get all data in one call. cmon...
             df = df.sort_values(by=['value'], ascending=False)
-            df = df.iloc[:11]
             frames.append(df)
-            print(df.head())
-            print(df.shape)
-        df = pd.concat(frames)
-        df.to_csv(f'./vendors/output/{institution}.csv') 
-        # TODO: ValueError("cannot reindex on an axis with duplicate labels") when calling with .get() directly instead of reading file
-        df = pd.read_csv(f'./vendors/output/{institution}.csv')
-        df.calendardate = pd.to_datetime(df.calendardate)
-        return df
+        self.ts = pd.concat(frames).reset_index(drop=True)
+        self.ts.value = self.ts.value.astype(float) / 1000000
+        self.ts['_ix'] = self.ts.ticker.astype(str) + '_' + self.ts.securitytype.astype(str)
+        return self.ts
+
+
+    def change(self):
+        ''' must call time_series_range first to createe self.ts attribute; NOTE that it includes api calls through get()
+        '''
+        dates = sorted(self.ts.calendardate.unique().tolist()) # last value is most recent date;  sorting converts  datee to int
+        dates = [pd.to_datetime(d).strftime('%Y-%m-%d') for d in dates]  # after sorting, convert back to date
+        print(dates)
+
+        dfx = self.ts.loc[self.ts.calendardate == dates[-1]].set_index('_ix') # most recent date's data
+        dfy = self.ts.loc[self.ts.calendardate == dates[0]].set_index('_ix')  # earliest dates data
+
+        dfz = pd.DataFrame()
+        dfz['ticker'] = dfx['ticker']
+        dfz['securitytype'] = dfx['securitytype']
+        dfz[dates[-1]] = dfx['value']
+        dfz[dates[0]] = dfy['value']
+        dfz['pct'] = (dfx['value'] - dfy['value']) / dfy['value']
+
+
+        df_increase = dfz.sort_values(by = ['pct'], ascending=False)
+        df_decrease = dfz.sort_values(by = ['pct'], ascending=True)
+        return (df_increase, df_decrease)
+
+
 
 
 
