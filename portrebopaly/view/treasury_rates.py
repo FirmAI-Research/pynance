@@ -45,11 +45,13 @@ class TreasuryRates:
 
     def draw_widgets(self):
         
+        # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+
         # Yield Curve of most recent data
-        df = self.tr.plot_curve()
+        df = self.tr.change_distribution()
         fig, ax = plt.subplots(1, 1, figsize=(11,6))
-        fig.suptitle(f'Yield Curve as of Yesterday')
-        ax = sns.lineplot(x = 'variable', y = 'value', data = df)
+        fig.suptitle(f'7 day change Distribution')
+        ax = sns.histplot(x = 'value', hue = 'variable', data=df, multiple="stack")
         plt.setp(ax.get_xticklabels(), rotation=20)
         canvas = FigureCanvasTkAgg(fig, master = self.yield_curve_frame)  
         canvas.draw()

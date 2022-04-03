@@ -43,7 +43,9 @@ class TreasuryRates:
 
         df = pd.concat(frames).reset_index(drop=False).rename(columns = {'index':'date'})  
         df.date = pd.to_datetime(df.date)
-        
+        for c in df.columns:
+            if c != 'date':
+                df[c] = pd.to_numeric(df[c])        
         return df
 
 
@@ -96,10 +98,20 @@ class TreasuryRates:
         # plt.show()
         return select_rows
     
+    def change_distribution(self):
+        df = self.get().set_index('date')
+        weekly_rows = df.iloc[-7:]
+        weekly_diff = weekly_rows.diff().dropna(how='all', axis=0).reset_index(drop=False)
+        weekly_diff = weekly_diff.melt(id_vars='date')
+        # sns.histplot(x = 'value', hue = 'variable', data=weekly_diff, multiple="stack")
+        # plt.show()
+        return weekly_diff
 
 
-tr = TreasuryRates()
+
+# tr = TreasuryRates()
 # tr.ts_by_years(years =  ['2021', '2022'])
-tr.ts_by_months(years = ['2022'], n=14)
+# tr.ts_by_months(years = ['2022'], n=14)
 # tr.plot_curve()
 # tr.plot_curve_at_points_in_time()
+# tr.change_distribution()
