@@ -167,7 +167,6 @@ class CoreUSInstitutionalInvestors(Nasdaq):
         df['value'] = (df['units'] * df['price']) / 1000000000
         df = df.sort_values(by='value', ascending=False)
         df =  df[['price', 'units', 'value', 'count']]  #  ticker is index
-        df.to_csv('./instituational_investors_qtr_end.csv')
         return df
     
 

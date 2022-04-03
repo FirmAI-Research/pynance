@@ -92,6 +92,14 @@ class Widgets():
 
 
 
+
+
+
+
+
+
+
+
     # ...class specific charts... TODO: improve
     
     def chart(self,  root:ttk.Frame, chart_data:list):

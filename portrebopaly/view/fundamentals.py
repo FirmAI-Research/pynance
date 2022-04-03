@@ -1,6 +1,5 @@
 import importlib
 
-# from subprocess import call
 from tkinter import *
 from tkinter import ttk
 
