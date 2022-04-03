@@ -103,8 +103,6 @@ class TreasuryRates:
         weekly_rows = df.iloc[-7:]
         weekly_diff = weekly_rows.diff().dropna(how='all', axis=0).reset_index(drop=False)
         weekly_diff = weekly_diff.melt(id_vars='date')
-        # sns.histplot(x = 'value', hue = 'variable', data=weekly_diff, multiple="stack")
-        # plt.show()
         return weekly_diff
 
 
