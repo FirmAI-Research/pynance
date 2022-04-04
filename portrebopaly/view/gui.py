@@ -6,6 +6,7 @@ from tkinter import ttk
 from view.fundamentals import Fundamentals
 from view.institution import Institution
 from view.treasury_rates import TreasuryRates
+from view.insiders import Insiders
 
 from view.menubar import MenuBar
 from view.widgets import Widgets
@@ -24,6 +25,10 @@ class Gui():
         self.tab_fundamentals = ttk.Frame(tabControl)
         self.tab_institutions = ttk.Frame(tabControl)
         self.tab_interest_rates = ttk.Frame(tabControl)
+        self.attribution = ttk.Frame(tabControl)
+        self.insiders = ttk.Frame(tabControl)
+
+
         self.tab_generator = ttk.Frame(tabControl)
 
         MenuBar(root)
@@ -32,6 +37,8 @@ class Gui():
         tabControl.add(self.tab_fundamentals, text ='Fundamentals')
         tabControl.add(self.tab_institutions, text ='Institutions')
         tabControl.add(self.tab_interest_rates, text ='Treasury Rates')
+        tabControl.add(self.attribution, text ='Attribution')
+        tabControl.add(self.insiders, text ='Insiders')
         tabControl.add(self.tab_generator, text ='Report Generator')
         tabControl.pack(expand = 1, fill ="both")
         
@@ -39,12 +46,15 @@ class Gui():
         ttk.Label(self.tab_fundamentals, text ="Fundamentals").pack() 
         ttk.Label(self.tab_institutions, text ="Institutional Investments").pack()  
         ttk.Label(self.tab_interest_rates, text ="Treasury Rates").pack() 
+        ttk.Label(self.attribution, text ="Attribution").pack() 
+        ttk.Label(self.insiders, text ="Insiders").pack() 
         ttk.Label(self.tab_generator, text ="Report Generator").pack() 
 
         # widgets
         Fundamentals(frame = self.tab_fundamentals)
         Institution(frame = self.tab_institutions)
         TreasuryRates(frame = self.tab_interest_rates)
+        Insiders(frame = self.insiders)
 
         root.mainloop()
 

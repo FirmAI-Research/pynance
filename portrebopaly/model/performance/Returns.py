@@ -1,16 +1,10 @@
 import yfinance as yf
 from datetime import date
-
-today = date.today()
-
 import matplotlib.pyplot as plt 
-
 import pandas as pd
 import numpy as np 
 
 from controller.calendar import Calendar
-
-# #returns = price_returns(symbol = ['MSFT'], date_start = '2020-04-21', time_sample='D', cumulative= True, plot = True)
 
 
 class Returns():

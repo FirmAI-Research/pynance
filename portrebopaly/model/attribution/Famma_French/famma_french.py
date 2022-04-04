@@ -108,14 +108,13 @@ class FammaFrench:
     def print_summary(self):
         print(self.df.tail())
         print(self.model.summary())
-        print(self.model.summary())
         print('Parameters: ', self.model.params)
         print('R2: ', self.model.rsquared)
 
 
 
     def plot(self):
-        ((self.df +1).cumprod()).plot(color = ['blue','r','g','y','pink','orange', 'black','teal','grey'], figsize=(15, 7))
+        ((self.df +1).cumprod()).plot(figsize=(15, 7))
         plt.title(f"Famma French Factors", fontsize=16)
         plt.ylabel('Portfolio Returns', fontsize=14)
         plt.xlabel('Year', fontsize=14)

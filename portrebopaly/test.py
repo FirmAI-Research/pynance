@@ -2,7 +2,7 @@
 import pandas as pd
 import nasdaqdatalink
 from controller.calendar import Calendar
-from vendors.nasdaq import Nasdaq, CoreUsFundamentals,  CoreUSInstitutionalInvestors,  Tickers
+from vendors.nasdaq import Nasdaq, CoreUsFundamentals,  CoreUSInstitutionalInvestors,  Tickers, Insiders
 import matplotlib.pyplot as plt
 import seaborn as sns 
 from model.attribution.Famma_French.famma_french import FammaFrench
@@ -104,9 +104,20 @@ def test_build_scorecard():
 
 
 def test_famma_french():
-    ff = FammaFrench(symbols=['SPY'], weights = [ 1.0 ])
+    ff = FammaFrench(symbols=['QQQ'], weights = [ 1.0 ])
     ff.merge_factors_and_portfolio(download_ff_data=False)
     ff.five_factor()
     ff.print_summary()
     ff.plot()
-test_famma_french()
+# test_famma_french()
+
+
+def test_insiders():
+    from model.equity.insiders.insiders import Insiders as InsidersModel
+
+    ins = Insiders()
+    ins.curl()
+    # ins.direct_by_ticker()
+
+
+test_insiders()

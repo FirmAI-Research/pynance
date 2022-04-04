@@ -5,12 +5,14 @@
   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  """
 
+import re
 import nasdaqdatalink
 from curses import keyname
 import json
 import os
 import pandas as pd
 import numpy as np
+import requests
 
 from controller.calendar import Calendar
 
@@ -34,10 +36,13 @@ class Nasdaq:
         #nasdaqdatalink.read_key() 
         nasdaqdatalink.ApiConfig.api_key = data['nasdaq_api_key'] 
         os.environ["NASDAQ_DATA_LINK_API_KEY"] =  data['nasdaq_api_key']  # NOTE options: nasdaqdatalink.ApiConfig.api_key = data['nasdaq_api_key']   |     nasdaqdatalink.read_key()     
+        self.api_key = os.environ["NASDAQ_DATA_LINK_API_KEY"]
 
-
-
-
+    
+    def curl(self):
+        request_url = ''    
+        res = requests.get(request_url)
+        print(res)
 
 
 class CoreUsFundamentals(Nasdaq):
@@ -214,10 +219,58 @@ class CoreUSInstitutionalInvestors(Nasdaq):
 
 
 
+class Insiders(Nasdaq):
+    '''
+    https://data.nasdaq.com/api/v3/datatables/SHARADAR/SF3.csv?&calendardate=2021-09-30&api_key=-sZL9MEeYDAGRHMhb7Uz&qopts.export=true
+        > qopts.export=True bypasses the 10,000 row export limit and provides excel file with link to s3 bucket in cell A1
+        > curl link in  A1 to download zip containing all data
+
+    curl https://data.nasdaq.com/api/v3/datatables/SHARADAR/SF2?qopts.export=true&api_key=API_KEY
+
+    '''
+
+    name = 'SHARADAR/SF2'
+
+    def __init__(self):
+        super().__init__()
+        self.authenticate()
+
+        self.prev_qtr_end = Calendar().previous_quarter_end()
 
 
-class Insiders:
+
+    def curl(self):
+        # self.df = nasdaqdatalink.get_table(self.name, paginate=True, filingdate=self.prev_qtr_end ) # FIXME: filingdate grtr equal to 
+        # self.df['pctofsharesownedbefore'] = self.df['transactionshares'] / self.df['sharesownedbeforetransaction']
+        request_url = f"https://data.nasdaq.com/api/v3/datatables/SHARADAR/SF2.json?api_key={self.api_key}&filingdate.gte=2022-01-01"
+        res = requests.get(request_url)
+        df  = pd.DataFrame.from_dict(res.json())
+        # df = pd.read_json(request_url)
+        # print(res)
+        # print(type(res))
+        # print(res.text)
+
+        # df = pd.read_json(res.text)
+        print(df)
 
 
-    def __init__():
+        # print(f'[SUCCEESS] Retrieved Insiders data: {len(self.df)} rows')
+        # print(self.df.shape)
+        # print(self.df.columns)
+        # print(self.df.head())
+        # return self.df
+    
+
+
+    def direct_by_ticker(self):
+        df = self.df.loc[ (self.df.directorindirect=='D') ]
+        df = df[['ticker','issuername','ownername','transactionvalue']].groupby(['ticker','issuername','ownername',]).agg({'transactionvalue':'sum'})
+        print(df)
+        return df
+
+
+    def ten_percenters(self):
         pass
+
+
+    
