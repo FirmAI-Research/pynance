@@ -4,48 +4,37 @@ Uses multiple regression model to assess portfolio performance as explained by r
 Daily Factor data extracted from https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html 
 4.22.21
 '''
-
 import warnings
 warnings.filterwarnings("ignore")
-
 import sys,os
-
 import pandas as pd
 import pandas_datareader as web
 import yfinance as yf
-
 import statsmodels.api as smf
 import urllib.request
 import zipfile
-
 from datetime import date
-
 import matplotlib.pyplot as plt 
 from functools import reduce
 
-from datetime import date
 
-'''pathing'''
 cwd = os.getcwd()
 iodir = f'{cwd}/io'
 data_dir= f'{iodir}/data/'
-
 parse_dict = {'F-F_Momentum_Factor_daily_CSV':(13, None,'https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Momentum_Factor_daily_CSV.zip'),
-        'F-F_Research_Data_Factors_daily_CSV':(4, None,'https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_Factors_daily_CSV.zip'),
-        'F-F_ST_Reversal_Factor_daily_CSV':(13, None, 'https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_ST_Reversal_Factor_daily_CSV.zip'),
-        'F-F_LT_Reversal_Factor_daily_CSV':(13, None, 'https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_LT_Reversal_Factor_daily_CSV.zip')}
-        # name: (skiprows, splitrow_str, zip_path)
+            'F-F_Research_Data_Factors_daily_CSV':(4, None,'https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_Factors_daily_CSV.zip'),
+            'F-F_ST_Reversal_Factor_daily_CSV':(13, None, 'https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_ST_Reversal_Factor_daily_CSV.zip'),
+            'F-F_LT_Reversal_Factor_daily_CSV':(13, None, 'https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_LT_Reversal_Factor_daily_CSV.zip'),
+            }
 
-
-'''pre-processing'''
 
 def get_fama_french(datafile):
 
     skiprows, splitrow_str, url = parse_dict.get(datafile)
-    name = datafile #url.split('.', -1)[-2].split('/',-1)[-1] # extract file name from url
+    name = datafile 
     print(f"Parsing {name}: SkipRows:{skiprows}, Split@{splitrow_str}")
 
-    # ''' retrieve & extract .zip data '''
+    ''' retrieve & extract .zip data '''
     localp_zip = f'{iodir}/data/{name}.zip'
     urllib.request.urlretrieve(url,localp_zip)
     zip_file = zipfile.ZipFile(localp_zip, 'r')
@@ -53,7 +42,7 @@ def get_fama_french(datafile):
     zip_file.close()
     csv_name = name[:-4] #drop the _CSV included in zip name
 
-    # ''' read local data '''
+    ''' read local data '''
     localp_csv = f'{iodir}/data/{csv_name}.CSV'
     ff_factors = pd.read_csv(localp_csv, skiprows = skiprows, index_col = 0).reset_index().dropna().rename(columns={'index':'date'})
     ff_factors['date']= pd.to_datetime(ff_factors['date'], format= '%Y%m%d')
@@ -68,11 +57,11 @@ def get_fama_french(datafile):
 
     def fx(x):
         return x/100 # convert values from percentages to decimals
+
     for c in ff_factors.columns:
         ff_factors[c] = pd.to_numeric(ff_factors[c]).apply(fx)
 
     return ff_factors
-
 
 
 def build_ff_factor_frame():
@@ -85,7 +74,6 @@ def build_ff_factor_frame():
 ffdf = build_ff_factor_frame()
 
 
-
 def build_portfolio_returns():
     import inspect
     currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -95,7 +83,6 @@ def build_portfolio_returns():
     returns = perfRet.portfolio_returns(arr = ['MSFT','AAPL'], weights = [0.5,0.5], date_start = '1975-01-01', date_end = date.today(), time_sample='D', cumulative= False, plot = False).rename({'Date':'date'})
     return returns
 portfolio_returns = build_portfolio_returns()
-
 
 df = ffdf.merge(portfolio_returns, left_index = True, right_index = True, how = 'inner')
 df.rename(columns={"weighted_returns": "Portfolio Returns", "Mkt-RF":"mkt_excess", "Mom   ":"Mom"}, inplace=True)

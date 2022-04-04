@@ -5,7 +5,7 @@ from controller.calendar import Calendar
 from vendors.nasdaq import Nasdaq, CoreUsFundamentals,  CoreUSInstitutionalInvestors,  Tickers
 import matplotlib.pyplot as plt
 import seaborn as sns 
-
+from model.attribution.Famma_French.famma_french import FammaFrench
 # -- NasdaqDataLink Api Call --
 def test_api_call():
     core = CoreUsFundamentals()
@@ -22,7 +22,7 @@ def test_core_us_fundamentals():
     df = df.loc[df.sector=='Technology']
     print(df)
     return df
-test_core_us_fundamentals()
+# test_core_us_fundamentals()
 
 
 # -- CoreUsFundamentals sample export -- 
@@ -80,7 +80,7 @@ def test_institutions_plot():
 def test_institutions_api_call():
     core = CoreUSInstitutionalInvestors()
 
-test_institutions_api_call()
+# test_institutions_api_call()
 
 
 
@@ -100,3 +100,13 @@ def test_build_scorecard():
     print(scorecard)
 
 # test_build_scorecard()
+
+
+
+def test_famma_french():
+    ff = FammaFrench(symbols=['SPY'], weights = [ 1.0 ])
+    ff.merge_factors_and_portfolio(download_ff_data=False)
+    ff.five_factor()
+    ff.print_summary()
+    ff.plot()
+test_famma_french()

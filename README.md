@@ -6,6 +6,7 @@ vendors:
 * Sharadar Core US Equities Bundle  |   https://data.nasdaq.com/databases/SFA/data  |   nasdaq data link (quandl)
 * yahoo_fin                         |   http://theautomatic.net/yahoo_fin-documentation/
 * fred api                          |   https://github.com/mortada/fredapi
+* US Treaesury                      |   https://home.treasury.gov/policy-issues/financing-the-government/interest-rate-statistics
 
 </br>
 
