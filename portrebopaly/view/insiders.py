@@ -4,7 +4,7 @@ from tkinter import *
 from tkinter import ttk
 
 from view.widgets import Widgets
-from model.equity.insiders import Insiders as InsidersModel
+from model.equity.insiders.insiders import Insiders as InsidersModel
 
 class Insiders():
 
@@ -22,7 +22,7 @@ class Insiders():
 
         self.draw_widgets()
 
-        self.core = InsidersModel()
+        # self.core = InsidersModel()
 
 
     def draw_widgets(self):

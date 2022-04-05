@@ -6,6 +6,7 @@ from vendors.nasdaq import Nasdaq, CoreUsFundamentals,  CoreUSInstitutionalInves
 import matplotlib.pyplot as plt
 import seaborn as sns 
 from model.attribution.Famma_French.famma_french import FammaFrench
+
 # -- NasdaqDataLink Api Call --
 def test_api_call():
     core = CoreUsFundamentals()
@@ -118,6 +119,10 @@ def test_insiders():
     ins = Insiders()
     ins.curl()
     # ins.direct_by_ticker()
+# test_insiders()
 
 
-test_insiders()
+def timeseries():
+    from model.time_series import arima
+
+timeseries()

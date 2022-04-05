@@ -1,0 +1,51 @@
+attribution
+	attribution - [ Brinson / bhb model] | contribution to return
+	use ff factor results to attribute performance
+	boxplot graphic
+	build fammafench view
+	add pca, etc.
+
+	https://www.cfainstitute.org/-/media/documents/support/programs/cipm/2019-cipm-l1v1r5.ashx
+
+	https://www.cfainstitute.org/-/media/documents/book/rf-lit-review/2019/rflr-performance-attribution.ashx
+
+	https://www.emaproducts.com/Video/EMA%20-%20A%20Four-Factor%20Attribution%20Model.pdf
+
+	https://rviews.rstudio.com/2018/04/11/introduction-to-fama-french/
+
+
+
+
+
+rename moodys to screens
+	default base table to all data view
+	right half table with desired metrics
+	buttons launch sceens and re populate base table / buttons to revert
+	--
+	bottom horizontal table = default view all data from get() 
+	right half verticle table = selected metrics populated based on selected industry
+	left half verticle table = averages / summary stats of the entire industry (broken down by quartile)
+
+
+time series analysis {generalized workflow}
+	add tabbed pane underneath main tabed pane
+	statsmodels views
+	enable all functionality to populate based on base time series supplied by path or drag drop file
+		assumptions are only a date time index ~ no other requirements
+
+
+
+
+--
+
+institutions
+	largeest instiutional investments by ticker
+	Q/Q
+		1-Q/Q security level change by institution
+		2-for all institutions aggregate Q/Q changes > x% and report number of institutions and total value having been bought or sold by security
+
+insiders
+	insider ownership as % of total float
+	# of insider activity as pct of number of c level personell
+
+
