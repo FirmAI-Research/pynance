@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-
+import json
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -37,7 +37,7 @@ class Attribution:
 
         
         self.model_frames_frame =  ttk.Frame(self.tab1)
-        self.model_frames_frame.pack(side=TOP, expand=True, fill=BOTH)
+        self.model_frames_frame.pack(side=BOTTOM, expand=True, fill=BOTH)
 
         self.model_frame3 =  ttk.Frame(self.model_frames_frame)
         self.model_frame3.pack(side=LEFT, expand=True, fill=BOTH)
@@ -72,8 +72,13 @@ class Attribution:
 
 
     def run(self):
+
         print(f'User selected text = {self.e.get()}')
-        self.ff = FF(symbols=['QQQ'], weights = [ 1.0 ])
+        user_input_dict = json.loads(str(self.e.get()))
+        print(user_input_dict.keys())
+        print(user_input_dict.values())
+
+        self.ff = FF(symbols=list(user_input_dict.keys()), weights = list(user_input_dict.values()))
         self.ff.merge_factors_and_portfolio(download_ff_data=False)
         self.df = self.ff.df
 
@@ -94,7 +99,7 @@ class Attribution:
 
         # portfolio entry
         if not hasattr(self, 'e'):
-            ttk.Label(self.drop_down_frame, text='Enter {portfolio ticker : weights, ...} ').pack(side=LEFT)
+            ttk.Label(self.drop_down_frame, text='Enter string dict() of {ticker : weights, ...} ').pack(side=LEFT)
             self.e = ttk.Entry( self.drop_down_frame, width=125)
             self.e.pack(side=LEFT, anchor=N)
             b = ttk.Button(self.drop_down_frame, text='Go', command= lambda : self.run())

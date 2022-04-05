@@ -62,6 +62,7 @@ class Arima(TimeSeries):
             obs = test[t]
             history.append(obs)
             print('predicted=%f, expected=%f' % (yhat, obs))
+            
         # evaluate forecasts
         rmse = sqrt(mean_squared_error(test, predictions))
         print('Test RMSE: %.3f' % rmse)
