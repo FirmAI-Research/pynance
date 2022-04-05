@@ -8,12 +8,12 @@ from view.widgets import Widgets
 class TimeSeries:
 
 
-    def __init__(self, root:ttk.Frame):
+    def __init__(self, frame:ttk.Frame):
 
-        self.root = root
+        self.root = frame
 
 
-        tabControl = ttk.Notebook(root)
+        tabControl = ttk.Notebook(self.root)
 
         self.tab1 = ttk.Frame(tabControl)
         tabControl.add(self.tab1, text ='tab1')

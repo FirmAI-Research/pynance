@@ -112,7 +112,6 @@ class FammaFrench:
         print('R2: ', self.model.rsquared)
 
 
-
     def plot(self):
         ((self.df +1).cumprod()).plot(figsize=(15, 7))
         plt.title(f"Famma French Factors", fontsize=16)
@@ -122,3 +121,7 @@ class FammaFrench:
         plt.legend()
         plt.yscale('log')
         plt.show()
+
+
+    def plot_text(self):
+        plt.text(0.01, 0.05, str(self.model.summary()), {'fontsize': 10}, fontproperties = 'monospace')  

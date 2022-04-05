@@ -52,7 +52,7 @@ class Gui():
         Institution(frame = self.tab_institutions)
         TreasuryRates(frame = self.tab_interest_rates)
         Attribution(frame = self.tab_attribution)
-        TimeSeries(self.tab_time_series)
+        TimeSeries(frame = self.tab_time_series)
         # Insiders(frame = self.insiders)
 
         root.mainloop()

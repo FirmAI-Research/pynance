@@ -88,8 +88,13 @@ class Widgets():
         return newWindow
 
 
-
-
+    def scroll_text(self):
+        # text_widget = tk.Text(self.model_frame3)
+        # scroll_bar = tk.Scrollbar(self.model_frame3)
+        # scroll_bar.pack(side=RIGHT)
+        # text_widget.pack(side = LEFT, expand=True, fill=BOTH)
+        # text_widget.insert(tk.END, self.model3.summary().as_text())
+        pass
 
 
 

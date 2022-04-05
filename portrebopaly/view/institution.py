@@ -49,7 +49,6 @@ class Institution:
 
         self.widgets = Widgets()
 
-        self.core = CoreUSInstitutionalInvestors()
 
         self.draw_widgets()
 
@@ -71,6 +70,8 @@ class Institution:
 
     def display_table(self):
      
+        self.core = CoreUSInstitutionalInvestors()
+
         self.core.get_export()  # sets core.df class attribute
 
         # by Ticker
