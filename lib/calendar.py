@@ -11,6 +11,10 @@ class Calendar:
 
     def today(self):
         return datetime.datetime.today()#.strftime('%Y-%m-%d')
+    
+    
+    def current_year(self, dtobj = datetime.datetime.today()):
+        return dtobj.year
 
 
     def previous_quarter_end(self, dt_obj = datetime.datetime.today()):
@@ -18,9 +22,12 @@ class Calendar:
         result = rr.before(dt_obj, inc=False) 
         return result.date()
 
+
     def prior_quarter_end(self):
         return self.previous_quarter_end() - datetime.timedelta(months=3)
 
     
     def quarter_end_list(self, start_date, end_date):
         return pd.date_range(pd.to_datetime(start_date), pd.to_datetime(end_date) + pd.offsets.QuarterBegin(1), freq='Q').strftime('%Y-%m-%d').tolist()
+
+    

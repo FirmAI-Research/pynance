@@ -1,1 +1,59 @@
+{% extends 'base.html' %} 
+{% load static %}
+ 
+
+
+{% block content %}
+
 <h1 style="color:teal"> T Rates </h1>
+
+<!-- pass pd.DataFrame variable from view and populate highcharts table -->
+<table id="example" class="display" style="width:100%"> 
+    <thead>
+        <tr>
+            {% for key, v in df.items %}
+            <th>{{key}}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in values %}
+        <tr>
+            {% for value in item %}
+            <td>{{value}}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+    <!-- table footers are optional -->
+    <!-- <tfoot>
+        <tr>
+            {% for key, v in df.items %}
+            <th>{{key}}</th>
+            {% endfor %}
+        </tr>
+    </tfoot> -->
+</table>
+
+{% endblock content %}
+
+
+
+
+
+{% block js %}
+
+
+<script>
+
+
+    $(document).ready(function () {
+        // Create DataTable
+        var table = $('#example').DataTable({
+            dom: 'Pfrtip',
+        });
+     
+    });
+    </script>
+
+{% endblock js %}

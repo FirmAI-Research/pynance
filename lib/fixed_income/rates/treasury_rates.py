@@ -5,6 +5,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from lib.calendar import Calendar
 
 class TreasuryRates:
 
@@ -12,8 +13,8 @@ class TreasuryRates:
         pass
 
 
-    def get(self, years:list= ['2022']):
-        ''' parse US Treasury.gov website for yield curve rates returning xml content for a list of years and concatenating
+    def get(self, years:list= [Calendar().current_year()]):
+        ''' parse US Treasury.gov website for yield curve rates returning concatenated xml content for a list of years
         https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve&field_tdr_date_value=2022
         '''
 
@@ -49,26 +50,18 @@ class TreasuryRates:
         return df
 
 
-    def _lineplot(self, data):
-        sns.lineplot(x = 'date', y = 'value', hue = 'variable', data = data)
-        # plt.ylim(0, 500)
-        plt.show()
-
-
-    def ts_by_years(self, years = ['2022']):
+    def melt_by_year(self, years = [Calendar().current_year()]):
         df = self.get(years = years)
         self.melted = df.melt(id_vars='date')
         self.melted.value = pd.to_numeric(self.melted.value)
-        # self._lineplot(data = self.melted)
         return self.melted
 
 
-    def ts_by_months(self, years = ['2022'], n=6):
+    def melt_by_month(self, years = [Calendar().current_year()], n=6):
         df = self.get(years = years)
         df = df.iloc[-n:,:]
         self.melted = df.melt(id_vars='date')
         self.melted.value = pd.to_numeric(self.melted.value)
-        # self._lineplot(data = self.melted)
         return self.melted
 
 
@@ -108,6 +101,8 @@ class TreasuryRates:
 
 
 # tr = TreasuryRates()
+# df = tr.get()
+# print(df)
 # tr.ts_by_years(years =  ['2021', '2022'])
 # tr.ts_by_months(years = ['2022'], n=14)
 # tr.plot_curve()
