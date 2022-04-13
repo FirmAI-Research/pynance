@@ -9,7 +9,14 @@ from sklearn.metrics import mean_squared_error
 from math import sqrt
 warnings.filterwarnings("ignore")
 from matplotlib import pyplot
-
+from statsmodels.graphics.tsaplots import plot_acf, acf, plot_pacf, pacf
+from statsmodels.tsa.stattools import acf, q_stat, adfuller
+import statsmodels.api as sm
+from scipy.stats import probplot, moment
+from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np 
 
 from timeseries import TimeSeries 
 
@@ -45,7 +52,6 @@ class Arima(TimeSeries):
 
 
     '''   walk-forward validation    '''
-    
     def evaluate(self):
         X = self.series.values
         size = int(len(X) * 0.001)
@@ -73,7 +79,6 @@ class Arima(TimeSeries):
         pyplot.show()
 
 
-
     ''' hyper-parameter tuning '''
     # evaluate an ARIMA model for a given order (p,d,q)
     def evaluate_arima_model(self, X, arima_order):
@@ -93,6 +98,38 @@ class Arima(TimeSeries):
         rmse = sqrt(mean_squared_error(test, predictions))
         return rmse
 
+
+    def moving_average(a, n=3) :
+        ret = np.cumsum(a, dtype=float)
+        ret[n:] = ret[n:] - ret[:-n]
+        return ret[n - 1:] / n
+
+
+    def plot_correlogram(self, x, lags=None, title=None):    
+        ''' https://www.itl.nist.gov/div898/handbook/pmc/section6/pmc624.htm '''
+        lags = min(10, int(len(x)/5)) if lags is None else lags
+        fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(14, 8))
+        axes[0][0].plot(x) # Residuals
+        axes[0][0].plot(self.moving_average(x, n=21), c='k', lw=1) # moving average of risiduals
+        q_p = np.max(q_stat(acf(x, nlags=lags), len(x))[1])
+        stats = f'Q-Stat: {np.max(q_p):>8.2f}\nADF: {adfuller(x)[1]:>11.2f}'
+        axes[0][0].text(x=.02, y=.85, s=stats, transform=axes[0][0].transAxes)
+        probplot(x, plot=axes[0][1])
+        mean, var, skew, kurtosis = moment(x, moment=[1, 2, 3, 4])
+        s = f'Mean: {mean:>12.2f}\nSD: {np.sqrt(var):>16.2f}\nSkew: {skew:12.2f}\nKurtosis:{kurtosis:9.2f}'
+        axes[0][1].text(x=.02, y=.75, s=s, transform=axes[0][1].transAxes)
+        plot_acf(x=x, lags=lags, zero=False, ax=axes[1][0])
+        plot_pacf(x, lags=lags, zero=False, ax=axes[1][1])
+        axes[1][0].set_xlabel('Lag')
+        axes[1][1].set_xlabel('Lag')
+        fig.suptitle(title, fontsize=14)
+        sns.despine()
+        fig.tight_layout()
+        fig.subplots_adjust(top=.9)
+        fig1 = plt.gcf()
+        plt.show()
+
+
     # evaluate combinations of p, d and q values for an ARIMA model
     def evaluate_models(self, p_values, d_values, q_values):
         dataset = self.data.astype('float32')
@@ -109,3 +146,4 @@ class Arima(TimeSeries):
                     except:
                         continue
         print('Best ARIMA%s RMSE=%.3f' % (best_cfg, best_score))
+
