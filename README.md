@@ -1,9 +1,10 @@
 http://127.0.0.1:8000/treasury_rates/
 
-django full stack
-TODO: react on the frontend
-
-cloudtables via https://datatables.net/
+currently django full stack; todo - react on the frontend
+cloudtables via https://datatables.net/ (datables )
 highcharts.js
 
-use python logging package
+python logging
+
+sqlite in dev --> aws rds in prod
+deploy with aws eb
