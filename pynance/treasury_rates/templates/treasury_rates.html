@@ -7,11 +7,29 @@
 
 <h1 style="color:teal">U.S. Treasury Rates</h1>
 
+
+<figure class="highcharts-figure">
+    <div id="point_in_time_curves" style="width:45%"></div>
+    <p class="highcharts-description">
+    Curves are plotted as of the first day of each of the past three months.
+    </p>
+  </figure>
+
+
+  <figure class="highcharts-figure">
+    <div id="all_tenors_over_time" style="width:45%"></div>
+    <p class="highcharts-description">
+      Treasury Rate Curves of each Tenor.
+    </p>
+  </figure>
+
+
+
 <!-- pass pd.DataFrame variable from view and populate highcharts table -->
-<table id="example" class="display" style="width:100%"> 
+<table id="rates_table" class="display" style="width:100%"> 
     <thead>
         <tr>
-            {% for key, v in df.items %}
+            {% for key, v in rates_table.items %}
             <th>{{key}}</th>
             {% endfor %}
         </tr>
@@ -26,14 +44,17 @@
         {% endfor %}
     </tbody>
     <!-- table footers are optional -->
-    <!-- <tfoot>
+    <tfoot>
         <tr>
-            {% for key, v in df.items %}
+            {% for key, v in rates_table.items %}
             <th>{{key}}</th>
             {% endfor %}
         </tr>
-    </tfoot> -->
+    </tfoot>
 </table>
+
+
+
 
 {% endblock content %}
 
@@ -49,12 +70,12 @@
 
     $(document).ready(function () {
 
-        var table = $('#example').DataTable({
+        var table = $('#rates_table').DataTable({
             "ordering": true,
             "info":     true,
             "order": [[ 0, "asc" ]],
             // "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
-            "scrollY": "750px",
+            "scrollY": "500px",
             "scrollCollapse": true,
             "paging": false,
             "stateSave": true,    
@@ -79,6 +100,81 @@
         });
 
     });
+
+
+    // var data = JSON.parse("{{data|escapejs}}");
+    Highcharts.chart('point_in_time_curves', {
+    
+    
+        title: {
+        text: 'Treasury Yield Curves at Points in Time'
+        },
+
+        subtitle: {
+        text: 'Source: treasury.gov'
+        },
+
+        yAxis: {
+        title: {
+            text: 'Yield Curves'
+        }
+        },
+
+        xAxis: {
+        accessibility: {
+            rangeDescription: 'Range: 3 Months'
+        },
+        categories: ['1 Month', '2 Month', '3 Month', '6 Month', '1 Year', '2 Year', '3 Year', '4 Year', '5 Year', '7 Year', '10 Year', '30 Year']
+        },
+
+        legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+        series: {
+            label: {
+            connectorAllowed: false
+            },
+        }
+        },
+
+        series:  JSON.parse("{{points_in_time_json|escapejs}}"),        // access context variable passed through view; use |escapejs instead of |safe
+
+        responsive: {
+        rules: [{
+            condition: {
+            maxWidth: 500
+            },
+            chartOptions: {
+            legend: {
+                layout: 'horizontal',
+                align: 'center',
+                verticalAlign: 'bottom'
+                        }
+                    }
+                }]
+            }   
+        });
+
+
+
     </script>
 
 {% endblock js %}
+
+
+
+
+
+
+
+
+<!-- 
+labels: {
+    formatter: function() {
+    return Highcharts.dateFormat('%b %e %Y', this.value);      // format the date
+        }
+    }     -->

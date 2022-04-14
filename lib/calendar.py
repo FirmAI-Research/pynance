@@ -1,6 +1,10 @@
 import datetime
 import dateutil.rrule as rrule
 import pandas as pd 
+from dateutil.relativedelta import relativedelta
+
+import pandas_market_calendars as mcal
+nyse = mcal.get_calendar('NYSE')
 
 
 class Calendar:
@@ -17,6 +21,21 @@ class Calendar:
         return dtobj.year
 
 
+    def previous_month_end(self, offset:int = None):
+        first = self.today().replace(day=1)
+        last_month_end = first - datetime.timedelta(days=1)
+        if offset == None:
+            return last_month_end
+        else:
+            return last_month_end + relativedelta(months=offset)
+
+
+    def closest_market_day(self, dtobj):
+        market_days = nyse.valid_days(start_date = '1900-01-01', end_date = '2100-01-01')
+        cloz_dict = { abs(dtobj.timestamp() - date.timestamp()) : date for date in market_days}
+        return cloz_dict[min(cloz_dict.keys())]
+
+        
     def previous_quarter_end(self, dt_obj = datetime.datetime.today()):
         rr = rrule.rrule(rrule.DAILY,bymonth=(3,6,9,12), bymonthday=-1, dtstart = dt_obj-datetime.timedelta(days=100))
         result = rr.before(dt_obj, inc=False) 

@@ -5,7 +5,9 @@ import numpy as np
 class Regression:
 
     def __init__(self, df:pd.DataFrame, x_col_str, y_col_str):
-        pass
+        self.df = df
+        self.x_col_str = x_col_str
+        self.y_col_str = y_col_str
 
 
     def evaluate_fit(self):
@@ -29,7 +31,6 @@ class Regression:
         ax.plot(self.x, self.y_true, "b-", label="True")
         ax.plot(np.hstack((self.x, self.x1n)), np.hstack((self.ypred, self.ynewpred)), "r", label="OLS prediction")
         ax.legend(loc="best")
-
 
 
 

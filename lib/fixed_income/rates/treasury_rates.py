@@ -1,11 +1,14 @@
+from re import L
 from tkinter import N
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd 
 import seaborn as sns
 import matplotlib.pyplot as plt
-
+import json
 from lib.calendar import Calendar
+
+cal = Calendar()
 
 class TreasuryRates:
 
@@ -46,58 +49,66 @@ class TreasuryRates:
         df.date = pd.to_datetime(df.date)
         for c in df.columns:
             if c != 'date':
-                df[c] = pd.to_numeric(df[c])        
-        return df
+                df[c] = pd.to_numeric(df[c])       
+        self.df = df
+        return self.df
+
+    def point_in_time_curves(self):
+        date_x = cal.closest_market_day(cal.previous_month_end(offset=-2)).strftime('%Y-%m-%d')
+        date_y = cal.closest_market_day(cal.previous_month_end(offset=-1)).strftime('%Y-%m-%d')
+        date_z = cal.closest_market_day(cal.previous_month_end()).strftime('%Y-%m-%d')
+
+        x = self.df.loc[self.df.date == date_x]
+        y = self.df.loc[self.df.date == date_y]
+        z = self.df.loc[self.df.date == date_z]
+
+        df = pd.concat([x,y,z], axis=0).set_index('date').transpose()
+        return self.to_highcharts(df)
 
 
-    def melt_by_year(self, years = [Calendar().current_year()]):
-        df = self.get(years = years)
-        self.melted = df.melt(id_vars='date')
+    def all_tenors_over_time(self):
+        print(df)
+
+    def to_highcharts(self, df):
+        return json.dumps([{'data': list(value.values), 'name': key} for key, value in df.items()])
+
+
+    def melt(self, years = [Calendar().current_year()]):
+        self.melted = self.df.melt(id_vars='date')
         self.melted.value = pd.to_numeric(self.melted.value)
         return self.melted
 
 
-    def melt_by_month(self, years = [Calendar().current_year()], n=6):
-        df = self.get(years = years)
-        df = df.iloc[-n:,:]
-        self.melted = df.melt(id_vars='date')
-        self.melted.value = pd.to_numeric(self.melted.value)
-        return self.melted
-
-
-    def plot_curve(self):
-        df = self.get()
-        df = pd.DataFrame(df.iloc[-1]).transpose()
-        self.melted = df.melt(id_vars='date')
-        self.melted.value = pd.to_numeric(self.melted.value)
-        # fig, ax = plt.subplots(1, 1)
-        # sns.lineplot(x = 'variable', y = 'value', data = self.melted)
-        # plt.show()
-        return self.melted
-
-
-    def plot_curve_at_points_in_time(self):
-        df = self.get().set_index('date')
-
-        nrows = len(df.index)
-        mr_month = df.iloc[-1]
-        mr_minus_1_week = df.iloc[nrows-7]      # TODO: not precise; use market day dates
-        mr_minus_1_month = df.iloc[nrows-30]
-
-        select_rows = pd.concat([mr_month, mr_minus_1_week, mr_minus_1_month], axis=1).transpose().reset_index().rename(columns = {'index':'date'}).melt(id_vars='date')
-        select_rows.value = pd.to_numeric(select_rows.value)
-        # fig, ax = plt.subplots(1, 1)
-        # sns.lineplot(x = 'variable', y = 'value', hue ='date', data = select_rows)
-        # plt.show()
-        return select_rows
-    
     def change_distribution(self):
-        df = self.get().set_index('date')
-        weekly_rows = df.iloc[-7:]
+        weekly_rows = self.df.iloc[-7:]
         weekly_diff = weekly_rows.diff().dropna(how='all', axis=0).reset_index(drop=False)
         weekly_diff = weekly_diff.melt(id_vars='date')
         return weekly_diff
 
+
+    # def plot_curve(self):
+    #     self.df = self.get()
+    #     self.df = pd.DataFrame(self.df.iloc[-1]).transpose()
+    #     self.melted = self.df.melt(id_vars='date')
+    #     self.melted.value = pd.to_numeric(self.melted.value)
+    #     # fig, ax = plt.subplots(1, 1)
+    #     # sns.lineplot(x = 'variable', y = 'value', data = self.melted)
+    #     # plt.show()
+    #     return self.melted
+
+
+    # def plot_curve_at_points_in_time(self):
+    #     nrows = len(self.df.index)
+    #     mr_month = self.df.iloc[-1]
+    #     mr_minus_1_week = self.df.iloc[nrows-7]      # TODO: not precise; use last month end market day dates
+    #     mr_minus_1_month = self.df.iloc[nrows-30]
+
+    #     select_rows = pd.concat([mr_month, mr_minus_1_week, mr_minus_1_month], axis=1).transpose().reset_index().rename(columns = {'index':'date'}).melt(id_vars='date')
+    #     select_rows.value = pd.to_numeric(select_rows.value)
+    #     # fig, ax = plt.subplots(1, 1)
+    #     # sns.lineplot(x = 'variable', y = 'value', hue ='date', data = select_rows)
+    #     # plt.show()
+    #     return select_rows
 
 
 # tr = TreasuryRates()
