@@ -1,39 +1,11 @@
 import pandas as pd 
-import statsmodels.api as sm
 import matplotlib.pyplot as plt 
 import numpy as np 
 
 class Regression:
 
-    def __init__(self, df:pd.DataFrame,  x_col_str, y_col_str):
+    def __init__(self, df:pd.DataFrame, x_col_str, y_col_str):
         pass
-
-
-class _StatsModels(Regression):
-
-
-    def __init__(self, how:str=None):
-        ''' simple linear regression or multiple regression
-        '''
-        super().__init__()
-        
-        if getattr(self, how) == 'simple':
-            print('Using Simple Linear Regression') if isinstance(self.x_col_str, str) else print('Using Multiple Regression') if isinstance(self.x_col_str, list) else ValueError('x_col_str must be str or list of str')
-            self.x = self.df[self.x_col_str]
-            self.y = self.df[self.y_col_str]
-            self.X = sm.add_constant(self.x)
-            self.model = sm.OLS(self.y, self.X).fit()
-
-
-    def predict_in_sample(self):
-        self.ypred  = self.model.predict(self.X) 
-        return self.ypred
-    
-    
-    def predict_out_of_sample(self):
-        self.x1n = np.linspace(-5, 5, 1)
-        self.Xnew = sm.add_constant(self.x1n)
-        self.ynewpred = self.model.predict(self.Xnew)
 
 
     def evaluate_fit(self):
@@ -61,9 +33,53 @@ class _StatsModels(Regression):
 
 
 
-class _Sklearn(Regression):
+from sklearn.linear_model import LinearRegression
 
+class _Sklearn(Regression):
 
     def __init__(self):
         super().__init__()
+
+        self.x = self.df[self.x_col_str]
+        self.y = self.df[self.y_col_str]
+        self.model = LinearRegression().fit(self.x, self.y) 
+        r_sq = self.model.score(self.x, self.y)
+
+        print('coefficient of determination:', r_sq)
+        print('intercept:', self.model.intercept_)
+        print('slope:', self.model.coef_) 
+        y_pred = self.model.predict(self.x)
+        print('Predicted response:', y_pred, sep='\n')
+
+
+
+import statsmodels.api as sm
+
+class _StatsModels(Regression):
+
+    def __init__(self):
+        super().__init__()
+
+        print('Using Simple Linear Regression') if isinstance(self.x_col_str, str) else print('Using Multiple Regression') if isinstance(self.x_col_str, list) else ValueError('x_col_str must be str or list of str')
+        self.x = self.df[self.x_col_str]
+        self.y = self.df[self.y_col_str]
+        self.X = sm.add_constant(self.x)
+        self.model = sm.OLS(self.y, self.X).fit()
+
+
+    def predict_in_sample(self):
+        self.ypred  = self.model.predict(self.X) 
+        return self.ypred
+    
+    
+    def predict_out_of_sample(self, n:int=10):
+        self.x1n = np.linspace(-n, n, 1)
+        self.Xnew = sm.add_constant(self.x1n)
+        self.ynewpred = self.model.predict(self.Xnew)
+
+
+
+
+
+
         

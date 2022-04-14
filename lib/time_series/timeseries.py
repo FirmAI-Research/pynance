@@ -1,3 +1,8 @@
+'''
+https://machinelearningmastery.com/time-series-data-stationary-python/
+Machine Learning for Algorithmic Trading
+https://github.com/PacktPublishing/Machine-Learning-for-Algorithmic-Trading-Second-Edition/blob/master/09_time_series_models/01_tsa_and_stationarity.ipynb
+'''
 import pandas as pd 
 import numpy as np
 import sys,os
@@ -10,19 +15,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns 
 
-'''
-https://machinelearningmastery.com/time-series-data-stationary-python/
-Machine Learning for Algorithmic Trading
-https://github.com/PacktPublishing/Machine-Learning-for-Algorithmic-Trading-Second-Edition/blob/master/09_time_series_models/01_tsa_and_stationarity.ipynb
-'''
-
-
 
 class TimeSeries():
     '''
 
     '''
-
     def __init__(self, fp:str=None, col:str = None, series:pd.Series = None, df:pd.DataFrame = None) -> None:
         self.fp = fp
         self.series = series
@@ -31,7 +28,7 @@ class TimeSeries():
         self.data = self.read_data()
     
     def __str__(self):
-        print('TimeSeries Object')
+        return 'TimeSeries Object'
  
 
     def read_data( self, skiprows=0) -> pd.DataFrame:
@@ -99,7 +96,7 @@ class TimeSeries():
         return self
     
 
-    # TODO...
+    # FIXME...
     def plot_series():
         with sns.axes_style('dark'):
             fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(14, 8))

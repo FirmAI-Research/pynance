@@ -1,9 +1,13 @@
 # evaluate an ARIMA model using a walk-forward validation
+# https://www.statsmodels.org/dev/examples/notebooks/generated/tsa_arma_0.html
+''' https://www.itl.nist.gov/div898/handbook/pmc/section6/pmc624.htm '''
+
 import warnings
 from math import sqrt
 import pandas as pd
 from pandas import read_csv
 from statsmodels.tsa.arima.model import ARIMA as _ARIMA
+
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_squared_error
 from math import sqrt
@@ -99,14 +103,13 @@ class Arima(TimeSeries):
         return rmse
 
 
-    def moving_average(a, n=3) :
+    def moving_average(a:pd.array, n:int=3) :
         ret = np.cumsum(a, dtype=float)
         ret[n:] = ret[n:] - ret[:-n]
         return ret[n - 1:] / n
 
 
     def plot_correlogram(self, x, lags=None, title=None):    
-        ''' https://www.itl.nist.gov/div898/handbook/pmc/section6/pmc624.htm '''
         lags = min(10, int(len(x)/5)) if lags is None else lags
         fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(14, 8))
         axes[0][0].plot(x) # Residuals
@@ -130,6 +133,15 @@ class Arima(TimeSeries):
         plt.show()
 
 
+    # FIXME: arima_order = (p, d, q)
+    def plot_model_summary(model_summary, title = None):
+        plt.rc('figure', figsize=(12, 7))
+        plt.text(0.01, 0.05, str(model_summary), {'fontsize': 10}, fontproperties = 'monospace') # approach improved by OP -> monospace!
+        plt.axis('off')
+        plt.tight_layout()
+        plt.savefig(f'{str(iop)}{title}.png')
+
+
     # evaluate combinations of p, d and q values for an ARIMA model
     def evaluate_models(self, p_values, d_values, q_values):
         dataset = self.data.astype('float32')
@@ -147,3 +159,91 @@ class Arima(TimeSeries):
                         continue
         print('Best ARIMA%s RMSE=%.3f' % (best_cfg, best_score))
 
+
+
+    # FIXME
+    def univariate_time_series_optimal_model():
+        
+        ''' ___ @ set params ___ '''
+        initial_p, initial_q = (1,4)
+        pq_iterations = 5
+        d = 12 # d = 0 if series is stationary; use dicky fuller test to determine --> see decomposition.py
+        ''' ___________________  '''
+
+        series_name, time_series, time_series_log, time_series_log_diff = get_data(d)
+
+        ''' ARMA ''' # but we are using the x_log_diff time series data to fit the ARMA model --> primitive AR"I"MA
+        model = tsa.ARMA(endog=time_series_log_diff, order=(initial_p, initial_q)).fit() # endogenous variable; order(p,q) ---> ARIMA order is really (p,d,q) ; p=autoregressive, q=movingaverage
+        print(model.summary())
+        plot_model_summary(model.summary(), title = f'ARMA_Model_Summary_{initial_p}_{initial_q}_{series_name}')
+        plot_correlogram(model.resid, title=f'ARMA_Residuals_Correlogram_{series_name}')
+        '''
+        Find optimal ARMA lags "We iterate over various (p, q) lag combinations 
+        & collect diagnostic statistics to compare the result" 
+        '''
+        train_size = 120
+        test_results = {}
+        y_true = time_series_log_diff.iloc[train_size:]
+        for p in range(pq_iterations):
+            for q in range(pq_iterations):
+                aic, bic = [], []
+                if p == 0 and q == 0:
+                    continue
+                print(p, q)
+                convergence_error = stationarity_error = 0
+                y_pred = []
+                for T in range(train_size, len(time_series_log_diff)):
+                    train_set = time_series_log_diff.iloc[T-train_size:T] # split data into test train to prevent overfitting when predicting
+                    try:
+                        model = tsa.ARMA(endog=train_set, order=(p, q)).fit() # fit model by iterating through p,q values
+                    except LinAlgError:
+                        convergence_error += 1
+                    except ValueError:
+                        stationarity_error += 1
+
+                    forecast, _, _ = model.forecast(steps=1)
+                    y_pred.append(forecast[0])
+                    aic.append(model.aic)
+                    bic.append(model.bic)
+
+                result = (pd.DataFrame({'y_true': y_true, 'y_pred': y_pred}) # collect results on this instance of the iteration
+                        .replace(np.inf, np.nan)
+                        .dropna())
+
+                rmse = np.sqrt(mean_squared_error(
+                    y_true=result.y_true, y_pred=result.y_pred)) # calculate prediction error
+
+                test_results[(p, q)] = [rmse,
+                                        np.mean(aic),
+                                        np.mean(bic),
+                                        convergence_error,
+                                        stationarity_error] # aggregate results of each p,q iteration
+
+        test_results = pd.DataFrame(test_results).T
+        test_results.columns = ['RMSE', 'AIC', 'BIC', 'convergence', 'stationarity']
+        test_results.index.names = ['p', 'q']
+        test_results.info()
+        test_results.dropna()
+
+        print(test_results.nsmallest(5, columns=['RMSE']))
+        print(test_results.nsmallest(5, columns=['BIC']))
+
+        # '''Root mean squared error'''
+        sns.heatmap(test_results.RMSE.unstack().mul(10), fmt='.2', annot=True, cmap='Blues_r')
+        fig1 = plt.gcf()
+        plt.show()
+        fig1.savefig(f'{str(iop)}{series_name}_RMSE_heatmap.png')
+
+        # '''Bayesian Information Criterion'''
+        sns.heatmap(test_results.BIC.unstack(), fmt='.2f', annot=True, cmap='Blues_r')
+        fig2 = plt.gcf()
+        plt.show()
+        fig2.savefig(f'{str(iop)}{series_name}_BIC_heatmap.png')
+
+        #''' use optimized ARMA lags to refit model '''
+        best_p, best_q = test_results.rank().loc[:, ['RMSE', 'BIC']].mean(1).idxmin()  # utilize best p,q values as determined by lowest RMSE,BIC
+        best_arma_model = tsa.ARMA(endog=time_series_log_diff, order=(best_p, best_q)).fit()
+        print(best_arma_model.summary())
+        plot_model_summary(best_arma_model.summary(), title = f'ARMA_Opt_Model_Summary_Opt_{best_p}_{best_q}_{series_name}')
+        plot_correlogram(best_arma_model.resid, lags=20, title=f'ARMA_Opt_Residuals_Correlogram_{best_p}_{best_q}_{series_name}')
+    
