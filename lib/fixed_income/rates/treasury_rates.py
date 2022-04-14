@@ -1,4 +1,4 @@
-from re import L
+from re import L, X
 from tkinter import N
 import requests
 from bs4 import BeautifulSoup
@@ -61,13 +61,34 @@ class TreasuryRates:
         x = self.df.loc[self.df.date == date_x]
         y = self.df.loc[self.df.date == date_y]
         z = self.df.loc[self.df.date == date_z]
-
-        df = pd.concat([x,y,z], axis=0).set_index('date').transpose()
+        t = pd.DataFrame(self.df.iloc[-1]).transpose()
+        print(t)
+        df = pd.concat([x,y,z,t], axis=0).set_index('date').transpose()
+        print()
         return self.to_highcharts(df)
 
 
     def all_tenors_over_time(self):
-        print(df)
+        x_axis = json.dumps(self.df.date.apply(lambda x : pd.to_datetime(x).strftime('%b %d %Y')).tolist())
+        return self.to_highcharts(self.df.set_index('date')), x_axis
+
+
+    def change_distribution(self):
+        weekly_rows = self.df.iloc[-5:]
+        weekly_diff = weekly_rows.set_index('date').diff().dropna(how='all', axis=0).reset_index(drop=False)
+        x_axis = json.dumps(weekly_diff.date.apply(lambda x : pd.to_datetime(x).strftime('%b %d %Y')).tolist())
+        return self.to_highcharts(weekly_diff.set_index('date')) , x_axis
+
+
+    def change_distribution_spider(self):
+        weekly_rows = self.df.iloc[-4:]
+        weekly_diff = weekly_rows.set_index('date').diff().abs().dropna(how='all', axis=0).reset_index(drop=False)
+        print(weekly_diff)
+        x_axis = json.dumps(weekly_diff.date.apply(lambda x : pd.to_datetime(x).strftime('%b %d %Y')).tolist())
+        print(x_axis)
+        print(weekly_diff.set_index('date').transpose())
+        return self.to_highcharts(weekly_diff.set_index('date').transpose()) , x_axis # NOTE: spider needs to be transposed
+
 
     def to_highcharts(self, df):
         return json.dumps([{'data': list(value.values), 'name': key} for key, value in df.items()])
@@ -77,14 +98,6 @@ class TreasuryRates:
         self.melted = self.df.melt(id_vars='date')
         self.melted.value = pd.to_numeric(self.melted.value)
         return self.melted
-
-
-    def change_distribution(self):
-        weekly_rows = self.df.iloc[-7:]
-        weekly_diff = weekly_rows.diff().dropna(how='all', axis=0).reset_index(drop=False)
-        weekly_diff = weekly_diff.melt(id_vars='date')
-        return weekly_diff
-
 
     # def plot_curve(self):
     #     self.df = self.get()
