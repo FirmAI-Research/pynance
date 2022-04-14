@@ -15,8 +15,7 @@ class Calendar:
 
     def today(self):
         return datetime.datetime.today()#.strftime('%Y-%m-%d')
-    
-    
+        
     def current_year(self, dtobj = datetime.datetime.today()):
         return dtobj.year
 

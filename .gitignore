@@ -5,3 +5,7 @@ portrebopaly/vendors/exports/*
 
 
 docs/_todo.txt
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
