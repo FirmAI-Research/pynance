@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-(f@hwv7$8@$y@7)d%jksg@ib6=8*bheqdep^=l^(@6wi_7s0ug
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', 'http://localhost:3000']    # FIXME
+ALLOWED_HOSTS = ['*', 'http://localhost:3000', 'ec2-34-207-78-246.compute-1.amazonaws.com']    # FIXME
 
 
 # Application definition

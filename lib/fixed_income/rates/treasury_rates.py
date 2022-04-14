@@ -1,5 +1,4 @@
 from re import L, X
-from tkinter import N
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd 
