@@ -2,37 +2,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.decomposition import PCA as sklearnPCA
-
 import yfinance as yf
 from datetime import date
 
 today = date.today()
-# read in data
+
 def historical_prices_cbind(arr= [],  date_start = '', date_end =None):
-    """
-    column bind time series of historical stock returns for an array of individual securities
-    _________
-    :param arr: array of individual tickers to retrieve historical prices for
-    :type list: 
-    :param plot: line chart of all columns in df   
-    :type bool: 
-    :param date_start: date to start retrieval of data
-    :type pd.datetime: 
-    :param date_end: date to end retrieval of data
-    :type pd.datetime:  
-    ----------
-    :return: timeseries of historical prices
-    :rtype: pd.dataframe
-    _________
-    """
     if date_end==None:
         date_end = pd.datetime.now().date()
         print(date_end)
-
     df = yf.download(arr,date_start)['Adj Close']
     print(df.head())
-
     return df
+
+
 
 stocks_ = historical_prices_cbind(['AAPL','JNJ','BABA','NLY','VZ','AMT','T','MLM'],'1975-01-01',today).dropna() 
 print(stocks_)

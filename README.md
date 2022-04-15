@@ -11,9 +11,12 @@ highcharts.js<br>
 python logging<br>
 sqlite in dev --> aws rds in prod<br>
 react on the frontend<br>
+add css for custom stylesheets
 
-***note***
+***useful***
+
 history | grep ...[recent cmd name]...
+vim --> esc :%d; i :w  :x  :q!
 
 
 ***Apache***
@@ -27,7 +30,6 @@ sudo a2enmod lbmethod_byrequests
 sudo a2enmod ssl
 
 [/etc/apache2/sites-available/000-default.conf]
-vim --> esc :%d to delete all and paste template below; i :w  :x  :q!
 <VirtualHost *:80>
         <!-- ServerName example.com
         ServerAlias www.example.com
@@ -57,7 +59,6 @@ apachectl configtest
 
 ---
 nohup python manage.py runserver 0.0.0.0:8000 &
----
 top 
 kill pid --##--
 re run nohup

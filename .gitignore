@@ -9,3 +9,6 @@ docs/_todo.txt
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+
+_tmp/*

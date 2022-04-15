@@ -1,4 +1,3 @@
-from calendar import week
 from django.shortcuts import render
 
 from lib.fixed_income.rates.treasury_rates import TreasuryRates
