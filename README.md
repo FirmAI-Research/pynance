@@ -1,16 +1,20 @@
 http://34.207.78.246/treasury_rates/
-
+http://ec2-34-207-78-246.compute-1.amazonaws.com:8000/treasury_rates/
 
 
 ***wip***
 currently django full stack hosted with apache on ubuntu ec2<br>
-cloudtables via https://datatables.net/ (datables )<br>
+cloudtables via https://datatables.net/ (datables)<br>
 highcharts.js<br>
 
 ***todo***
 python logging<br>
 sqlite in dev --> aws rds in prod<br>
 react on the frontend<br>
+
+***note***
+history | grep ...[recent cmd name]...
+
 
 ***Apache***
 
@@ -22,6 +26,8 @@ sudo a2enmod proxy_balancer
 sudo a2enmod lbmethod_byrequests 
 sudo a2enmod ssl
 
+[/etc/apache2/sites-available/000-default.conf]
+vim --> esc :%d to delete all and paste template below; i :w  :x  :q!
 <VirtualHost *:80>
         <!-- ServerName example.com
         ServerAlias www.example.com
@@ -45,8 +51,9 @@ sudo a2enmod ssl
 
 </VirtualHost>
 
-apachectl configtest
 
+
+apachectl configtest
 
 ---
 nohup python manage.py runserver 0.0.0.0:8000 &
