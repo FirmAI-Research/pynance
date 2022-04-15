@@ -33,7 +33,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*', 'http://localhost:3000', 'ec2-34-207-78-246.compute-1.amazonaws.com']    # FIXME
 
-CSRF_TRUSTED_ORIGINS = ['*','https://*.0.0.0.0:8000', 'ec2-34-207-78-246.compute-1.amazonaws.com']  # NOTE not part of default conf; required as of django 4.0 for csrf_protect
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000','http://*.0.0.0.0:8000', 'http://ec2-34-207-78-246.compute-1.amazonaws.com']  # NOTE not part of default conf; required as of django 4.0 for csrf_protect
 
 
 # Application definition
