@@ -8,6 +8,8 @@ from functools import reduce
 import statsmodels.api as smf
 import matplotlib.pyplot as plt
 import yfinance as yf
+from os import listdir
+from os.path import isfile, join
 
 from lib.calendar import Calendar
 cal = Calendar()
@@ -73,12 +75,18 @@ class FammaFrench:
         zip_file = zipfile.ZipFile(localp_zip, 'r')
         zip_file.extractall(self.data_dir)
         zip_file.close()
+        
         csv_name = fname[:-4]  # drop the _CSV included in zip name
 
+        # linux filepaths are case sensitive, windows are insensitive
+        onlyfiles = [f for f in listdir(f'{self.iodir}/data/') if isfile(join(self.iodir, 'data',f))]
+        for f in onlyfiles: 
+            if '.zip' not in f:
+                os.rename( join(self.iodir, 'data',f), join(self.iodir, 'data',f).replace('CSV', 'csv'))
+
         ''' read local data '''
-        localp_csv = f'{self.iodir}/data/{csv_name}.CSV'
-        ff_factors = pd.read_csv(localp_csv, skiprows=skiprows, index_col=0).reset_index(
-        ).dropna().rename(columns={'index': 'date'})
+        localp_csv = f'{self.iodir}/data/{csv_name}.csv'
+        ff_factors = pd.read_csv(localp_csv, skiprows=skiprows, index_col=0).reset_index().dropna().rename(columns={'index': 'date'})
         ff_factors['date'] = pd.to_datetime(
             ff_factors['date'], format='%Y%m%d')
         ff_factors = ff_factors.set_index('date').dropna()

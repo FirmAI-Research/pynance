@@ -17,7 +17,7 @@ def famma_french(request):
     sys.path.append(io_dirp) 
 
     ff = FammaFrench(symbols = ['SPY'],  weights = [1], iodir=os.path.join(io_dirp, '_tmp/ff/'))
-    ff.merge_factors_and_portfolio(download_ff_data=False)    # TODO store ff download in db table each morning
+    ff.merge_factors_and_portfolio(download_ff_data=True)    # TODO store ff download in db table each morning
     ff.three_factor()
 
     model_summary = ff.model.summary().as_html().replace('<table class="simpletable">', '').replace('</table>', '')
