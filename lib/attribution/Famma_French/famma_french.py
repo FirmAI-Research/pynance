@@ -49,12 +49,14 @@ class FammaFrench:
     https://www.quantconnect.com/tutorials/introduction-to-financial-python/fama-french-multi-factor-models
     '''
 
-    def __init__(self, symbols: list, weights: list, iodir:str):
+    def __init__(self, symbols: list, weights: list, date_start:str = '1975-01-01', date_end:str=None, iodir:str=None):
         ''' 
         :param: symbols: list of tickers to retrieve historical prices for for factor attribution against the FF 5 factors
         '''
         self.symbols = symbols
-        self.weights = weights
+        self.weights = [float(x) for x in weights]
+        self.date_start = date_start
+        self.date_end = cal.today() if date_end is None else date_end
         self.iodir = iodir
         self.data_dir = os.path.join(self.iodir, 'data')
         # key = file name; values = skiprows, zip file download path
@@ -120,18 +122,22 @@ class FammaFrench:
         if isinstance(self.symbols, list) and len(self.symbols) > 1:
             print('Using weighting scheme')
             for symbol in self.symbols:
-                returns = pd.DataFrame(yf.download(symbol,'1975-01-01')['Adj Close'].pct_change().dropna())
+                returns = pd.DataFrame(yf.download(symbol,self.date_start, self.date_end)['Adj Close'].pct_change().dropna())
                 returns.rename(columns = {'Adj Close':symbol}, inplace = True)
                 frames.append(returns)
             from functools import reduce
             df = reduce(lambda x, y: pd.merge(x, y, on = 'Date'), frames)
             print(df)
-
+            print(self.weights)
+            print(type(self.weights))
+            print(len(self.weights))
             df['weighted_returns'] = pd.DataFrame(df.dot(self.weights)) # calculate weighted returns via matrix multiplication
+            print(df)
+
         else:
             print('Not using weighting scheme')
             symbol = self.symbols[0]
-            returns = pd.DataFrame(yf.download(symbol,'1975-01-01')['Adj Close'].pct_change().dropna())
+            returns = pd.DataFrame(yf.download(symbol,self.date_start, self.date_end)['Adj Close'].pct_change().dropna())
             returns.rename(columns = {'Adj Close':'weighted_returns'}, inplace = True)
             df = returns
 
@@ -165,7 +171,7 @@ class FammaFrench:
         self.model = smf.formula.ols(
             formula="port_excess ~ mkt_excess + SMB + HML", data=self.df).fit()
 
-    def carhar_four_factor(self):
+    def four_factor(self):
         self.model = smf.formula.ols(
             formula="port_excess ~ mkt_excess + SMB + HML + Mom", data=self.df).fit()
 
