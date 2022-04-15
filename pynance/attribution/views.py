@@ -1,6 +1,7 @@
 import sys
 import os
 import pandas as pd
+from django.views.decorators.csrf import csrf_protect 
 
 from django.shortcuts import render
 
@@ -14,6 +15,7 @@ def index(request):
     return render(request, 'attribution_index.html')
 
 
+@csrf_protect 
 def famma_french(request):
 
     io_dirp = os.path.dirname(os.path.dirname(os.path.dirname(

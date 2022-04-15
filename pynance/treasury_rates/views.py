@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_protect 
 
 from lib.fixed_income.rates.treasury_rates import TreasuryRates
 from lib.learn.regression.linreg import _StatsModels
@@ -45,7 +46,7 @@ def index(request):
     return render(request, 'treasury_rates.html', context)
 
 
-
+@csrf_protect 
 def market_return_regression(request):
 
 
