@@ -63,3 +63,4 @@ top
 kill pid --##--
 re run nohup
 
+sudo apt install tree

@@ -5,7 +5,8 @@ import pandas as pd
 from django.shortcuts import render
 
 from lib.attribution.Famma_French.famma_french import FammaFrench
-
+from lib.calendar import Calendar
+cal = Calendar()
 
 def index(request):
     print('asdf')
@@ -24,8 +25,18 @@ def famma_french(request):
     tickers = str(request.POST.get("tickers")).split(', ')
     weights = str(request.POST.get("weights")).split(', ')
     model_name = str(request.POST.get("model_name"))
-    date_start = pd.to_datetime(str(request.POST.get("datepicker_start"))).strftime('%Y-%m-%d')
-    date_end = str(request.POST.get("datepicker_end"))
+
+    try: 
+        date_start = pd.to_datetime(str(request.POST.get("datepicker_start"))).strftime('%Y-%m-%d')
+    except Exception:
+        date_start = '2022-01-01'
+
+
+    try: 
+        date_end = str(request.POST.get("datepicker_end"))
+    except Exception:
+        date_end = cal.today()
+
 
     print(model_name)
     print(tickers)

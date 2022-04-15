@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+
+{% block content %}
+<h1 style="color:teal">Regress Market Returns against Treasury Rates</h1>
+
+<form action="" method="POST">
+    {% csrf_token %}
+
+    <div style="display:block">
+
+        <div class="form-group" style="width:50%; float:left">
+            <label for="tickers">Enter an individual ticker</label>
+            <input class="form-control" name='tickers' id="tickers" placeholder="SPY">
+        </div>
+
+        <div class="form-group" style="width:50%; float:left">
+            <label for="tenors">Select Tenors to regress against</label>
+            <select class="form-control" id="exampleFormControlSelect1"  name='tenors' id="tenors">
+              <option>1 Month</option>
+              <option>2 Month</option>
+              <option>3 Month</option>
+              <option>6 Month</option>
+              <option>1 Year</option>
+              <option>2 Year</option>
+              <option>3 Year</option>
+              <option>5 Year</option>
+              <option>7 Year</option>
+              <option>10 Year</option>
+              <option>20 Year</option>
+              <option>30 Year</option>
+            </select>
+            
+        </div>
+
+        <div style="clear:both;"></div>
+    </div>
+
+
+    <!-- datepicker -->
+    <div class="form-group" style="width:50%;float:left;display:flex">
+
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+            integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://unpkg.com/gijgo@1.9.13/js/gijgo.min.js" type="text/javascript"></script>
+        <link href="https://unpkg.com/gijgo@1.9.13/css/gijgo.min.css" rel="stylesheet" type="text/css" />
+        <input id="datepicker_start" width="276" placeholder="Start Date" name='datepicker_start' />
+        <script>
+            $('#datepicker_start').datepicker({
+                uiLibrary: 'bootstrap4'
+            });
+        </script>
+    </div>
+    <div style="clear:both;"></div>
+
+    </div>
+    <div style="float:left;width:20%;padding-top:1%;">
+        <button type="submit" name="submit" class="btn btn-outline-success btn-lg btn-block">Run</button>
+    </div>
+</form>
+
+<div style="clear:both;"></div>
+
+
+
+
+<div style="padding-top:2%;">
+
+    <div class="card" style="width: 18rem; float:left">
+        <div class="card-header">
+            Parameters
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">y = {{ticker}}</li>
+            <li class="list-group-item">x = {{x_str}}</li>
+            <li class="list-group-item">{{date_start}}</li>
+
+        </ul>
+    </div>
+
+    <div style="text-align: center; ">
+        <h3 style="color:teal">OLS Regression Results</h3>
+        <table style='font-family:monospace;width:50%; font-size:100%;margin-left: auto; margin-right: auto;'>
+            {{model_summary|safe }}
+        </table>
+    </div>
+
+</div>
+
+{% endblock content %}
+
+
+
+
+
+{% block js %}
+
+
+{% endblock js %}
