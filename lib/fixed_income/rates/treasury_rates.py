@@ -1,3 +1,4 @@
+from datetime import datetime
 from re import L, X
 import requests
 from bs4 import BeautifulSoup
@@ -53,7 +54,7 @@ class TreasuryRates:
         return self.df
 
     def point_in_time_curves(self):
-        date_x = cal.closest_market_day(cal.previous_month_end(offset=-2)).strftime('%Y-%m-%d')
+        date_x = cal.closest_market_day(datetime( cal.today().year, 1, 2)).strftime('%Y-%m-%d') # Year End
         date_y = cal.closest_market_day(cal.previous_month_end(offset=-1)).strftime('%Y-%m-%d')
         date_z = cal.closest_market_day(cal.previous_month_end()).strftime('%Y-%m-%d')
 
@@ -61,9 +62,8 @@ class TreasuryRates:
         y = self.df.loc[self.df.date == date_y]
         z = self.df.loc[self.df.date == date_z]
         t = pd.DataFrame(self.df.iloc[-1]).transpose()
-        print(t)
-        df = pd.concat([x,y,z,t], axis=0).set_index('date').transpose()
-        print()
+        df = pd.concat([x, y,z,t], axis=0).set_index('date').transpose()
+        print(df)
         return self.to_highcharts(df)
 
 
@@ -80,7 +80,7 @@ class TreasuryRates:
 
 
     def change_distribution_spider(self):
-        weekly_rows = self.df.iloc[-4:]
+        weekly_rows = self.df.iloc[-6:]
         weekly_diff = weekly_rows.set_index('date').diff().abs().dropna(how='all', axis=0).reset_index(drop=False)
         print(weekly_diff)
         x_axis = json.dumps(weekly_diff.date.apply(lambda x : pd.to_datetime(x).strftime('%b %d %Y')).tolist())

@@ -9,15 +9,11 @@
 
 
 <figure class="highcharts-figure">
-    <div id="point_in_time_curves" style="width:50%;height:25%; float:left"></div>
+    <div id="point_in_time_curves" style="width:50%;height:50%; float:left"></div>
 </figure>
 
 <figure class="highcharts-figure">
-    <div id="change_distribution" style="width:50%;height:50%; float:right"></div>
-</figure>
-
-<figure class="highcharts-figure">
-    <div id="spiderweb" style="width:50%;height:25%; float:left"></div>
+    <div id="spiderweb" style="width:50%;height:50%; float:left"></div>
 </figure>
 
 
@@ -50,8 +46,14 @@
 </table>
 
 
+
 <figure class="highcharts-figure">
-    <div id="all_tenors_over_time" style="width:100%; float:left"></div>
+    <div id="change_distribution" style="width:50%;height:75%; float:left"></div>
+</figure>
+
+
+<figure class="highcharts-figure">
+    <div id="all_tenors_over_time" style="width:50%;height:75%; float:left"></div>
 </figure>
 
 
@@ -237,7 +239,7 @@
             type: 'area'
         },
         title: {
-            text: 'Daily Change by Tenure as a portion of the Total Change'
+            text: 'Daily Change by Tenor'
         },
         subtitle: {
             text: 'Rolling five days; Source: treasury.gov'
@@ -272,13 +274,13 @@
                 lineColor: '#666666',
                 lineWidth: 1,
                 marker: {
-                    enabled:false,
+                    enabled: false,
                     lineWidth: 0,
                     lineColor: '#666666'
                 }
             }
         },
-        series:   JSON.parse("{{weekly_change|escapejs}}"),        // access context variable passed through view; use |escapejs instead of |safe
+        series: JSON.parse("{{weekly_change|escapejs}}"),        // access context variable passed through view; use |escapejs instead of |safe
 
     });
 
@@ -298,7 +300,7 @@
         },
 
         title: {
-            text: '3 day Changes by Absolute Value',
+            text: '5 day Absolute Change',
             x: -80
         },
 
@@ -307,9 +309,12 @@
         },
 
         xAxis: {
-            categories:  ['1 Month', '2 Month', '3 Month', '6 Month', '1 Year', '2 Year', '3 Year', '5 Year', '7 Year', '10 Year', '20 Year', '30 Year'],
+            categories: ['1 Month', '2 Month', '3 Month', '6 Month', '1 Year', '2 Year', '3 Year', '5 Year', '7 Year', '10 Year', '20 Year', '30 Year'],
             tickmarkPlacement: 'off',
-            lineWidth: 0
+            lineWidth: 0,
+            labels: {
+                useHTML: false,
+            }
         },
 
         yAxis: {
@@ -329,7 +334,7 @@
             layout: 'vertical'
         },
 
-        series:   JSON.parse("{{weekly_change_spider|escapejs}}"),
+        series: JSON.parse("{{weekly_change_spider|escapejs}}"),
 
         responsive: {
             rules: [{
@@ -349,7 +354,7 @@
             }]
         }
 
-        });
+    });
 
 
 
