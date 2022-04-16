@@ -23,34 +23,43 @@
 
     <div style="display:block">
 
-        <p>Some companies may not have reported quarter end data yet. Enter a ticker and click run.</p>
+        <p>Some companies may not have reported quarter end data yet. Enter a ticker and click run. Example: AAL</p>
+        <p>Page takes ~1min to load.</p>
         <div class="form-group" style="width:50%; float:left">
             <label for="tickers">Company Tickers</label>
             <input class="form-control" name='tickers' id="tickers" placeholder="AAL">
         </div>
 
-        <div class="form-group" style="width:50%; float:left">
+        <!-- <div class="form-group" style="width:50%; float:left">
             <label for="names">Company Name</label>
             <select class="form-control" id="exampleFormControlSelect1" name='names' id="names">
                 <option>1 Month</option>
             </select>
 
-        </div>
-
-        <div style="clear:both;"></div>
-
+        </div> -->
 
     </div>
+
+
+    <div style=>
+
+        <div class="card" style="width: 18rem; float:right">
+            <div class="card-header">
+                Parameters
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">y = {{selected_ticker}}</li>
+            </ul>
+        </div>
 
 
     <div style="clear:both;"></div>
 
     <div style="display:block">
-
-        <div class="form-check form-check-inline">
+        <!-- <div class="form-check form-check-inline">
             <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled>
             <label class="form-check-label" for="inlineCheckbox3">Disabled</label>
-        </div>
+        </div> -->
     </div>
 
     <div style="float:left;width:20%;padding-top:1%;">
@@ -63,18 +72,21 @@
 
 
 <figure class="highcharts-figure">
-    <div id="boxplot1" style="width:50%;height:25%; float:left"></div>
+    <div id="boxplot1" style="width:50%;height:35%; float:left"></div>
 </figure>
 
 <figure class="highcharts-figure">
-    <div id="boxplot2" style="width:50%;height:25%; float:left"></div>
+    <div id="boxplot2" style="width:50%;height:35%; float:left"></div>
 </figure>
 
+
+<div style="clear:both;"></div>
+
 <!-- pass pd.DataFrame variable from view and populate highcharts table -->
-<!-- <table id="sector_view" class="display" style="width:100%">
+<table id="sector_view" class="display" style="width:100%">
     <thead>
         <tr>
-            {% for key, v in df.items %}
+            {% for key, v in pctile_frame.items %}
             <th>{{key}}</th>
             {% endfor %}
         </tr>
@@ -90,13 +102,13 @@
     </tbody>
     <tfoot>
         <tr>
-            {% for key, v in df.items %}
+            {% for key, v in pctile_frame.items %}
             <th>{{key}}</th>
             {% endfor %}
         </tr>
     </tfoot>
 </table>
- -->
+
 
 
 {% endblock content %}
@@ -109,20 +121,20 @@
 
 <script>
 
-    // $(document).ready(function () {
+    $(document).ready(function () {
 
-    //     var table = $('#sector_view').DataTable({
-    //         "ordering": true,
-    //         "info": true,
-    //         "order": [[0, "asc"]],
-    //         "scrollY": "500px",
-    //         "scrollCollapse": true,
-    //         "paging": true,
-    //         "searching": true,
+        var table = $('#sector_view').DataTable({
+            "ordering": true,
+            "info": true,
+            "order": [[0, "asc"]],
+            "scrollY": "500px",
+            "scrollCollapse": true,
+            "paging": true,
+            "searching": true,
 
-    //     });
+        });
 
-    // });
+    });
 
 
 

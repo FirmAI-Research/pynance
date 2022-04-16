@@ -42,8 +42,9 @@ class Nasdaq:
         self.api_key = os.environ["NASDAQ_DATA_LINK_API_KEY"]
 
 
-    def calculate_box_plot(self, column=None):
-        arr = pd.to_numeric(self.df[column]).dropna().values
+    def calculate_box_plot(self, df, column=None):
+        ''' calculat quartiles of an individual array '''
+        arr = pd.to_numeric(df[column]).dropna().values
         Q1, median, Q3 = np.percentile(arr, [25, 50, 75])
         IQR = Q3 - Q1
 
@@ -62,10 +63,20 @@ class Nasdaq:
 
         Qs = [actual_loval, Q1, median, Q3, actual_hival]
 
-        print(arr)
-        print(Qs)
+        # print(arr)
+        # print(Qs)
         return Qs, outliers
 
+
+    def build_percentiles_frame(self, df):
+        datalists = []
+        for c in df.columns:
+            if c in self.fundamental_cols and c != 'ticker':
+                qs, outliers = self.calculate_box_plot(df, column=c)
+                datalists.append(qs)
+        xdf = pd.DataFrame(datalists, columns=['low', 'Q1', 'median', 'Q3', 'high']).transpose()
+        xdf.columns = [x for x in self.fundamental_cols if x != 'ticker']
+        return xdf.reset_index()
 
 
 
@@ -121,7 +132,7 @@ class Fundamentals(Nasdaq):
 
     def get(self): # NOTE using prior quarter fundamentals for complete dataset
         df = nasdaqdatalink.get_table(self.name, dimension="MRQ", calendardate=[cal.prior_quarter_end()], paginate=True) ##qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
-        df['roe'] = df['netinc'] / df['equity']
+        df['roe'] = df['netinc'] / (df['equity'] )
         df['roc'] = df['netinc'] / (df['equity'] + df['debt'])
         df['roa'] = df['netinc'] / df['assets']
         return df
@@ -145,6 +156,7 @@ class Fundamentals(Nasdaq):
         self.df = self.sector_df[self.ticker_cols + self.fundamental_cols]
         self.df.to_excel(f'{self.iodir}/nasdaq_fundamentals_sector_view.xlsx')
         return self.df
+
 
 
 
