@@ -26,14 +26,14 @@
     <link rel="stylesheet" href="//cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
 
 
-
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css">
 
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.min.css"
+        rel="stylesheet" />
 
 
-  
+
 </head>
 
 
@@ -62,30 +62,48 @@
                                 Rates
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="{% url 'treasury_rates' %}" style="color:teal">Treasury Rates</a></li>
-                                <li><a class="dropdown-item" href="{% url 'market_return_regression' %}" style="color:teal">Market Regression</a></li>
+                                <li><a class="dropdown-item" href="{% url 'treasury_rates' %}"
+                                        style="color:teal">Treasury Rates</a></li>
+                                <li><a class="dropdown-item" href="{% url 'market_return_regression' %}"
+                                        style="color:teal">Market Regression</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li><a class="dropdown-item" href="#" style="color:teal"></a></li>
                             </ul>
                         </li>
-
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false" style="color:teal">
                                 Attribution
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="{% url 'famma_french' %}" style="color:teal">Famma French</a></li>
+                                <li><a class="dropdown-item" href="{% url 'famma_french' %}" style="color:teal">Famma
+                                        French</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
-                                <li><a class="dropdown-item" href="#" style="color:teal">Principle Component Analysis</a></li>
+                                <li><a class="dropdown-item" href="#" style="color:teal">Principle Component
+                                        Analysis</a></li>
                                 <li><a class="dropdown-item" href="#" style="color:teal">Value at Risk</a></li>
                             </ul>
                         </li>
-
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false" style="color:teal">
+                                Equity Fundamentals
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{% url 'fundamentals' %}" style="color:teal">Sector
+                                        View</a></li>
+                                <li><a class="dropdown-item" href="{% url 'fundamentals' %}" style="color:teal">Dcf</a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="#" style="color:teal"></a></li>
+                            </ul>
+                        </li>
 
 
                         <li class="nav-item">
@@ -137,7 +155,7 @@
 
 
 
-    
+
     <!-- Custom script -->
     {% block js %}
 

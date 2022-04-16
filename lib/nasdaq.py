@@ -14,7 +14,9 @@ import pandas as pd
 import numpy as np
 import requests
 
-from controller.calendar import Calendar
+from lib.calendar import Calendar
+cal = Calendar()
+
 
 class Nasdaq:
     """
@@ -24,6 +26,7 @@ class Nasdaq:
     mydata = nasdaqdatalink.get("EIA/PET_RWTC_D")
 
     """    
+    iodir =  os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/_tmp/nasdaq_data_link/'  
 
     # equtiy
     def __init__(self):
@@ -31,71 +34,137 @@ class Nasdaq:
 
 
     def authenticate(self):        
-        with open('../secrets.json') as f:
+        with open(r"C:\dev\_secrets\nasdaq_data_link.json") as f:
             data = json.load(f)
         #nasdaqdatalink.read_key() 
         nasdaqdatalink.ApiConfig.api_key = data['nasdaq_api_key'] 
         os.environ["NASDAQ_DATA_LINK_API_KEY"] =  data['nasdaq_api_key']  # NOTE options: nasdaqdatalink.ApiConfig.api_key = data['nasdaq_api_key']   |     nasdaqdatalink.read_key()     
         self.api_key = os.environ["NASDAQ_DATA_LINK_API_KEY"]
 
-    
-    def curl(self):
-        request_url = ''    
-        res = requests.get(request_url)
-        print(res)
+
+    def calculate_box_plot(self, column=None):
+        arr = pd.to_numeric(self.df[column]).dropna().values
+        Q1, median, Q3 = np.percentile(arr, [25, 50, 75])
+        IQR = Q3 - Q1
+
+        loval = Q1 - 1.5 * IQR
+        hival = Q3 + 1.5 * IQR
+
+        wiskhi = np.compress(arr <= hival, arr)
+        wisklo = np.compress(arr >= loval, arr)
+
+        actual_hival = np.max(wiskhi)
+        actual_loval = np.min(wisklo)
+
+        outliers_high = np.compress(arr > actual_hival, arr)
+        outliers_low = np.compress(arr < actual_loval, arr)
+        outliers = [x for x in outliers_high ] + [y for y in outliers_low]
+
+        Qs = [actual_loval, Q1, median, Q3, actual_hival]
+
+        print(arr)
+        print(Qs)
+        return Qs, outliers
 
 
-class CoreUsFundamentals(Nasdaq):
-    """
-    view:
-        AR - As reported
-        MR - Most reecent reported
-
-    time dimensions:
-        Y - Annual
-        Q - Quarter
-        T - Trailing Twelve Months
-
-    filters: 
-        1 - ticker
-        2 - calendardate
-        3 - lastupdated
-        4 - dimension
-        5 - datekey
 
 
-    full export - https://data.nasdaq.com/api/v3/datatables/SHARADAR/SF1?qopts.export=true&api_key=API_KEY
+class Metrics(Nasdaq):
+    name = 'SHARADAR/Daily'
 
-    """
+    ticker_cols = ['ticker', 'name','exchange','category','cusips', 'sector', 'industry', 'scalemarketcap', 'scalerevenue', 'currency']
 
-    name = 'SHARADAR/SF1'
-
-    def __init__(self):
+    def __init__(self, ):        
         super().__init__()
         self.authenticate()
 
 
-    def get(self):
-        df = nasdaqdatalink.get_table(self.name, paginate=True, dimension="MRY", ticker='AMZN')
-        print(df)
-
-
-    def get_export(self, dimension='MRQ'):
-        df = pd.read_csv('./vendors/exports/SHARADAR_SF1_Full_Export.csv')
-        prev_qtr = str(Calendar().previous_quarter_end())
-        df = df.loc[(df.dimension == dimension) & (df.calendardate == prev_qtr)]
+    def get(self): # NOTE using prior quarter fundamentals for complete dataset
+        df = nasdaqdatalink.get_table(self.name, date=[cal.previous_quarter_end()], paginate=True) ##qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
         return df
 
 
-    def merge_meta_data(self, df_core):
+    def merge_meta_data(self, df):
         tickers = Tickers()
-        df_tickers =  tickers.get_export().dropna(subset=['ticker'])
-        df = df_core.merge(df_tickers, how='left', on='ticker')
+        df_tickers =  tickers.get().dropna(subset=['ticker'])
+        df_tickers = df_tickers[self.ticker_cols]
+        return df.merge(df_tickers, how='left', on='ticker')
+
+    def metrics_by_sector(self, sector=None):
+        metrics = self.get()
+        self.sector_df = self.merge_meta_data(metrics)
+        self.sector_df.to_excel(f'{self.iodir}/nasdaq_metrics.xlsx')
+        self.sector_df =  self.sector_df.loc[self.sector_df.sector == sector]
+        self.sector_df.to_excel(f'{self.iodir}/nasdaq_metrics_sector_view.xlsx')
+        self.df = self.sector_df
+        return self.sector_df
+
+
+
+
+class Fundamentals(Nasdaq):
+    """
+    full export - https://data.nasdaq.com/api/v3/datatables/SHARADAR/SF1?qopts.export=true&api_key=API_KEY
+    """
+    name = 'SHARADAR/SF1'
+
+    fundamental_cols = ['ticker','calendardate', 'assets','capex', 'debt', 'depamor', 'ebit', 'ebitda', 'eps','equity', 'ev',  'fcf', 'gp', 'intangibles', 'intexp', 'inventory',  'liabilities', 'ncf', 'netinc', 'opex', 'opinc', 'pb', 'pe',
+    'price', 'ps', 'receivables', 'revenue', 'rnd', 'tangibles', 'taxassets', 'taxexp', 'taxliabilities', 'workingcapital',
+    'roe','roc','roa']
+
+    ticker_cols = ['name','exchange','category','cusips', 'sector', 'industry', 'scalemarketcap', 'scalerevenue', 'currency']
+
+    def __init__(self, ):        
+        super().__init__()
+        self.authenticate()
+
+
+    def get(self): # NOTE using prior quarter fundamentals for complete dataset
+        df = nasdaqdatalink.get_table(self.name, dimension="MRQ", calendardate=[cal.prior_quarter_end()], paginate=True) ##qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
+        df['roe'] = df['netinc'] / df['equity']
+        df['roc'] = df['netinc'] / (df['equity'] + df['debt'])
+        df['roa'] = df['netinc'] / df['assets']
         return df
 
 
-    def parse_seector_industry(self, sector:str=None, industry:str=None):
+    def merge_meta_data(self, df):
+        tickers = Tickers()
+        df_tickers =  tickers.get().dropna(subset=['ticker'])
+        return df.merge(df_tickers, how='left', on='ticker')
+
+
+    def fundamentals_by_sector(self, sector=None):
+        fdmtl = self.get()
+        self.sector_df = self.merge_meta_data(fdmtl)
+        self.sector_df.to_excel(f'{self.iodir}/nasdaq_fundamentals.xlsx')
+        self.sector_df =  self.sector_df.loc[self.sector_df.sector == sector]
+        return self.sector_df
+
+
+    def view_sector(self):
+        self.df = self.sector_df[self.ticker_cols + self.fundamental_cols]
+        self.df.to_excel(f'{self.iodir}/nasdaq_fundamentals_sector_view.xlsx')
+        return self.df
+
+
+
+
+    # Misc.
+    def curl(self):
+        # request_url = f"https://data.nasdaq.com/api/v3/datatables/{self.name}.json?api_key={self.api_key}&dimension=MRQ&ticker=AMZN&filingdate.gte=2022-01-01"
+        # res = requests.get(request_url)
+        # df  = pd.DataFrame.from_dict(res.json())
+        # print(df)
         pass
+
+
+    # def get_export(self, dimension='MRQ'):
+    #     df = pd.read_csv('./vendors/exports/SHARADAR_SF1_Full_Export.csv')
+    #     prev_qtr = str(Calendar().previous_quarter_end())
+    #     df = df.loc[(df.dimension == dimension) & (df.calendardate == prev_qtr)]
+    #     return df
+
+
 
 
 
@@ -105,18 +174,26 @@ class Tickers(Nasdaq):
 
     def __init__(self):
         super().__init__()
-        #self.authenticate()
+        self.authenticate()
 
 
     def get(self):
-        df = nasdaqdatalink.get_table(self.name, paginate=True)
-        print(df)
-
-
-    def get_export(self, table_name='SF1'):
-        df = pd.read_csv('./vendors/exports/SHARADAR_TICKERS.csv')
-        df = df.loc[df.table==table_name]
+        df = nasdaqdatalink.get_table(self.name, table="SF1", paginate=True ) #qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
+        df = df.loc[(df.isdelisted == 'N') & (df.lastpricedate == max(df.lastpricedate)) ]
+        df = df.drop_duplicates(subset=['ticker', 'name'])
         return df
+
+
+    # def get_export(self, table_name='SF1'):
+    #     df = pd.read_csv('./vendors/exports/SHARADAR_TICKERS.csv')
+    #     df = df.loc[df.table==table_name]
+    #     return df
+
+
+
+
+
+
 
 
 class CoreUSInstitutionalInvestors(Nasdaq):
@@ -216,6 +293,8 @@ class CoreUSInstitutionalInvestors(Nasdaq):
         df_increase = dfz.sort_values(by = ['pct'], ascending=False)
         df_decrease = dfz.sort_values(by = ['pct'], ascending=True)
         return (df_increase, df_decrease)
+
+
 
 
 

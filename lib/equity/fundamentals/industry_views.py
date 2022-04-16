@@ -22,7 +22,6 @@ class Moodys(Nasdaq):
         """
 
 
-
 class Semiconductors(Moodys):
 
     def __init__(self):

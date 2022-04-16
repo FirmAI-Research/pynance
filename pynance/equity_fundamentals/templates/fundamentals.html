@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+
+{% block content %}
+<h1 style="color:teal">Equity Fundamentals</h1>
+
+<h3 style="color:teal">Sector View</h3>
+
+
+
+
+
+
+
+
+
+
+<form action="" method="POST">
+    {% csrf_token %}
+
+    <div style="display:block">
+
+        <p>Some companies may not have reported quarter end data yet. Enter a ticker and click run.</p>
+        <div class="form-group" style="width:50%; float:left">
+            <label for="tickers">Company Tickers</label>
+            <input class="form-control" name='tickers' id="tickers" placeholder="AAL">
+        </div>
+
+        <div class="form-group" style="width:50%; float:left">
+            <label for="names">Company Name</label>
+            <select class="form-control" id="exampleFormControlSelect1" name='names' id="names">
+                <option>1 Month</option>
+            </select>
+
+        </div>
+
+        <div style="clear:both;"></div>
+
+
+    </div>
+
+
+    <div style="clear:both;"></div>
+
+    <div style="display:block">
+
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled>
+            <label class="form-check-label" for="inlineCheckbox3">Disabled</label>
+        </div>
+    </div>
+
+    <div style="float:left;width:20%;padding-top:1%;">
+        <button type="submit" name="submit" class="btn btn-outline-success btn-lg btn-block">Run</button>
+    </div>
+</form>
+
+<div style="clear:both;"></div>
+
+
+
+<figure class="highcharts-figure">
+    <div id="boxplot1" style="width:50%;height:25%; float:left"></div>
+</figure>
+
+<figure class="highcharts-figure">
+    <div id="boxplot2" style="width:50%;height:25%; float:left"></div>
+</figure>
+
+<!-- pass pd.DataFrame variable from view and populate highcharts table -->
+<!-- <table id="sector_view" class="display" style="width:100%">
+    <thead>
+        <tr>
+            {% for key, v in df.items %}
+            <th>{{key}}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in values %}
+        <tr>
+            {% for value in item %}
+            <td>{{value}}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            {% for key, v in df.items %}
+            <th>{{key}}</th>
+            {% endfor %}
+        </tr>
+    </tfoot>
+</table>
+ -->
+
+
+{% endblock content %}
+
+
+
+
+
+{% block js %}
+
+<script>
+
+    // $(document).ready(function () {
+
+    //     var table = $('#sector_view').DataTable({
+    //         "ordering": true,
+    //         "info": true,
+    //         "order": [[0, "asc"]],
+    //         "scrollY": "500px",
+    //         "scrollCollapse": true,
+    //         "paging": true,
+    //         "searching": true,
+
+    //     });
+
+    // });
+
+
+
+
+
+
+
+    Highcharts.chart('boxplot1', {
+
+        chart: {
+            type: 'boxplot'
+        },
+
+        title: {
+            text: 'Sector ROE'
+        },
+
+        legend: {
+            enabled: false
+        },
+
+        xAxis: {
+            categories: ['Sector'],
+            title: {
+                text: 'Experiment No.'
+            }
+        },
+
+        yAxis: {
+            title: {
+                text: 'ROE'
+            },
+            plotLines: [{
+                // value: 250,
+                color: 'red',
+                width: 1,
+                label: {
+                    // text: 'Theoretical mean: 932',
+                    align: 'center',
+                    style: {
+                        color: 'gray'
+                    }
+                }
+            }],
+        },
+
+        series: [
+
+            {
+                name: 'Selected Company',
+                data: [
+                    JSON.parse("{{qs_json|escapejs}}")
+                ],        // access context variable passed through view; use |escapejs instead of |safe
+
+                tooltip: {
+                    headerFormat: '<em>Experiment No {point.key}</em><br/>'
+                }
+            }, {
+                name: 'Company',
+                color: Highcharts.getOptions().colors[0],
+                type: 'scatter',
+                data: [ // x, y positions where 0 is the first category
+                    JSON.parse("{{selected_pe_json|escapejs}}")
+
+                    // add outlier series here??
+
+                ],
+                marker: {
+                    fillColor: 'red',
+                    lineWidth: 1,
+                    lineColor: Highcharts.getOptions().colors[0]
+                },
+                tooltip: {
+                    pointFormat: 'Observation: {point.y}'
+                }
+            },
+
+        ]
+
+    });
+
+
+
+
+
+
+
+    Highcharts.chart('boxplot2', {
+
+        chart: {
+            type: 'boxplot'
+        },
+
+        title: {
+            text: 'PE'
+        },
+
+        legend: {
+            enabled: false
+        },
+
+        xAxis: {
+            categories: ['Sector'],
+            title: {
+                text: 'Experiment No.'
+            }
+        },
+
+        yAxis: {
+            title: {
+                text: 'PE'
+            },
+            plotLines: [{
+                // value: 250,
+                color: 'red',
+                width: 1,
+                label: {
+                    // text: 'Theoretical mean: 932',
+                    align: 'center',
+                    style: {
+                        color: 'gray'
+                    }
+                }
+            }],
+        },
+
+        series: [
+
+            {
+                name: 'Selected Company',
+                data: [
+                    JSON.parse("{{qs_json2|escapejs}}")
+                ],        // access context variable passed through view; use |escapejs instead of |safe
+
+                tooltip: {
+                    headerFormat: '<em>Experiment No {point.key}</em><br/>'
+                }
+            }, {
+                name: 'Company',
+                color: Highcharts.getOptions().colors[0],
+                type: 'scatter',
+                data: [ // x, y positions where 0 is the first category
+                    JSON.parse("{{selected_pe_json2|escapejs}}")
+
+                    // add outlier series here??
+
+                ],
+                marker: {
+                    fillColor: 'red',
+                    lineWidth: 1,
+                    lineColor: Highcharts.getOptions().colors[0]
+                },
+                tooltip: {
+                    pointFormat: 'Observation: {point.y}'
+                }
+            },
+
+        ]
+
+    });
+
+
+</script>
+{% endblock js %}

@@ -42,7 +42,7 @@ class Calendar:
 
 
     def prior_quarter_end(self):
-        return self.previous_quarter_end() - datetime.timedelta(months=3)
+        return self.previous_quarter_end() - relativedelta(months=3)
 
     
     def quarter_end_list(self, start_date, end_date):
