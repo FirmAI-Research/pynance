@@ -34,7 +34,8 @@ class Nasdaq:
 
 
     def authenticate(self):        
-        with open(r"C:\dev\_secrets\nasdaq_data_link.json") as f:
+        fp = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/_tmp/nasdaq_data_link.json'
+        with open(fp) as f:
             data = json.load(f)
         #nasdaqdatalink.read_key() 
         nasdaqdatalink.ApiConfig.api_key = data['nasdaq_api_key'] 
