@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+
+{% block content %}
+<h1 style="color:teal">Dcf</h1>
+
+<div style="width:33%;float:left;">
+
+    <table class="table table-striped">
+
+        <tr>
+            <th class= "table-primary">metric</th>
+            <th class= "table-primary">2015</th>
+            <th class= "table-primary">2015</th>
+            <th class= "table-primary">2015</th>
+            <th class= "table-primary">2015</th>
+            <th class= "table-primary">2015</th>
+
+
+
+        </tr>
+        <tr>
+            <td>Revenue</td>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+        </tr>
+        <tr>
+            <td>Revenue</td>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+        </tr>
+    </table>
+
+
+</div>
+
+
+<div style="width:33%;float:left;padding-left: 50px;">
+
+    <table class="table table-striped">
+
+        <tr>
+            <th>Geom. Avg.</th>
+            <th>CAGR</th>
+            <th>Growth Rate</th>
+            <th>Rate being Used</th>
+
+        </tr>
+        <tr>
+            <td class= "table-default">2</td>
+            <td class= "table-default">2</td>
+            <td class= "table-default">
+                <input type="range" class="form-range" min="0" max="5" step="0.5" id="customRange3"
+                    oninput="this.nextElementSibling.value = this.value" style="float:left;width:60%;">
+                <output style="float:left;width:10%;padding-left:25px;">24</output>
+            </td>
+            <td class= "table-default">2</td>
+
+        </tr>
+
+
+    </table>
+
+
+
+
+</div>
+
+
+<div style="width:33%;float:left;padding-left: 50px;">
+
+    <table class="table table-striped">
+
+        <tr>
+            <th class= "table-primary">2015</th>
+            <th class= "table-primary">2015</th>
+            <th class= "table-primary">2015</th>
+            <th class= "table-primary">2015</th>
+            <th class= "table-primary">2015</th>
+
+
+
+        </tr>
+        <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+
+        </tr>
+
+
+    </table>
+
+
+</div>
+
+{% endblock content %}
+
+
+
+
+{% block js %}
+
+<script>
+
+
+
+</script>
+{% endblock js %}

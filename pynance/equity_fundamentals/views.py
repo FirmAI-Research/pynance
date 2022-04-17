@@ -98,7 +98,7 @@ def fundamentals(request):
         company_pct_rank_data = company_pct_rank_data[cols]
         for c in company_pct_rank_data.columns:
             if c != 'ticker':
-                company_pct_rank_data[c] = company_pct_rank_data[c].apply(lambda x : '{:.2f}'.format(x))
+                company_pct_rank_data[c] = company_pct_rank_data[c].apply(lambda x : '{:,.2f}'.format(x))
         print(company_pct_rank_data)
 
         context = {
@@ -131,7 +131,14 @@ def fundamentals(request):
     return render(request, 'fundamentals.html', context)
 
 
+
+
+
 def dcf(request):
     # select a company from the sector view to load the dcf view
     # dcf --> dcf view
-    pass
+    context = {
+
+    }
+    return render(request, 'dcf.html', context)
+
