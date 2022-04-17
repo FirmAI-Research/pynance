@@ -77,7 +77,11 @@ class Nasdaq:
                 datalists.append(qs)
         xdf = pd.DataFrame(datalists, columns=['low', 'Q1', 'median', 'Q3', 'high']).transpose()
         xdf.columns = [x for x in self.fundamental_cols if x != 'ticker']
-        return xdf.reset_index()
+        xdf.drop(columns=['calendardate'], inplace=True)
+        for c in xdf.columns:
+            xdf[c] = xdf[c].apply(lambda x : '{:,.2f}'.format(x))
+        xdf.reset_index(inplace=True)
+        return xdf
 
 
 
@@ -116,7 +120,13 @@ class Metrics(Nasdaq):
 
 class Fundamentals(Nasdaq):
     """
+    5 filter columns:
+        ticker, calendardate, lastupdated, dimension, datekey
     full export - https://data.nasdaq.com/api/v3/datatables/SHARADAR/SF1?qopts.export=true&api_key=API_KEY
+
+    Notes:
+    nasdaqdatalink.get_table('SHARADAR/SF1', calendardate={'gte':'2013-12-31'}, ticker='AAPL')
+    qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
     """
     name = 'SHARADAR/SF1'
 
@@ -126,13 +136,15 @@ class Fundamentals(Nasdaq):
 
     ticker_cols = ['name','exchange','category','cusips', 'sector', 'industry', 'scalemarketcap', 'scalerevenue', 'currency']
 
-    def __init__(self, ):        
+    def __init__(self, ticker = None, calendardate = None):        
         super().__init__()
         self.authenticate()
 
+        self.calendardate = calendardate
+
 
     def get(self): # NOTE using prior quarter fundamentals for complete dataset
-        df = nasdaqdatalink.get_table(self.name, dimension="MRQ", calendardate=[cal.prior_quarter_end()], paginate=True) ##qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
+        df = nasdaqdatalink.get_table(self.name, dimension="MRQ", calendardate=[self.calendardate],  paginate=True) 
         df['roe'] = df['netinc'] / (df['equity'] )
         df['roc'] = df['netinc'] / (df['equity'] + df['debt'])
         df['roa'] = df['netinc'] / df['assets']
@@ -148,18 +160,15 @@ class Fundamentals(Nasdaq):
     def fundamentals_by_sector(self, sector=None):
         fdmtl = self.get()
         self.sector_df = self.merge_meta_data(fdmtl)
-        self.sector_df.to_excel(f'{self.iodir}/nasdaq_fundamentals.xlsx')
+        # self.sector_df.to_excel(f'{self.iodir}/nasdaq_fundamentals.xlsx')
         self.sector_df =  self.sector_df.loc[self.sector_df.sector == sector]
         return self.sector_df
 
 
     def view_sector(self):
         self.df = self.sector_df[self.ticker_cols + self.fundamental_cols]
-        self.df.to_excel(f'{self.iodir}/nasdaq_fundamentals_sector_view.xlsx')
+        # self.df.to_excel(f'{self.iodir}/nasdaq_fundamentals_sector_view.xlsx')
         return self.df
-
-
-
 
 
     # Misc.
