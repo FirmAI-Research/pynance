@@ -93,7 +93,8 @@ class Nasdaq:
             # time.strftime('%Y-%m-%d', time.gmtime(os.path.getmtime(path_to_file)))
             return  time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.path.getmtime(path_to_file)))# getmtime= modified, getctime = created
         else:
-            stat = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(path_to_file)))  
+            stat = os.stat(path_to_file)
+            print(stat.st_mtime)
             return stat.st_mtime
 
 
