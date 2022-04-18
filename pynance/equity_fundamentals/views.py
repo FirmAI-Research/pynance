@@ -74,13 +74,11 @@ def fundamentals(request):
         all_sector_data = df
         all_sector_data = all_sector_data[[x for x in fun.fundamental_cols]]
         for c in ticker_data.columns:
-            try:
-                all_sector_data[c] = all_sector_data[c].apply(
-                    lambda x: '{:,.2f}'.format(x))
-            except Exception:
-                pass
+            if c not in  ['ticker', 'calendardate']:
+                all_sector_data[c] = all_sector_data[c].apply(lambda x: '{:,.2f}'.format(x))
         all_sector_data.drop(columns=['calendardate'], inplace=True)
         all_sector_data.reset_index()
+        all_companies_in_sector = all_sector_data
 
         # Selected Company percentile rank for each column
         all_sector_data = df
@@ -118,8 +116,8 @@ def fundamentals(request):
             'ticker_data': ticker_data,
             'ticker_values': ticker_data.values.tolist(),
 
-            'all_sector_data': all_sector_data,
-            'sector_values': all_sector_data.values.tolist(),
+            'all_sector_data': all_companies_in_sector,
+            'sector_values': all_companies_in_sector.values.tolist(),
 
             'company_pct_rank_data': company_pct_rank_data,
             'company_pct_rank_values': company_pct_rank_data.values.tolist(),

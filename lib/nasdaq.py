@@ -13,7 +13,8 @@ import os
 import pandas as pd
 import numpy as np
 import requests
-
+import os
+import platform
 from lib.calendar import Calendar
 cal = Calendar()
 
@@ -83,6 +84,17 @@ class Nasdaq:
         xdf.reset_index(inplace=True)
         return xdf
 
+    def get_modified_time(self, path_to_file):
+        """
+        See http://stackoverflow.com/a/39501288/1709587 for explanation.
+        """
+        import time
+        if platform.system() == 'Windows':
+            # time.strftime('%Y-%m-%d', time.gmtime(os.path.getmtime(path_to_file)))
+            return  time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.path.getmtime(path_to_file)))# getmtime= modified, getctime = created
+        else:
+            stat = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(path_to_file)))  
+            return stat.st_mtime
 
 
 class Metrics(Nasdaq):
@@ -144,10 +156,23 @@ class Fundamentals(Nasdaq):
 
 
     def get(self): # NOTE using prior quarter fundamentals for complete dataset
-        df = nasdaqdatalink.get_table(self.name, dimension="MRQ", calendardate=[self.calendardate],  paginate=True) 
-        df['roe'] = df['netinc'] / (df['equity'] )
-        df['roc'] = df['netinc'] / (df['equity'] + df['debt'])
-        df['roa'] = df['netinc'] / df['assets']
+        fp = f'{self.iodir}/all_fundamentals.xlsx'
+
+        if not os.path.exists(fp) or (pd.to_datetime(self.get_modified_time(fp)) < cal.today()): 
+            print('File does not exist or has not been updated today. Downloading full query results...')
+
+            print(f'Modified: {pd.to_datetime(self.get_modified_time(fp))}')
+            print(f'Today: {cal.today()}')
+            df = nasdaqdatalink.get_table(self.name, dimension="MRQ", calendardate=[self.calendardate],  paginate=True) 
+            df['roe'] = df['netinc'] / (df['equity'] )
+            df['roc'] = df['netinc'] / (df['equity'] + df['debt'])
+            df['roa'] = df['netinc'] / df['assets']
+            df.to_excel(fp)
+        else:
+            print('data has been updated today - reading from file')
+            df = pd.read_excel(fp)
+
+
         return df
 
 
@@ -200,9 +225,21 @@ class Tickers(Nasdaq):
 
 
     def get(self):
-        df = nasdaqdatalink.get_table(self.name, table="SF1", paginate=True ) #qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
-        df = df.loc[(df.isdelisted == 'N') & (df.lastpricedate == max(df.lastpricedate)) ]
-        df = df.drop_duplicates(subset=['ticker', 'name'])
+
+        fp = f'{self.iodir}/all_tickers.xlsx'
+
+        if not os.path.exists(fp) or (pd.to_datetime(self.get_modified_time(fp)) < cal.today()): 
+            print('Tickers File does not exist or has not been updated today. Downloading full query results...')
+            print(f'Modified: {pd.to_datetime(self.get_modified_time(fp))}')
+            print(f'Today: {cal.today()}')
+            df = nasdaqdatalink.get_table(self.name, table="SF1", paginate=True ) #qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
+            df = df.loc[(df.isdelisted == 'N') & (df.lastpricedate == max(df.lastpricedate)) ]
+            df = df.drop_duplicates(subset=['ticker', 'name'])
+            df.to_excel(fp)
+        else:
+            print('Tickers data has been updated today - reading from file')
+            df = pd.read_excel(fp)
+
         return df
 
 
