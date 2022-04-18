@@ -19,7 +19,9 @@ import datetime
 from datetime import timezone
 from lib.calendar import Calendar
 cal = Calendar()
+import pytz
 
+utc=pytz.UTC
 
 class Nasdaq:
     """
@@ -162,7 +164,7 @@ class Fundamentals(Nasdaq):
     def get(self): # NOTE using prior quarter fundamentals for complete dataset
         fp = f'{self.iodir}/all_fundamentals.xlsx'
 
-        if not os.path.exists(fp) or (pd.to_datetime(self.get_modified_time(fp)) < cal.today()): 
+        if not os.path.exists(fp) or (utc.localize(pd.to_datetime(self.get_modified_time(fp))) < utc.localize(cal.today())): 
             print('File does not exist or has not been updated today. Downloading full query results...')
 
             print(f'Modified: {pd.to_datetime(self.get_modified_time(fp))}')
@@ -232,7 +234,7 @@ class Tickers(Nasdaq):
 
         fp = f'{self.iodir}/all_tickers.xlsx'
 
-        if not os.path.exists(fp) or (pd.to_datetime(self.get_modified_time(fp)) < cal.today()): 
+        if not os.path.exists(fp) or (utc.localize(pd.to_datetime(self.get_modified_time(fp))) < utc.localize(cal.today())): 
             print('Tickers File does not exist or has not been updated today. Downloading full query results...')
             print(f'Modified: {pd.to_datetime(self.get_modified_time(fp))}')
             print(f'Today: {cal.today()}')
