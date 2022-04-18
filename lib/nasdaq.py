@@ -15,6 +15,8 @@ import numpy as np
 import requests
 import os
 import platform
+import datetime
+from datetime import timezone
 from lib.calendar import Calendar
 cal = Calendar()
 
@@ -94,8 +96,9 @@ class Nasdaq:
             return  time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.path.getmtime(path_to_file)))# getmtime= modified, getctime = created
         else:
             stat = os.stat(path_to_file)
-            print(stat.st_mtime)
-            return stat.st_mtime
+            modified = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
+            print(modified)
+            return modified
 
 
 class Metrics(Nasdaq):
