@@ -21,7 +21,7 @@ def fundamentals(request):
 
     print(ticker)
 
-    tick = Tickers().get()
+    tick = Tickers().get() # FIXME Tickers.get() is bein called twice - Once directly, and once as part of the Fundamentals class
     ticker_row = tick.loc[tick.ticker == ticker]
     sector = ticker_row.sector.iloc[0]
     calendardate = cal.prior_quarter_end()

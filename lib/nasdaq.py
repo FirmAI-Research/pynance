@@ -94,12 +94,10 @@ class Nasdaq:
         """
         import time
         if platform.system() == 'Windows':
-            # time.strftime('%Y-%m-%d', time.gmtime(os.path.getmtime(path_to_file)))
             return  time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.path.getmtime(path_to_file)))# getmtime= modified, getctime = created
         else:
             stat = os.stat(path_to_file)
             modified = datetime.datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
-            print(modified)
             return modified
 
 

@@ -14,41 +14,42 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt
 import seaborn as sns 
-
+import os, pathlib
 
 class TimeSeries():
     '''
 
     '''
-    def __init__(self, fp:str=None, col:str = None, series:pd.Series = None, df:pd.DataFrame = None) -> None:
-        self.fp = fp
-        self.series = series
-        self.df = df
+    def __init__(self, data, column:str=None) -> None:
 
-        self.data = self.read_data()
+        if isinstance(data, pd.DataFrame):
+            if column is None:
+                raise ValueError('[ERROR] Column string is required if a datafrme is passed to the constructor')
+            self.data = data[column]
+            self.data_fmt = pd.DataFrame
+
+        elif isinstance(data, pd.Series):
+            self.data = data
+            self.data_fmt = pd.Series
+
+        elif type(data) == str:
+            if column is None:
+                raise ValueError('[ERROR] Column string is required if a datafrme is passed to the constructor')
+            if '.csv' in data:
+                self.data = pd.read_csv(data)
+            elif '.xls' in data: 
+                self.data = pd.read_excel(data)
+            self.data = self.data[column]
+            self.data_fmt = pathlib.Path
+
+        else:
+            raise ValueError('[ERROR] Invalid data format was supplied by the user. Please pass a path to an existing file, and Series, or a DataFrame')
+
+        print(self.__dict__)
+
     
     def __str__(self):
         return 'TimeSeries Object'
- 
-
-    def read_data( self, skiprows=0) -> pd.DataFrame:
-        '''
-        detect raw data from filepath or series as supplied in constructor too set instance variable self.data
-        '''
-        if type(self.fp) == str:
-            if '.csv' in self.fp:
-                data = pd.read_csv(self.fp, skiprows=skiprows)
-            elif '.xls' in self.fp: # catch xlsx, xlsm, xls
-                data = pd.read_excel(self.fp, skiprows=skiprows)
-        elif isinstance(self.series, pd.Series):
-            data = self.series # returns pd.series
-        elif isinstance(self.df, pd.DataFrame):
-            data = self.df # returns pd.series
-            print('Passed a DataFrame')
-        else:
-            sys.exit()
-            print('No File Input Data Supplied')
-        return data
 
 
     def decomposition(self, data, col_name=None, plot=True):
@@ -68,6 +69,7 @@ class TimeSeries():
                 plt.tight_layout()
                 plt.subplots_adjust(top=.91);
         plt.show()
+
 
     def check_stationarity(self, data=None, col_name=None,plot=True):
         X = self.df[col_name].values
