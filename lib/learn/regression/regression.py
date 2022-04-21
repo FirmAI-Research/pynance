@@ -19,9 +19,7 @@ class Regression:
         self.df = data
         self.dep_var = dep_var
 
-        # Checking for null values
         print(self.df.info())
-        # Checking for outliers
         print(self.df.describe())
 
 
@@ -38,7 +36,6 @@ class Regression:
             self.df.drop(var, axis=1, inplace=True)
 
 
-
     def split(self, test_size:float) -> None:
         self.df_train, self.df_test = train_test_split(self.df, train_size = 1-test_size, test_size = test_size) # random_state = 100; ensures train and test keep the same rows
 
@@ -46,20 +43,71 @@ class Regression:
     def get_numeric_cols(self):
         return self.df.select_dtypes(exclude=['object', 'datetime64']).columns
 
+    def cast_numeric_cols(self):
+        for c in self.df.columns:
+            if c in self.get_numeric_cols():
+                self.df[c] = pd.to_numeric(self.df[c])
 
     def scale(self):
         self.scaler = MinMaxScaler()
-        numeric_cols = self.get_numeric_cols()
-        self.df_train[numeric_cols] = self.scaler.fit_transform(self.df_train[numeric_cols])
+        print('scale column order: ', self.df.columns)
+        # numeric_cols = self.get_numeric_cols()
 
     
-    def build_model(self):
-        self.y_train = self.df_train.pop(self.dep_var)
-        self.X_train = self.df_train
-        self.X_train_lm = sm.add_constant(self.X_train)
-        self.model = sm.OLS(self.y_train, self.X_train_lm).fit()
+    def train_model(self):
+        df_train = self.df_train
+        df_train[self.get_numeric_cols()] = self.scaler.fit_transform(df_train[self.get_numeric_cols()])
+        y_train = df_train.pop(self.dep_var)
+        X_train = df_train
+        X_train_lm = sm.add_constant(X_train)
+        self.model = sm.OLS(y_train.astype(float), X_train_lm.astype(float)).fit()
         self.model_summary = self.model.summary()
         
+    
+    def test_model(self):
+        df_test = self.df_test
+        df_test[self.get_numeric_cols()] = self.scaler.transform(df_test[self.get_numeric_cols()])
+        # X_actual = df_test[self.dep_var]
+        y_test = df_test.pop(self.dep_var)
+        X_test = df_test
+        X_test_lm = sm.add_constant(X_test)
+        y_pred = self.model.predict(X_test_lm)
+        print(r2_score(y_true = y_test, y_pred = y_pred))
+
+        def residuals_distribution():
+            fig = plt.figure()
+            sns.distplot((y_test - y_pred), )
+            fig.suptitle('Error Terms', fontsize = 20)                   
+            plt.xlabel('Errors', fontsize = 18)                         
+            plt.show()
+        residuals_distribution()
+
+        def scatter():
+            fig = plt.figure()
+            sns.regplot(y_test, y_pred)
+            fig.suptitle('Acctual minus Predicted', fontsize = 20)                   
+            plt.xlabel('Actual', fontsize = 18)
+            plt.ylabel('Predicted', fontsize = 18)
+            plt.show()
+        scatter()
+
+
+    def oos_predict(self):
+        df_test  = self.df_test
+        df_test[self.get_numeric_cols()] = self.scaler.transform(df_test[self.get_numeric_cols()]) 
+        X_new = df_test.iloc[2:3, ] # NOTE use most recent data which was dropd from test set due to na shift value
+        X_test_lm_new = sm.add_constant(X_new)
+        X_new.pop(self.dep_var)
+        y_pred_new = self.model.predict(X_test_lm_new)
+        X_new.insert(0, self.dep_var, y_pred_new) # must be same collumn index as when scaled
+        df = pd.DataFrame(self.scaler.inverse_transform(X_new))
+        df.columns = X_new.columns
+        print(df)
+
+
+    def oos_iterative_predict(self):
+        pass
+
 
     def vif(self):
         """[Summary]
@@ -67,36 +115,13 @@ class Regression:
         Keep varibles with VIF values < 5
         If VIF > 5 and high p-value, drop the variable; Rinse and repeat until all variables have VIF < 5 and significant p-values (<0.005)
         """        
-        self.vif = pd.DataFrame()
-        self.vif['Features'] = self.X_train.columns
-        self.vif['VIF'] = [variance_inflation_factor(self.X_train.values, i) for i in range(self.X_train.shape[1])]
-        self.vif['VIF'] = round(self.vif['VIF'], 2)
-        self.vif = self.vif.sort_values(by = "VIF", ascending = False)
-        self.vif
-
-
-    def check_residuals(self):
-        """[Summary]
-        check if the error terms are normally distributed 
-        """
-        y_train_price = self.model.predict(self.X_train_lm)
-        # Plot the histogram of the error terms
-        fig = plt.figure()
-        sns.distplot((self.y_train - y_train_price), bins = 20)
-        fig.suptitle('Error Terms', fontsize = 20)                  # Plot heading 
-        plt.xlabel('Errors', fontsize = 18)                         # X-label
-        plt.show()
-
-    
-    def check_model(self):
-        self.check_residuals()
-        self.df_test[self.get_numeric_cols()] = self.scaler.transform(self.df_test[self.get_numeric_cols()])
-        self.y_test = self.df_test.pop(self.dep_var)
-        self.X_test = self.df_test
-        self.X_test = sm.add_constant(self.X_test)
-        self.y_pred = self.model.predict(self.X_test)
-        print(r2_score(y_true = self.y_test, y_pred = self.y_pred))
-
+        # vif = pd.DataFrame()
+        # vif['Features'] = self.X_train.columns
+        # vif['VIF'] = [variance_inflation_factor(self.X_train.values, i) for i in range(self.X_train.shape[1])]
+        # vif['VIF'] = round(vif['VIF'], 2)
+        # vif = vif.sort_values(by = "VIF", ascending = False).to_dict()
+        # vif
+        pass
 
 
     # def evaluate_predictions(self):
@@ -108,22 +133,6 @@ class Regression:
     #     ax.legend(loc="best")
 
 
-
-
-    def evaluate_fit(self):
-        ''' evaluate model fit after calling sm.OLS().fit()'''
-        plt.scatter(self.X_test,self.y_test)
-        plt.show()
-        # y_true = self.model.params[0] + self.model.params[1]*self.X_test
-        # plt.plot(self.X_test, self.y_test, linewidth=3)
-        # # plt.xlabel(self.x_col_str)
-        # # plt.ylabel(self.y_col_str)
-        # plt.title('OLS Regression')
-        # self.results = self.model.summary()
-        # print(self.results)
-        return self.results
-
-
     # def rfe(self):
     #     # Running RFE with the output number of the variable equal to 10
     #     lm = LinearRegression()
@@ -131,21 +140,3 @@ class Regression:
     #     rfe = RFE(lm, 10)             # running RFE
     #     rfe = rfe.fit(X_train, y_train)
     #     list(zip(X_train.columns,rfe.support_,rfe.ranking_))
-
-
-
-# Test
-# from lib.learn.regression.regression import Regression
-# fp = r"C:\dev\pynance\_tmp\housing.csv"
-# df = pd.read_csv(fp)
-# reg = Regression(data=df, dep_var='price')
-# reg.binary_encode(var_list =  ['mainroad', 'guestroom', 'basement', 'hotwaterheating', 'airconditioning', 'prefarea'])
-# reg.cat_encode(var_list = ['furnishingstatus'])
-# reg.split(test_size=0.3)
-# reg.scale()
-# reg.build_model()
-# print(reg.df)
-# print(reg.model_summary)
-# reg.vif()
-# print(reg.vif)
-# reg.check_model()
