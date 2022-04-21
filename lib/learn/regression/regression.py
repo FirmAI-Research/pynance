@@ -9,12 +9,12 @@ from sklearn.metrics import r2_score
 from sklearn.feature_selection import RFE
 
 
+
 class Regression:
     """[Summary]
     Pass and unindexed dataframe as data
 
     """    
-
     def __init__(self, data:pd.DataFrame, dep_var:str) -> None:
         self.df = data
         self.dep_var = dep_var
@@ -22,13 +22,13 @@ class Regression:
         print(self.df.info())
         print(self.df.describe())
 
-
+    # @ TODO move to feature engine
     def binary_encode(self, var_list:str) -> None:
         def binary_map(x):
             return x.map({'yes': 1, "no": 0})
         self.df[var_list] = self.df[var_list].apply(binary_map)
 
-
+    # @ TODO move to feature engine
     def cat_encode(self, var_list:str) -> None:
         for var in var_list:
             dummies = pd.get_dummies(self.df[var])
@@ -43,10 +43,12 @@ class Regression:
     def get_numeric_cols(self):
         return self.df.select_dtypes(exclude=['object', 'datetime64']).columns
 
+
     def cast_numeric_cols(self):
         for c in self.df.columns:
             if c in self.get_numeric_cols():
                 self.df[c] = pd.to_numeric(self.df[c])
+
 
     def scale(self):
         self.scaler = MinMaxScaler()
@@ -68,7 +70,7 @@ class Regression:
         df_test = self.df_test
         df_test[self.get_numeric_cols()] = self.scaler.transform(df_test[self.get_numeric_cols()])
         # X_actual = df_test[self.dep_var]
-        y_test = df_test.pop(self.dep_var)
+        y_test = df_test.pop(self.dep_var) # save as variable
         X_test = df_test
         X_test_lm = sm.add_constant(X_test)
         y_pred = self.model.predict(X_test_lm)
@@ -92,14 +94,13 @@ class Regression:
         scatter()
 
 
-    def oos_predict(self):
-        df_test  = self.df_test
-        df_test[self.get_numeric_cols()] = self.scaler.transform(df_test[self.get_numeric_cols()]) 
-        X_new = df_test.iloc[2:3, ] # NOTE use most recent data which was dropd from test set due to na shift value
+    def oos_predict(self, X_new:pd.Series):
+        X_new = pd.DataFrame(X_new).transpose() # X_new is a series in the same shape of the X_train data
+        X_new.fillna(0, inplace=True) # fill na value from most recent shift row as the most recent close price?
+        X_new[self.get_numeric_cols()] = self.scaler.transform(X_new[self.get_numeric_cols()]) 
         X_test_lm_new = sm.add_constant(X_new)
-        X_new.pop(self.dep_var)
         y_pred_new = self.model.predict(X_test_lm_new)
-        X_new.insert(0, self.dep_var, y_pred_new) # must be same collumn index as when scaled
+        X_new[self.dep_var] = y_pred_new
         df = pd.DataFrame(self.scaler.inverse_transform(X_new))
         df.columns = X_new.columns
         print(df)

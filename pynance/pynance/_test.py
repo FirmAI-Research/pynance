@@ -37,42 +37,55 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 from lib.learn.regression.regression import Regression
-# import pandas_datareader as wb
-# start = '2000-01-01'
-# end = '2021-12-31'
-# ticker = 'AAPL'
-# aapl = wb.DataReader(ticker, 'yahoo', start, end)
-# aapl.to_csv(r"aapl_prices.csv")
-# x = pd.read_csv('/Users/michaelsands/code/pynance/_tmp/SHARADAR-SF1_AAPL.csv')
-# y = pd.read_csv('/Users/michaelsands/code/pynance/_tmp/aapl_prices.csv')
-# y.Date = pd.to_datetime(y.Date)
-# y.set_index('Date', inplace=True)
-# y = y.resample('Q').last()
-# print(y)
+from lib.nasdaq import Nasdaq, Fundamentals
+import nasdaqdatalink
+import pandas_datareader as wb
 
-# x.calendardate = pd.to_datetime(x.calendardate)
-# x.set_index('calendardate', inplace=True)
-# x = x.loc[x['dimension'] == 'MRQ']
-# print(x)
+def create_fundamental_regression_dataset():
+  ticker = 'AMZN'
+  # fundamentals
+  fun = Fundamentals()
+  fun.authenticate()
+  dfx = nasdaqdatalink.get_table(fun.name, dimension="MRQ", ticker=ticker, paginate=True) 
+  dfx.calendardate = pd.to_datetime(dfx.calendardate)
+  dfx.set_index('calendardate', inplace=True)
+  # market prices
+  start = '2000-01-01'
+  end = '2022-03-31'
+  ticker = ticker
+  dfy = wb.DataReader(ticker, 'yahoo', start, end)
+  dfy = dfy.resample('Q').last()
+  # mere
+  df = dfx.merge(dfy, left_index=True, right_index=True)
+  df.to_csv(r"C:\dev\pynance\_tmp\fundamentals_regression.csv")
+create_fundamental_regression_dataset()
 
-# df = x.merge(y, left_index=True, right_index=True)
-df = pd.read_csv('/Users/michaelsands/code/pynance/_tmp/aapl_fundamental_features.csv')
-df['NextMonthsClose'] = df['Adj Close'].shift(1)
-df.dropna(subset=['NextMonthsClose'], inplace=True)
-df.drop(columns=['datekey', 'reportperiod', 'lastupdated','Unnamed: 0', 'ticker', 'dimension','Adj Close'], inplace=True)
-df.dropna(axis=1, inplace=True)
+
+''' Regress next quarter's closing price by previous quarter end fundamental data '''
+# pre-process
+df = pd.read_csv(r"C:\dev\pynance\_tmp\fundamentals_regression.csv")
+df['NextQtrClose'] = df['Adj Close'].shift(1)
+df = df[['NextQtrClose', 'reportperiod','workingcapital', 'netinc', 'eps', 'ebitda', 'fcf', 'rnd' ]]
+
+datekey_index = df.reportperiod
+df.drop('reportperiod', axis=1, inplace=True) # drop datekey to exclude from regression and concat later on
+
+latest_fundamental_data = df.iloc[0]
+
+df.dropna(subset=['NextQtrClose'], inplace=True) # drop the most recent data which is NaN due to shift
 print(df)
-print(df.columns.tolist())
-df = df[['NextMonthsClose', 'workingcapital', 'netinc', 'eps', 'ebitda', 'fcf', 'rnd' ]]
-reg = Regression(data=df, dep_var='NextMonthsClose')
+
+# model and predict
+reg = Regression(data=df, dep_var='NextQtrClose')
 reg.cast_numeric_cols()
-reg.split(test_size=0.3)
+reg.split(test_size=0.40)
 reg.scale()
 reg.train_model()
-print(reg.df)
-print(reg.model_summary)
-print(reg.model.pvalues)
+# print(reg.df)
+# print(reg.model_summary)
+# print(reg.model.pvalues)
+# reg.test_model() # NOTE: running test_model before oos_predict is not working; run one or the other at a given time
 
-# NOTE: running test_model before oos_predict is not working
-# reg.test_model()
-reg.oos_predict()
+print(latest_fundamental_data)
+
+reg.oos_predict(X_new = latest_fundamental_data)
