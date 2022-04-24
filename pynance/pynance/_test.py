@@ -99,7 +99,6 @@ sys.path.append(lib_dirp)
   │ @Test: regression : find relevant features from fundamental data on future share prices                                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  """
-
 def housing_regression():
   root = r'C:\dev\pynance\_tmp\housing\\'
   housing_price_index = pd.read_csv(root + '/monthly-hpi.csv')
@@ -114,12 +113,12 @@ def housing_regression():
   df.drop(['date'], axis=1, inplace=True)
   df = df.iloc[:, :7]
   print(df.head())
+  print(df.tail())
   from lib.learn.regression.regression import Regression
   reg = Regression(data = df, dep_var = 'housing_price_index') # indep_var='total_unemployed'
   reg.split(test_size=0.4)
   reg.train_model()
   # reg.reg_plots()
-  reg.test_model()
-  reg.oos_predict(X_new = [1, 1282,220,3.39,16.5,8500,2900] )
-
+  # reg.test_model()
+  # reg.oos_predict(most_recent=True ) # NOTE first value should be constant of 1; X_new = [1, 1282,220,3.39,16.5,8500,2900],
 housing_regression()

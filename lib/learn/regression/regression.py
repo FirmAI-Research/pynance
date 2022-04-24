@@ -11,10 +11,11 @@ from statsmodels.formula.api import ols
 from statsmodels.sandbox.regression.predstd import wls_prediction_std
 
 
-class Regression:
-    """[Summary]
-    Pass and unindexed dataframe as data
 
+class Regression():
+    """[Summary]
+    Pass an unindexed dataframe as data
+    Do not pass an indep_var to use multivariate regression
     """    
     def __init__(self, data:pd.DataFrame, dep_var:str, indep_var:str=None) -> None:
         self.df = data
@@ -74,6 +75,20 @@ class Regression:
             X_train_lm = sm.add_constant(X_train)  # Multiple regression
         self.model = sm.OLS(y_train.astype(float), X_train_lm.astype(float)).fit()
         model_summary = self.model.summary()
+
+        def vif():
+            """[Summary]
+            Variance Inflation Factor or VIF is a quantitative value that says how much the feature variables are correlated with each other. 
+            Keep varibles with VIF values < 5
+            If VIF > 5 and high p-value, drop the variable; Rinse and repeat until all variables have VIF < 5 and significant p-values (<0.005)
+            """        
+            vif = pd.DataFrame()
+            vif['Features'] = X_train.columns
+            vif['VIF'] = [variance_inflation_factor(X_train.values, i) for i in range(X_train.shape[1])]
+            vif['VIF'] = round(vif['VIF'], 2)
+            vif = vif.sort_values(by = "VIF", ascending = False).to_dict()
+            return vif
+        print('VIF: \n', vif())
         print(model_summary)
     
 
@@ -99,10 +114,9 @@ class Regression:
         
         elif self.how == 'multivariate':
 
-            fig = plt.figure(figsize=(20,12))
+            fig = plt.figure(figsize=(15,8))
             fig = sm.graphics.plot_partregress_grid(self.model, fig=fig)
             plt.show()
-
 
             
     def test_model(self):
@@ -133,44 +147,28 @@ class Regression:
         scatter()
 
 
-    def oos_predict(self, X_new:pd.Series):
+    def oos_predict(self, X_new:list = None, most_recent:bool = False):
         ''' X_new is a series in the same shape of the X_train data
+        X_new[self.get_numeric_cols()] = self.scaler.transform(X_new[self.get_numeric_cols()]) 
+        df = pd.DataFrame(self.scaler.inverse_transform(X_new))
         ''' 
-        X_new = pd.DataFrame(X_new).transpose() 
-        # X_new[self.get_numeric_cols()] = self.scaler.transform(X_new[self.get_numeric_cols()]) 
+        if most_recent:
+            mr = self.df.drop(self.dep_var, axis=1)
+            X_new = pd.DataFrame([1] + mr.iloc[-1].values.tolist()).transpose() 
+
+        else:
+            X_new = pd.DataFrame(X_new).transpose() 
+
         X_test_lm_new = sm.add_constant(X_new)
         y_pred_new = self.model.predict(X_test_lm_new)
-        # df = pd.DataFrame(self.scaler.inverse_transform(X_new))
         X_new.columns = ['const'] + [c for c in self.df_train.columns if c != self.dep_var]
         print(X_new)
         print(y_pred_new)
-
-
-    def oos_iterative_predict(self, n:int = 10):
-        ''' Recursively predicts n new periods of test data, retraining the model on all test data as well as the newly predicted data after each iteration.
-        n = number of forward periods to predict
-        '''
-        pass
+        return y_pred_new.values
 
 
 
-
-
-
-    # def vif(self):
-        """[Summary]
-        Variance Inflation Factor or VIF is a quantitative value that says how much the feature variables are correlated with each other. 
-        Keep varibles with VIF values < 5
-        If VIF > 5 and high p-value, drop the variable; Rinse and repeat until all variables have VIF < 5 and significant p-values (<0.005)
-        """        
-        # vif = pd.DataFrame()
-        # vif['Features'] = self.X_train.columns
-        # vif['VIF'] = [variance_inflation_factor(self.X_train.values, i) for i in range(self.X_train.shape[1])]
-        # vif['VIF'] = round(vif['VIF'], 2)
-        # vif = vif.sort_values(by = "VIF", ascending = False).to_dict()
-        # vif
-        # pass
-
+    # TODO
 
     # def evaluate_predictions(self):
     #     ''' evaluate accuracy of predictions using fit model after making out of sample predictions '''
