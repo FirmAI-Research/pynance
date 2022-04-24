@@ -99,26 +99,49 @@ sys.path.append(lib_dirp)
   │ @Test: regression : find relevant features from fundamental data on future share prices                                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  """
-def housing_regression():
-  root = r'C:\dev\pynance\_tmp\housing\\'
-  housing_price_index = pd.read_csv(root + '/monthly-hpi.csv')
-  unemployment = pd.read_csv(root + '/unemployment-macro.csv')
-  federal_funds_rate = pd.read_csv(root + '/fed_funds.csv')
-  shiller = pd.read_csv(root + '/shiller.csv')
-  gross_domestic_product = pd.read_csv(root + '/gdp.csv')
-  df = (shiller.merge(housing_price_index, on='date')
-                      .merge(unemployment, on='date')
-                      .merge(federal_funds_rate, on='date')
-                      .merge(gross_domestic_product, on='date'))
-  df.drop(['date'], axis=1, inplace=True)
-  df = df.iloc[:, :7]
-  print(df.head())
-  print(df.tail())
-  from lib.learn.regression.regression import Regression
-  reg = Regression(data = df, dep_var = 'housing_price_index') # indep_var='total_unemployed'
-  reg.split(test_size=0.4)
-  reg.train_model()
-  # reg.reg_plots()
-  # reg.test_model()
-  # reg.oos_predict(most_recent=True ) # NOTE first value should be constant of 1; X_new = [1, 1282,220,3.39,16.5,8500,2900],
-housing_regression()
+# def housing_regression():
+#   root = r'C:\dev\pynance\_tmp\housing\\'
+#   housing_price_index = pd.read_csv(root + '/monthly-hpi.csv')
+#   unemployment = pd.read_csv(root + '/unemployment-macro.csv')
+#   federal_funds_rate = pd.read_csv(root + '/fed_funds.csv')
+#   shiller = pd.read_csv(root + '/shiller.csv')
+#   gross_domestic_product = pd.read_csv(root + '/gdp.csv')
+#   df = (shiller.merge(housing_price_index, on='date')
+#                       .merge(unemployment, on='date')
+#                       .merge(federal_funds_rate, on='date')
+#                       .merge(gross_domestic_product, on='date'))
+#   df.drop(['date'], axis=1, inplace=True)
+#   df = df.iloc[:, :7]
+#   print(df.head())
+#   print(df.tail())
+#   from lib.learn.regression.regression import Regression
+#   reg = Regression(data = df, dep_var = 'housing_price_index') # indep_var='total_unemployed'
+#   reg.split(test_size=0.4)
+#   reg.train_model()
+#   # reg.reg_plots()
+#   # reg.test_model()
+#   # reg.oos_predict(most_recent=True ) # NOTE first value should be constant of 1; X_new = [1, 1282,220,3.39,16.5,8500,2900],
+# housing_regression()
+
+
+
+""" 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ @Test: feature engineering                                                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+"""
+from lib.learn.featureengine import FeatureEngine
+
+df_wine = pd.read_csv('https://archive.ics.uci.edu/ml/'
+              'machine-learning-databases/wine/wine.data',
+              header=None)
+df_wine.columns = ['Class label', 'Alcohol', 'Malic acid', 'Ash',
+                'Alcalinity of ash', 'Magnesium', 'Total phenols',
+                'Flavanoids', 'Nonflavanoid phenols', 'Proanthocyanins',
+                'Color intensity', 'Hue',
+                'OD280/OD315 of diluted wines', 'Proline']
+print(df_wine.head())
+
+fe = FeatureEngine(df_wine)
+fe.eig()
+fe.explained_variance()
