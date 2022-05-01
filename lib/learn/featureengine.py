@@ -192,3 +192,41 @@ class FeatureEngine:
         multiple_outliers = list(k for k, v in outlier_indices.items() if v > n)
 
         return multiple_outliers
+
+
+
+    def facet_grid_example():
+        sector_ts = xfer.copy()[['XFER_DATE','ASSET_CLASS_LONG_NAME','NET','CREDITS','DEBITS']].groupby(
+            ['XFER_DATE','ASSET_CLASS_LONG_NAME']).sum()
+        sector_ts['Rolling_Average_Long'] =  sector_ts[indicator].rolling(long_periods).mean()
+        sector_ts['Rolling_Average_Short'] =  sector_ts[indicator].rolling(short_periods).mean()
+        sector_ts.reset_index(inplace=True)
+        sector_ts.dropna(inplace=True)
+        sector_ts.drop(columns = [x for x in ['NET','CREDITS','DEBITS'] if x != indicator], inplace=True)
+        sector_ts = sector_ts.loc[pd.to_datetime(sector_ts['XFER_DATE']) >= pd.to_datetime(ytd)]
+        sector_ts = sector_ts.melt(id_vars=['ASSET_CLASS_LONG_NAME','XFER_DATE'], value_vars=[indicator,'Rolling_Average_Long','Rolling_Average_Short'], 
+                                var_name='period', value_name='value')
+        # sector_ts
+        d = {'color': ['C0', 'k', 'r'], "ls" : ["-","--",":"]}
+        sns.set(font_scale = 1.3)
+        g = sns.FacetGrid(sector_ts, col='ASSET_CLASS_LONG_NAME', hue='period', height = 12, col_wrap=2, 
+                        sharex=False, sharey=False, despine=True, margin_titles=True, hue_kws=d)
+        g.map(sns.lineplot, 'XFER_DATE', 'value',legend='full',markers=True)
+        for ax in g.axes.flat:
+            ax.yaxis.grid(True)
+            ax.xaxis.grid(True)
+            ax.legend()
+        g.add_legend() #loc='upper center'
+        g.set_xticklabels(rotation=0, horizontalalignment='center')
+
+
+    def reg_plots_example():
+        sns.set(font_scale=2) 
+        # g = sns.scatterplot(x='Date', y='Value', hue = 'Manager', data = melt, s=200)
+        nyear_melt = melt.loc[(pd.to_datetime(melt.Date).dt.date >= nyearago) & (pd.to_datetime(melt.Date).dt.date < today)]
+
+        nyear_melt.Date = dates.datestr2num([x.strftime('%Y-%m-%d') for x in nyear_melt.Date])# lmplot needs int x axis
+        g = sns.lmplot(x="Date", y="Value", hue="Manager", col="Manager", data=nyear_melt, height=10, aspect=.6)
+        for ax in g.axes.flat:
+            ax.tick_params(labelrotation=45)
+            ax.xaxis.set_major_formatter(DateFormatter("%Y/%m/%d"))

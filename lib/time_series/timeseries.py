@@ -21,7 +21,6 @@ class TimeSeries():
     '''
     def __init__(self, data, column:str=None) -> None:
         
-        
         if isinstance(data, pd.DataFrame):
             if column is None:
                 raise ValueError('[ERROR] Column string is required if a datafrme is passed to the constructor')
@@ -124,7 +123,7 @@ class TimeSeries():
         data = self.data.reset_index()
         data.rename(columns={'Date': 'ds', self.column: 'y'}, inplace=True)
 
-        df_train = data.iloc[ : int(len(data)/2), :] # fixme use sklearn
+        df_train = data.iloc[ : int(len(data)/2), :] 
         df_test = data.iloc[ int(len(data)/2):, :]
 
         model_prophet = Prophet(seasonality_mode='additive')
@@ -134,45 +133,42 @@ class TimeSeries():
         df_future = model_prophet.make_future_dataframe(periods=365)
         df_pred = model_prophet.predict(df_future)
         model_prophet.plot(df_pred)
-        plt.show()
-        
+        plt.savefig(f'img/{self.column}_forecast.png')
 
-plt.tight_layout()
-#plt.savefig('images/ch3_im3.png')
-plt.show()
+        model_prophet.plot_components(df_pred)
+        plt.tight_layout()
+        plt.savefig('img/ch3_im4.png')
+
+        # merge test set with predicted data and plot accuracy of model's predictions
+        selected_columns = ['ds', 'yhat_lower', 'yhat_upper', 'yhat']
+
+        df_pred = df_pred.loc[:, selected_columns].reset_index(drop=True)
+        df_test = df_test.merge(df_pred, on=['ds'], how='left')
+        df_test.ds = pd.to_datetime(df_test.ds)
+        df_test.set_index('ds', inplace=True)
+        fig, ax = plt.subplots(1, 1)
+
+        ax = sns.lineplot(data=df_test[['y', 'yhat_lower', 
+                                        'yhat_upper', 'yhat']])
+        ax.fill_between(df_test.index,
+                        df_test.yhat_lower,
+                        df_test.yhat_upper,
+                        alpha=0.3)
+        ax.set(title=f'{self.column} - actual vs. predicted',
+            xlabel='Date',
+            ylabel='{self.column}')
+
+        plt.tight_layout()
+        plt.savefig('img/actual_v_predicted.png')
+
+
+
 
 # @Test 
-ts = TimeSeries(data='/Users/michaelsands/data/stock_prices.csv', column='IAU')
-# ts.decomposition(model='multiplicative')
+# ts = TimeSeries(data='/Users/michaelsands/data/stock_prices.csv', column='AMZN')
+# ts.decomposition(model='additive')
 # ts.check_stationarity()
 # ts.auto_correlation( lags=24 )
-ts.prophet_forecast()
+# ts.prophet_forecast()
 
 
-
-############################################################################################
-
-# tickers = ['GOOG','AMZN','MSFT','AAPL', 'BLK','JPM','IAU']
-# import pandas_datareader as data
-# import pandas as pd
-# data_source = 'yahoo'
-# start_date = '2000-01-01'
-# end_date = '2022-04-30'
-# frames = []
-# for ticker in tickers:
-#     stockdata = data.DataReader(ticker, data_source, start_date, end_date)['Close']
-#     stockdata =  pd.DataFrame(stockdata).rename(columns={'Close':ticker})
-#     frames.append(stockdata)
-# df = pd.concat(frames, axis=1)
-# df.to_csv('/Users/michaelsands/data/stock_prices.csv')
-
-# import datetime
-# start = datetime.datetime (2000, 1, 1)
-# end = datetime.datetime (2022, 4, 30)
-# seriesid = ['PAYEMS', 'GDP', 'UNRATE', 'CPILFESL', 'T10YIE', 'DGS10', 'DGS30']
-# frames = []
-# for ticker in seriesid:
-#     stockdata = data.DataReader(ticker, 'fred', start_date, end_date)
-#     frames.append(stockdata)
-# df = pd.concat(frames, axis=1)
-# df.to_csv('/Users/michaelsands/data/fred_prices.csv')
