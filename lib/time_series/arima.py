@@ -2,11 +2,18 @@
 # https://www.statsmodels.org/dev/examples/notebooks/generated/tsa_arma_0.html
 ''' https://www.itl.nist.gov/div898/handbook/pmc/section6/pmc624.htm '''
 
+from timeseries import TimeSeries 
+
 import warnings
 from math import sqrt
 import pandas as pd
 from pandas import read_csv
 from statsmodels.tsa.arima.model import ARIMA as _ARIMA
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error
+from math import sqrt
+warnings.filterwarnings("ignore")
+from matplotlib import pyplot
 
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_squared_error
@@ -21,20 +28,6 @@ from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np 
-
-from timeseries import TimeSeries 
-
-import warnings
-from math import sqrt
-import pandas as pd
-from pandas import read_csv
-from statsmodels.tsa.arima.model import ARIMA as _ARIMA
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_squared_error
-from math import sqrt
-warnings.filterwarnings("ignore")
-from matplotlib import pyplot
-
 
 class Arima:
     ''' auto regressive integrated moving average
@@ -56,7 +49,6 @@ class Arima:
     adjust p,d,q and train test size to prevent LinAlgError: Schur decomposition solver error.
     
     '''
-
     def __init__(self, df:pd.DataFrame=None, col:str = None):
         self.data = df
         self.col = col

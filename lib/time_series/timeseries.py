@@ -83,7 +83,7 @@ class TimeSeries():
                 plt.tight_layout()
                 plt.subplots_adjust(top=.91)
         
-            # alternative method:
+            # NOTE alternative method:
             # components.plot() \
             #              .suptitle(f'{model}  decomposition', 
             #                        fontsize=14)
