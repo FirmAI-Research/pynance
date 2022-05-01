@@ -102,6 +102,23 @@ class Arima(TimeSeries):
         rmse = sqrt(mean_squared_error(test, predictions))
         return rmse
 
+    # evaluate combinations of p, d and q values for an ARIMA model
+    def evaluate_models(self, p_values, d_values, q_values):
+        dataset = self.data.astype('float32')
+        best_score, best_cfg = float("inf"), None
+        for p in p_values:
+            for d in d_values:
+                for q in q_values:
+                    order = (p,d,q)
+                    try:
+                        rmse = self.evaluate_arima_model(dataset, order)
+                        if rmse < best_score:
+                            best_score, best_cfg = rmse, order
+                        print('ARIMA%s RMSE=%.3f' % (order,rmse))
+                    except:
+                        continue
+        print('Best ARIMA%s RMSE=%.3f' % (best_cfg, best_score))
+
 
     def moving_average(a:pd.array, n:int=3) :
         ret = np.cumsum(a, dtype=float)
@@ -142,22 +159,98 @@ class Arima(TimeSeries):
         plt.savefig(f'{str(iop)}{title}.png')
 
 
-    # evaluate combinations of p, d and q values for an ARIMA model
-    def evaluate_models(self, p_values, d_values, q_values):
-        dataset = self.data.astype('float32')
-        best_score, best_cfg = float("inf"), None
-        for p in p_values:
-            for d in d_values:
-                for q in q_values:
-                    order = (p,d,q)
-                    try:
-                        rmse = self.evaluate_arima_model(dataset, order)
-                        if rmse < best_score:
-                            best_score, best_cfg = rmse, order
-                        print('ARIMA%s RMSE=%.3f' % (order,rmse))
-                    except:
-                        continue
-        print('Best ARIMA%s RMSE=%.3f' % (best_cfg, best_score))
+    def arima_diagnostics(resids, n_lags=40):
+        '''
+        Function for diagnosing the fit of an ARIMA model by investigating the residuals.
+        
+        Parameters
+        ----------
+        resids : np.array
+            An array containing the residuals of a fitted model
+        n_lags : int
+            Number of lags for autocorrelation plot
+            
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+            Created figure
+        '''
+        
+        # create placeholder subplots
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+
+        r = resids
+        resids = (r - np.nanmean(r)) / np.nanstd(r)
+        resids_nonmissing = resids[~(np.isnan(resids))]
+        
+        # residuals over time
+        sns.lineplot(x=np.arange(len(resids)), y=resids, ax=ax1)
+        ax1.set_title('Standardized residuals')
+
+        # distribution of residuals
+        x_lim = (-1.96 * 2, 1.96 * 2)
+        r_range = np.linspace(x_lim[0], x_lim[1])
+        norm_pdf = scs.norm.pdf(r_range)
+        
+        sns.distplot(resids_nonmissing, hist=True, kde=True, 
+                    norm_hist=True, ax=ax2)
+        ax2.plot(r_range, norm_pdf, 'g', lw=2, label='N(0,1)')
+        ax2.set_title('Distribution of standardized residuals')
+        ax2.set_xlim(x_lim)
+        ax2.legend()
+            
+        # Q-Q plot
+        qq = sm.qqplot(resids_nonmissing, line='s', ax=ax3)
+        ax3.set_title('Q-Q plot')
+
+        # ACF plot
+        plot_acf(resids, ax=ax4, lags=n_lags, alpha=0.05)
+        ax4.set_title('ACF plot')
+
+        # arima_diagnostics(arima.resid, 40)
+
+
+
+    def _forecast():
+        auto_arima_pred = auto_arima.predict(n_periods=n_forecasts, 
+                                    return_conf_int=True, 
+                                    alpha=0.05)
+
+        auto_arima_pred = [pd.DataFrame(auto_arima_pred[0], 
+                                        columns=['prediction']),
+                        pd.DataFrame(auto_arima_pred[1], 
+                                        columns=['ci_lower', 'ci_upper'])]
+        auto_arima_pred = pd.concat(auto_arima_pred, 
+                                    axis=1).set_index(test.index)
+
+        fig, ax = plt.subplots(1)
+
+        ax = sns.lineplot(data=test, color=COLORS[0], label='Actual')
+
+        ax.plot(arima_pred.prediction, c=COLORS[1], label='ARIMA(2,1,1)')
+        ax.fill_between(arima_pred.index,
+                        arima_pred.ci_lower,
+                        arima_pred.ci_upper,
+                        alpha=0.3, 
+                        facecolor=COLORS[1])
+
+        ax.plot(auto_arima_pred.prediction, c=COLORS[2], 
+                label='ARIMA(3,1,2)')
+        ax.fill_between(auto_arima_pred.index,
+                        auto_arima_pred.ci_lower,
+                        auto_arima_pred.ci_upper,
+                        alpha=0.2, 
+                        facecolor=COLORS[2])
+
+        ax.set(title="Google's stock price  - actual vs. predicted", 
+            xlabel='Date', 
+            ylabel='Price ($)')
+        ax.legend(loc='upper left')
+
+        plt.tight_layout()
+        #plt.savefig('images/ch3_im25.png')
+        plt.show()
+
 
 
 

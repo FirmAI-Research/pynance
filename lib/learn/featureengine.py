@@ -140,13 +140,10 @@ class FeatureEngine:
             return data_f
 
 
-
-
     def display_missing(data=None, plot=False):
         '''
         Display missing values as a pandas dataframe.
         '''
-
         if data is None:
             raise ValueError("data: Expecting a DataFrame or Series, got 'None'")
 
@@ -163,7 +160,6 @@ class FeatureEngine:
             return df
         else:
             return df
-
 
 
     def detect_outliers(data, n, features):
