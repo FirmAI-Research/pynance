@@ -130,18 +130,26 @@ sys.path.append(lib_dirp)
   │ @Test: feature engineering                                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 """
-from lib.learn.featureengine import FeatureEngine
+# from lib.learn.featureengine import FeatureEngine
 
-df_wine = pd.read_csv('https://archive.ics.uci.edu/ml/'
-              'machine-learning-databases/wine/wine.data',
-              header=None)
-df_wine.columns = ['Class label', 'Alcohol', 'Malic acid', 'Ash',
-                'Alcalinity of ash', 'Magnesium', 'Total phenols',
-                'Flavanoids', 'Nonflavanoid phenols', 'Proanthocyanins',
-                'Color intensity', 'Hue',
-                'OD280/OD315 of diluted wines', 'Proline']
-print(df_wine.head())
+# df_wine = pd.read_csv('https://archive.ics.uci.edu/ml/'
+#               'machine-learning-databases/wine/wine.data',
+#               header=None)
+# df_wine.columns = ['Class label', 'Alcohol', 'Malic acid', 'Ash',
+#                 'Alcalinity of ash', 'Magnesium', 'Total phenols',
+#                 'Flavanoids', 'Nonflavanoid phenols', 'Proanthocyanins',
+#                 'Color intensity', 'Hue',
+#                 'OD280/OD315 of diluted wines', 'Proline']
+# print(df_wine.head())
 
-fe = FeatureEngine(df_wine)
-fe.eig()
-fe.explained_variance()
+# fe = FeatureEngine(df_wine)
+# fe.eig()
+# fe.explained_variance()
+
+
+""" 
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ @Test: prophet / finance cookbook                                                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+generalizable time series feature engineering / analysis / and prediction workflows
+"""
