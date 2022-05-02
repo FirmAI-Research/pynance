@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block content %}
+<h1 style="color:teal">Prophet Forecast</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <img src='{% static "img/AMZN_forecast.png" %}' alt="My image" />
+    </div>
+
+    <div class="col-md-6">
+        <img src='{% static "img/actual_v_predicted.png" %}' alt="My image" />
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-6">
+        <img src='{% static "img/components.png" %}' alt="My image" />
+    </div>
+
+    <div class="col-md-6">
+        <img src='{% static "img/seasonal_decompose.png" %}' alt="My image" />
+    </div>
+
+    <div class="col-md-6">
+        <img src='{% static "img/autocorrelation.png" %}' alt="My image" />
+    </div>
+</div>
+{% endblock content %}
+
+
+
+
+
+{% block js %}
+
+<script>
+
+
+</script>
+{% endblock js %}

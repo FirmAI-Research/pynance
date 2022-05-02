@@ -55,7 +55,6 @@ class Arima:
         self.order = (4,1,10) 
         self.train_test_size = 0.50 # % of train / test set to slice
 
-
     def model(self):
         self.data.index = pd.to_datetime(self.data.index)
         self.series = self.data[self.col]

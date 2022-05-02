@@ -3,6 +3,7 @@ https://machinelearningmastery.com/time-series-data-stationary-python/
 Machine Learning for Algorithmic Trading
 https://github.com/PacktPublishing/Machine-Learning-for-Algorithmic-Trading-Second-Edition/blob/master/09_time_series_models/01_tsa_and_stationarity.ipynb
 '''
+from cv2 import CC_STAT_WIDTH
 import pandas as pd 
 import numpy as np
 import sys,os
@@ -12,9 +13,16 @@ from pandas import DataFrame
 from matplotlib import pyplot
 import pandas as pd 
 import numpy as np 
+import matplotlib
 import matplotlib.pyplot as plt
+matplotlib.use('Agg')
+
 import seaborn as sns 
 import os, pathlib
+
+cwd = os.getcwd()
+img_dirp = os.path.join(cwd, 'time_series/static')
+print(img_dirp)
 
 class TimeSeries():
     ''' Apply time series analysis to a series of data
@@ -88,7 +96,8 @@ class TimeSeries():
             #              .suptitle(f'{model}  decomposition', 
             #                        fontsize=14)
 
-        plt.show()
+        # plt.show()
+        plt.savefig(os.path.join(img_dirp, 'img/seasonal_decompose.png'))
 
 
     def check_stationarity(self, plot=True):
@@ -104,13 +113,12 @@ class TimeSeries():
         if plot == True:
             X = np.log(X) #log transform
             plt.hist(X)
-            plt.show()
+            # plt.show()
 
     def auto_correlation(self, lags=24):
         from statsmodels.graphics import tsaplots
         fig = tsaplots.plot_acf(self.data)
-        plt.show()
-
+        plt.savefig(os.path.join(img_dirp, 'img/autocorrelation.png'))
 
     def interpolate_na(self, col_name=None, method='time'):
         self.data = self.data.interpolate(method, axis = 0) #linear or time
@@ -123,8 +131,9 @@ class TimeSeries():
         data = self.data.reset_index()
         data.rename(columns={'Date': 'ds', self.column: 'y'}, inplace=True)
 
-        df_train = data.iloc[ : int(len(data)/2), :] 
-        df_test = data.iloc[ int(len(data)/2):, :]
+        size = int(len(data))
+        df_train = data.iloc[ int(-size*.4):, :] 
+        df_test = data.iloc[ int(size*.4):, :]
 
         model_prophet = Prophet(seasonality_mode='additive')
         model_prophet.add_seasonality(name='monthly', period=30.5, fourier_order=5)
@@ -133,11 +142,11 @@ class TimeSeries():
         df_future = model_prophet.make_future_dataframe(periods=365)
         df_pred = model_prophet.predict(df_future)
         model_prophet.plot(df_pred)
-        plt.savefig(f'img/{self.column}_forecast.png')
+        plt.savefig(os.path.join(img_dirp, f'img/{self.column}_forecast.png'))
 
         model_prophet.plot_components(df_pred)
         plt.tight_layout()
-        plt.savefig('img/ch3_im4.png')
+        plt.savefig(os.path.join(img_dirp, 'img/components.png'))
 
         # merge test set with predicted data and plot accuracy of model's predictions
         selected_columns = ['ds', 'yhat_lower', 'yhat_upper', 'yhat']
@@ -147,7 +156,6 @@ class TimeSeries():
         df_test.ds = pd.to_datetime(df_test.ds)
         df_test.set_index('ds', inplace=True)
         fig, ax = plt.subplots(1, 1)
-
         ax = sns.lineplot(data=df_test[['y', 'yhat_lower', 
                                         'yhat_upper', 'yhat']])
         ax.fill_between(df_test.index,
@@ -159,7 +167,9 @@ class TimeSeries():
             ylabel='{self.column}')
 
         plt.tight_layout()
-        plt.savefig('img/actual_v_predicted.png')
+        plt.savefig(os.path.join(img_dirp, 'img/actual_v_predicted.png'))
+
+        # plt.show()
 
 
 
