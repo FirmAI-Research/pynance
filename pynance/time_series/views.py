@@ -24,7 +24,6 @@ def forecast(request):
     ts.auto_correlation( lags=24 )
     ts.prophet_forecast()
 
-
     img_dirp = os.path.join(os.getcwd(), 'pynance/static/img')
 
     context = {

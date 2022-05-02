@@ -2,10 +2,10 @@
 # https://www.statsmodels.org/dev/examples/notebooks/generated/tsa_arma_0.html
 ''' https://www.itl.nist.gov/div898/handbook/pmc/section6/pmc624.htm '''
 
-from timeseries import TimeSeries 
 
 import warnings
 from math import sqrt
+import matplotlib
 import pandas as pd
 from pandas import read_csv
 from statsmodels.tsa.arima.model import ARIMA as _ARIMA
@@ -13,23 +13,20 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_squared_error
 from math import sqrt
 warnings.filterwarnings("ignore")
-from matplotlib import pyplot
 
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_squared_error
-from math import sqrt
-warnings.filterwarnings("ignore")
-from matplotlib import pyplot
+import matplotlib.pyplot as plt
+
 from statsmodels.graphics.tsaplots import plot_acf, acf, plot_pacf, pacf
 from statsmodels.tsa.stattools import acf, q_stat, adfuller
 import statsmodels.api as sm
 from scipy.stats import probplot, moment
 from sklearn.metrics import mean_squared_error
-import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np 
 
-class Arima:
+from timeseries import TimeSeries 
+
+class Arima(TimeSeries):
     ''' auto regressive integrated moving average
     
     autoregression --> self correlation; correlation of a time series to a lagged version of itself
@@ -49,11 +46,25 @@ class Arima:
     adjust p,d,q and train test size to prevent LinAlgError: Schur decomposition solver error.
     
     '''
-    def __init__(self, df:pd.DataFrame=None, col:str = None):
+    def __init__(   self, 
+                    df:pd.DataFrame=None, 
+                    col:str = None
+                    # order,
+                    # train_test_size
+                ):
         self.data = df
         self.col = col
-        self.order = (4,1,10) 
+        self.order = (1,1,0) 
         self.train_test_size = 0.50 # % of train / test set to slice
+
+        if self.data.isnull().values.any():
+            print('[WARNING] NaN values found in dataframe')
+            try:
+                self.data = self.interpolate_na( method='time' ).dropna()  # FIXME
+                print('[INFO] NaN values interpolated')
+            except: 
+                self.data.dropna(inplace=True)
+
 
     def model(self):
         self.data.index = pd.to_datetime(self.data.index)
@@ -70,11 +81,11 @@ class Arima:
         # line plot of residuals
         residuals = pd.DataFrame(model_fit.resid)
         residuals.plot()
-        pyplot.show()
+        plt.show()
         
         # density plot of residuals
         residuals.plot(kind='kde')
-        pyplot.show()
+        plt.show()
         # summary stats of residuals
         print(residuals.describe())
         return self
@@ -99,10 +110,10 @@ class Arima:
         rmse = sqrt(mean_squared_error(test, predictions))
         print('Test RMSE: %.3f' % rmse)
         # plot forecasts against actual outcomes
-        pyplot.plot(test, linewidth=1, linestyle=':')
-        pyplot.plot(predictions, color='red', linewidth=1, linestyle='-')
-        # pyplot.ylim(30, 150)
-        pyplot.show()
+        plt.plot(test, linewidth=1, linestyle=':')
+        plt.plot(predictions, color='red', linewidth=1, linestyle='-')
+        # plt.ylim(30, 150)
+        plt.show()
 
 
     def evaluate_for_optimization(self, X, order):
@@ -146,17 +157,20 @@ class Arima:
         print('Best ARIMA%s RMSE=%.3f' % (best_cfg, best_score))
 
 
-    def moving_average(a:pd.array, n:int=3) :
-        ret = np.cumsum(a, dtype=float)
+    def moving_average(self, a:pd.array, n:int=3) :
+        ret = np.cumsum(a)
         ret[n:] = ret[n:] - ret[:-n]
         return ret[n - 1:] / n
 
 
-    def plot_correlogram(self, x, lags=None, title=None):    
+    def plot_correlogram(self, lags=None, title=None): 
+        matplotlib.use('TkAgg') # NOTE: necessary due to inheritence of TimeSeries which uses 'Agg'
+
+        x = self.data[self.col]
         lags = min(10, int(len(x)/5)) if lags is None else lags
         fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(14, 8))
-        axes[0][0].plot(x) # Residuals
-        axes[0][0].plot(self.moving_average(x, n=21), c='k', lw=1) # moving average of risiduals
+        axes[0][0].plot(x.values) # Residuals
+        # axes[0][0].plot(self.moving_average(x, n=21), c='k', lw=1) # moving average of risiduals # FIXME calculate moveaverage
         q_p = np.max(q_stat(acf(x, nlags=lags), len(x))[1])
         stats = f'Q-Stat: {np.max(q_p):>8.2f}\nADF: {adfuller(x)[1]:>11.2f}'
         axes[0][0].text(x=.02, y=.85, s=stats, transform=axes[0][0].transAxes)
@@ -173,11 +187,12 @@ class Arima:
         fig.tight_layout()
         fig.subplots_adjust(top=.9)
         fig1 = plt.gcf()
+        print('plotting')
         plt.show()
 
 
     # FIXME: arima_order = (p, d, q)
-    def plot_model_summary(model_summary, title = None):
+    def plot_model_summary(self, model_summary, title = None):
         plt.rc('figure', figsize=(12, 7))
         plt.text(0.01, 0.05, str(model_summary), {'fontsize': 10}, fontproperties = 'monospace') # approach improved by OP -> monospace!
         plt.axis('off')
@@ -366,3 +381,15 @@ class Arima:
         plot_model_summary(best_arma_model.summary(), title = f'ARMA_Opt_Model_Summary_Opt_{best_p}_{best_q}_{series_name}')
         plot_correlogram(best_arma_model.resid, lags=20, title=f'ARMA_Opt_Residuals_Correlogram_{best_p}_{best_q}_{series_name}')
     
+
+
+
+#  @test
+fp = '/Users/michaelsands/data/fred_prices.csv'  #'/Users/michaelsands/data/stock_prices.csv'
+df = pd.read_csv(fp)
+
+a  =  Arima(df = df, col = 'DGS10')
+a.model()
+a.evaluate()
+a.plot_correlogram()
+# a.arima_diagnostics(a.model_fit.resid)

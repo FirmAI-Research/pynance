@@ -115,6 +115,21 @@ class TimeSeries():
             plt.hist(X)
             # plt.show()
 
+
+    def difference(self, interval=1):
+        # # if dataset is nonstationary
+
+        self.data = self.data.diff()
+        return self.data
+
+        # Manual implementation
+        # diff = list()
+        # for i in range(interval, len(dataset)):
+        #     value = dataset[i] - dataset[i - interval]
+        #     diff.append(value)
+        # return Series(diff)
+
+
     def auto_correlation(self, lags=24):
         from statsmodels.graphics import tsaplots
         fig = tsaplots.plot_acf(self.data)
@@ -178,6 +193,7 @@ class TimeSeries():
 # ts = TimeSeries(data='/Users/michaelsands/data/stock_prices.csv', column='AMZN')
 # ts.decomposition(model='additive')
 # ts.check_stationarity()
+# ts.difference()
 # ts.auto_correlation( lags=24 )
 # ts.prophet_forecast()
 
