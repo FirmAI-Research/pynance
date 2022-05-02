@@ -100,8 +100,11 @@ class TimeSeries():
         plt.savefig(os.path.join(img_dirp, 'img/seasonal_decompose.png'))
 
 
-    def check_stationarity(self, plot=True):
-        X = self.data.values
+    def check_stationarity(self, difference = False, plot=True):
+        if difference == True:
+            X = self.difference(self.data.values)
+        else:
+            X = self.data.values
         split = round(len(X) / 2)
         X1, X2 = X[0:split], X[split:]
         mean1, mean2 = X1.mean(), X2.mean()
@@ -111,15 +114,20 @@ class TimeSeries():
         self.data.hist()
 
         if plot == True:
+            matplotlib.use('TkAgg') 
             X = np.log(X) #log transform
             plt.hist(X)
-            # plt.show()
+            plt.show()
 
 
-    def difference(self, interval=1):
+    def difference(self, interval=5):
         # # if dataset is nonstationary
 
         self.data = self.data.diff()
+
+        # TODO: must drop infinite values after differencing
+        if np.inf in self.data:
+            self.data = self.data.loc[self.data != np.inf] # FIXME
         return self.data
 
         # Manual implementation
@@ -134,6 +142,7 @@ class TimeSeries():
         from statsmodels.graphics import tsaplots
         fig = tsaplots.plot_acf(self.data)
         plt.savefig(os.path.join(img_dirp, 'img/autocorrelation.png'))
+
 
     def interpolate_na(self, col_name=None, method='time'):
         self.data = self.data.interpolate(method, axis = 0) #linear or time

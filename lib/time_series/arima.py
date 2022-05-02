@@ -3,26 +3,35 @@
 ''' https://www.itl.nist.gov/div898/handbook/pmc/section6/pmc624.htm '''
 
 
+from logging import exception
 import warnings
 from math import sqrt
 import matplotlib
 import pandas as pd
 from pandas import read_csv
 from statsmodels.tsa.arima.model import ARIMA as _ARIMA
+
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_squared_error
 from math import sqrt
 warnings.filterwarnings("ignore")
+
+import sys, os
 
 import matplotlib.pyplot as plt
 
 from statsmodels.graphics.tsaplots import plot_acf, acf, plot_pacf, pacf
 from statsmodels.tsa.stattools import acf, q_stat, adfuller
 import statsmodels.api as sm
+from scipy import stats as scs
 from scipy.stats import probplot, moment
 from sklearn.metrics import mean_squared_error
 import seaborn as sns
 import numpy as np 
+
+cwd = os.getcwd()
+img_dirp = os.path.join(cwd, '/static/')
+print(img_dirp)
 
 from timeseries import TimeSeries 
 
@@ -48,19 +57,22 @@ class Arima(TimeSeries):
     '''
     def __init__(   self, 
                     df:pd.DataFrame=None, 
-                    col:str = None
-                    # order,
-                    # train_test_size
+                    col:str = None,
+                    order:tuple = None,
+                    train_test_size:float = 0.4
                 ):
-        self.data = df
+        self.data = df[col]
         self.col = col
-        self.order = (1,1,0) 
+        self.order = order
         self.train_test_size = 0.50 # % of train / test set to slice
+
+        if order is None:
+            raise ValueError('[ERROR] An order of (p, d, q) must be specified for an Arima model')
 
         if self.data.isnull().values.any():
             print('[WARNING] NaN values found in dataframe')
             try:
-                self.data = self.interpolate_na( method='time' ).dropna()  # FIXME
+                self.data = self.interpolate_na( method='linear' ).dropna()  # FIXME
                 print('[INFO] NaN values interpolated')
             except: 
                 self.data.dropna(inplace=True)
@@ -68,18 +80,17 @@ class Arima(TimeSeries):
 
     def model(self):
         self.data.index = pd.to_datetime(self.data.index)
-        self.series = self.data[self.col]
-        # self.series.index = self.series.index.to_period('M')
-        
+        self.series = self.data
+
         # fit model
         model = _ARIMA(self.series, order=self.order)
-        model_fit = model.fit()
-        
+        self.model_fit = model.fit()
+
         # summary of fit model
-        print(model_fit.summary())
+        print(self.model_fit.summary())
         
         # line plot of residuals
-        residuals = pd.DataFrame(model_fit.resid)
+        residuals = pd.DataFrame(self.model_fit.resid)
         residuals.plot()
         plt.show()
         
@@ -157,20 +168,21 @@ class Arima(TimeSeries):
         print('Best ARIMA%s RMSE=%.3f' % (best_cfg, best_score))
 
 
-    def moving_average(self, a:pd.array, n:int=3) :
-        ret = np.cumsum(a)
-        ret[n:] = ret[n:] - ret[:-n]
-        return ret[n - 1:] / n
+    def plot_correlogram(self, lags=10, title=None): 
+        # NOTE: without passing residuals this meethod can notbe used by the optimal brute force finder
 
-
-    def plot_correlogram(self, lags=None, title=None): 
+        def moving_average(self, a:pd.array, n:int=3) :
+            ret = np.cumsum(a)
+            ret[n:] = ret[n:] - ret[:-n]
+            return ret[n - 1:] / n
+            
         matplotlib.use('TkAgg') # NOTE: necessary due to inheritence of TimeSeries which uses 'Agg'
 
-        x = self.data[self.col]
+        x = self.data
         lags = min(10, int(len(x)/5)) if lags is None else lags
         fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(14, 8))
         axes[0][0].plot(x.values) # Residuals
-        # axes[0][0].plot(self.moving_average(x, n=21), c='k', lw=1) # moving average of risiduals # FIXME calculate moveaverage
+        # axes[0][0].plot(moving_average(x, n=21), c='k', lw=1) # moving average of risiduals # FIXME calculate moveaverage
         q_p = np.max(q_stat(acf(x, nlags=lags), len(x))[1])
         stats = f'Q-Stat: {np.max(q_p):>8.2f}\nADF: {adfuller(x)[1]:>11.2f}'
         axes[0][0].text(x=.02, y=.85, s=stats, transform=axes[0][0].transAxes)
@@ -191,16 +203,7 @@ class Arima(TimeSeries):
         plt.show()
 
 
-    # FIXME: arima_order = (p, d, q)
-    def plot_model_summary(self, model_summary, title = None):
-        plt.rc('figure', figsize=(12, 7))
-        plt.text(0.01, 0.05, str(model_summary), {'fontsize': 10}, fontproperties = 'monospace') # approach improved by OP -> monospace!
-        plt.axis('off')
-        plt.tight_layout()
-        plt.savefig(f'{str(iop)}{title}.png')
-
-
-    def arima_diagnostics(resids, n_lags=40):
+    def arima_diagnostics(self, resids:np.array, n_lags:int=40):
         '''
         Function for diagnosing the fit of an ARIMA model by investigating the residuals.
         
@@ -216,7 +219,8 @@ class Arima(TimeSeries):
         fig : matplotlib.figure.Figure
             Created figure
         '''
-        
+        matplotlib.use('TkAgg') # NOTE: necessary due to inheritence of TimeSeries which uses 'Agg'
+
         # create placeholder subplots
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 
@@ -248,76 +252,42 @@ class Arima(TimeSeries):
         plot_acf(resids, ax=ax4, lags=n_lags, alpha=0.05)
         ax4.set_title('ACF plot')
 
-        # arima_diagnostics(arima.resid, 40)
-
-
-    # FIXME
-    def _forecast():
-        auto_arima_pred = auto_arima.predict(n_periods=n_forecasts, 
-                                    return_conf_int=True, 
-                                    alpha=0.05)
-
-        auto_arima_pred = [pd.DataFrame(auto_arima_pred[0], 
-                                        columns=['prediction']),
-                        pd.DataFrame(auto_arima_pred[1], 
-                                        columns=['ci_lower', 'ci_upper'])]
-        auto_arima_pred = pd.concat(auto_arima_pred, 
-                                    axis=1).set_index(test.index)
-
-        fig, ax = plt.subplots(1)
-
-        ax = sns.lineplot(data=test, color=COLORS[0], label='Actual')
-
-        ax.plot(arima_pred.prediction, c=COLORS[1], label='ARIMA(2,1,1)')
-        ax.fill_between(arima_pred.index,
-                        arima_pred.ci_lower,
-                        arima_pred.ci_upper,
-                        alpha=0.3, 
-                        facecolor=COLORS[1])
-
-        ax.plot(auto_arima_pred.prediction, c=COLORS[2], 
-                label='ARIMA(3,1,2)')
-        ax.fill_between(auto_arima_pred.index,
-                        auto_arima_pred.ci_lower,
-                        auto_arima_pred.ci_upper,
-                        alpha=0.2, 
-                        facecolor=COLORS[2])
-
-        ax.set(title="Google's stock price  - actual vs. predicted", 
-            xlabel='Date', 
-            ylabel='Price ($)')
-        ax.legend(loc='upper left')
-
-        plt.tight_layout()
-        #plt.savefig('images/ch3_im25.png')
         plt.show()
 
 
 
+    # FIXME: arima_order = (p, d, q)
+    def plot_model_summary(self, model_summary, title = 'model_summary'):
+        plt.rc('figure', figsize=(12, 7))
+        plt.text(0.01, 0.05, str(model_summary), {'fontsize': 10}, fontproperties = 'monospace') 
+        plt.axis('off')
+        plt.tight_layout()
+        # plt.savefig(os.path.join(img_dirp, f'{title}.png'))
+        plt.show()
 
-    # FIXME
-    def univariate_time_series_optimal_model():
+
+    def univariate_time_series_optimal_model(self):
         
         ''' ___ @ set params ___ '''
         initial_p, initial_q = (1,4)
         pq_iterations = 5
-        d = 12 # d = 0 if series is stationary; use dicky fuller test to determine --> see decomposition.py
-        ''' ___________________  '''
+        d = 1 # d = 0 if series is stationary; use dicky fuller test to determine --> see decomposition.py
 
-        series_name, time_series, time_series_log, time_series_log_diff = get_data(d)
+        # series_name, time_series, time_series_log, time_series_log_diff = get_data(d)
+        series_name  = self.col
 
         ''' ARMA ''' # but we are using the x_log_diff time series data to fit the ARMA model --> primitive AR"I"MA
-        model = tsa.ARMA(endog=time_series_log_diff, order=(initial_p, initial_q)).fit() # endogenous variable; order(p,q) ---> ARIMA order is really (p,d,q) ; p=autoregressive, q=movingaverage
+        model = _ARIMA(endog=self.data, order=(initial_p, d, initial_q)).fit() # endogenous variable; order(p,q) ---> ARIMA order is really (p,d,q) ; p=autoregressive, q=movingaverage
         print(model.summary())
-        plot_model_summary(model.summary(), title = f'ARMA_Model_Summary_{initial_p}_{initial_q}_{series_name}')
-        plot_correlogram(model.resid, title=f'ARMA_Residuals_Correlogram_{series_name}')
+        self.plot_model_summary(model.summary(), title = f'ARMA_Model_Summary_{initial_p}_{initial_q}_{series_name}')
+        # self.plot_correlogram(model.resid, title=f'ARMA_Residuals_Correlogram_{series_name}')
         '''
         Find optimal ARMA lags "We iterate over various (p, q) lag combinations 
         & collect diagnostic statistics to compare the result" 
         '''
         train_size = 120
         test_results = {}
-        y_true = time_series_log_diff.iloc[train_size:]
+        y_true = self.data.iloc[train_size:]
         for p in range(pq_iterations):
             for q in range(pq_iterations):
                 aic, bic = [], []
@@ -326,16 +296,16 @@ class Arima(TimeSeries):
                 print(p, q)
                 convergence_error = stationarity_error = 0
                 y_pred = []
-                for T in range(train_size, len(time_series_log_diff)):
-                    train_set = time_series_log_diff.iloc[T-train_size:T] # split data into test train to prevent overfitting when predicting
+                for T in range(train_size, len(self.data)):
+                    train_set = self.data.iloc[T-train_size:T] # split data into test train to prevent overfitting when predicting
                     try:
-                        model = tsa.ARMA(endog=train_set, order=(p, q)).fit() # fit model by iterating through p,q values
-                    except LinAlgError:
+                        model = _ARIMA(endog=train_set, order=(p, d, q)).fit() # fit model by iterating through p,q values
+                    except exception: #LinAlgError:
                         convergence_error += 1
                     except ValueError:
                         stationarity_error += 1
 
-                    forecast, _, _ = model.forecast(steps=1)
+                    forecast = model.forecast(steps=1)
                     y_pred.append(forecast[0])
                     aic.append(model.aic)
                     bic.append(model.bic)
@@ -366,30 +336,78 @@ class Arima(TimeSeries):
         sns.heatmap(test_results.RMSE.unstack().mul(10), fmt='.2', annot=True, cmap='Blues_r')
         fig1 = plt.gcf()
         plt.show()
-        fig1.savefig(f'{str(iop)}{series_name}_RMSE_heatmap.png')
+        fig1.savefig(os.path.join(img_dirp, f'{series_name}_RMSE_heatmap.png'))
 
         # '''Bayesian Information Criterion'''
         sns.heatmap(test_results.BIC.unstack(), fmt='.2f', annot=True, cmap='Blues_r')
         fig2 = plt.gcf()
         plt.show()
-        fig2.savefig(f'{str(iop)}{series_name}_BIC_heatmap.png')
+        fig1.savefig(os.path.join(img_dirp, f'{series_name}_BIC_heatmap.png'))
 
         #''' use optimized ARMA lags to refit model '''
         best_p, best_q = test_results.rank().loc[:, ['RMSE', 'BIC']].mean(1).idxmin()  # utilize best p,q values as determined by lowest RMSE,BIC
-        best_arma_model = tsa.ARMA(endog=time_series_log_diff, order=(best_p, best_q)).fit()
+        best_arma_model = _ARIMA(endog=self.data, order=(best_p, d, best_q)).fit()
         print(best_arma_model.summary())
-        plot_model_summary(best_arma_model.summary(), title = f'ARMA_Opt_Model_Summary_Opt_{best_p}_{best_q}_{series_name}')
-        plot_correlogram(best_arma_model.resid, lags=20, title=f'ARMA_Opt_Residuals_Correlogram_{best_p}_{best_q}_{series_name}')
+        self.plot_model_summary(best_arma_model.summary(), title = f'ARMA_Opt_Model_Summary_Opt_{best_p}_{best_q}_{series_name}')
+        # self.plot_correlogram(best_arma_model.resid, lags=20, title=f'ARMA_Opt_Residuals_Correlogram_{best_p}_{best_q}_{series_name}')
     
 
+    # FIXME
+    def _forecast(self, n_forecasts):
+        auto_arima_pred = self.model_fit.predict(n_periods=n_forecasts, 
+                                    return_conf_int=True, 
+                                    alpha=0.05)
+        print(auto_arima_pred)
+        auto_arima_pred = [pd.DataFrame(auto_arima_pred[0], 
+                                        columns=['prediction']),
+                        pd.DataFrame(auto_arima_pred[1], 
+                                        columns=['ci_lower', 'ci_upper'])]
+
+        auto_arima_pred = pd.concat(auto_arima_pred, 
+                                    axis=1).set_index(self.index)
+
+        fig, ax = plt.subplots(1)
+
+        ax = sns.lineplot(data=test, color=COLORS[0], label='Actual')
+
+        ax.plot(arima_pred.prediction, c=COLORS[1], label='ARIMA(2,1,1)')
+        ax.fill_between(arima_pred.index,
+                        arima_pred.ci_lower,
+                        arima_pred.ci_upper,
+                        alpha=0.3, 
+                        facecolor=COLORS[1])
+
+        ax.plot(auto_arima_pred.prediction, c=COLORS[2], 
+                label='ARIMA(3,1,2)')
+        ax.fill_between(auto_arima_pred.index,
+                        auto_arima_pred.ci_lower,
+                        auto_arima_pred.ci_upper,
+                        alpha=0.2, 
+                        facecolor=COLORS[2])
+
+        ax.set(title="Google's stock price  - actual vs. predicted", 
+            xlabel='Date', 
+            ylabel='Price ($)')
+        ax.legend(loc='upper left')
+
+        plt.tight_layout()
+        #plt.savefig('images/ch3_im25.png')
+        plt.show()
 
 
 #  @test
 fp = '/Users/michaelsands/data/fred_prices.csv'  #'/Users/michaelsands/data/stock_prices.csv'
-df = pd.read_csv(fp)
+#  10 year treasuries are not stationary; need to differnce
 
-a  =  Arima(df = df, col = 'DGS10')
+df = pd.read_csv(fp).iloc[-1000:,  :]
+
+a  =  Arima(df = df, col = 'DGS10', order = (1, 1, 1))
 a.model()
-a.evaluate()
-a.plot_correlogram()
-# a.arima_diagnostics(a.model_fit.resid)
+# a.check_stationarity(difference=False)
+# a.evaluate()
+# a._forecast(10)
+# a.plot_correlogram()
+# a.arima_diagnostics(a.model_fit.resid, 40)
+# a.plot_model_summary(a.model_fit.summary())
+# print(a.model_fit.forecast(steps=10))
+a.univariate_time_series_optimal_model()
