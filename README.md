@@ -7,6 +7,11 @@ windows (run conda prompt as admim)
 conda install numpy cython -c conda-forge
 conda install pystan -c conda-forge
 conda install fbprophet
+...
+https://stackoverflow.com/questions/53178281/installing-fbprophet-python-on-windows-10
+
+
+
 --
 pip install pystan~=2.14
 
