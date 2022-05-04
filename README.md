@@ -1,20 +1,15 @@
 http://34.207.78.246/treasury_rates/
 http://ec2-34-207-78-246.compute-1.amazonaws.com:8000/treasury_rates/
 
-
 ***pystan & fbprophet ***
 windows (run conda prompt as admim)
 conda install numpy cython -c conda-forge
 conda install pystan -c conda-forge
 conda install fbprophet
+dependeny: pip install pystan~=2.14
 ...
 https://stackoverflow.com/questions/53178281/installing-fbprophet-python-on-windows-10
-
-
-
 --
-pip install pystan~=2.14
-
 linux
 --conda
 cd /tmp
@@ -26,8 +21,9 @@ source ~/.bashrc
 conda list
 conda create --name my_env python=3
 
-conda install -c conda-forge pystan
-conda install -c conda-forge fbprophet
+Make sure compilers (gcc, g++, build-essential) and Python development tools (python-dev, python3-dev) are installed. In Red Hat systems, install the packages gcc64 and gcc64-c++. If you are using a VM, be aware that you will need at least 4GB of memory to install prophet, and at least 2GB of memory to use prophet.
+<b>conda install -c conda-forge prophet<b>
+dependency: conda install -c conda-forge pystan
 
 --ec2: OSError: [Errno 28] No space left on device
 df -h
@@ -35,6 +31,10 @@ lsblk
 df -hT   ---> /dev/root
 sudo resize2fs /dev/root
 <Reboot ec2 instance after adding storage to volume>
+
+conda activate pynance_venvenv
+
+
 
 ***wip***
 django hosted with apache on ubuntu ec2<br>
