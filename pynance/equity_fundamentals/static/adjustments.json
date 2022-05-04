@@ -1,0 +1,31 @@
+{
+    "data": [
+        {
+            "metric": "r&d",
+            "y-4": "1/17/2016",
+            "y-3": "supplier1",
+            "y-2": "$10",
+            "y-1": "Cash",
+            "y": "Cash",
+            "y+1": "Cash",
+            "y+2": "Cash",
+            "y+3": "Cash",
+            "y+4": "Cash",
+            "fmt":"metric"
+        },
+        {
+            "metric": "lease expense",
+            "y-4": "1/17/2016",
+            "y-3": "supplier1",
+            "y-2": "$10",
+            "y-1": "Cash",
+            "y": "Cash",
+            "y+1": "Cash",
+            "y+2": "Cash",
+            "y+3": "Cash",
+            "y+4": "Cash",
+            "fmt":"metric"
+        }
+     
+    ]
+}

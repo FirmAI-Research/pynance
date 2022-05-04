@@ -12,6 +12,25 @@ iodir = os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))) + '/_tmp/nasdaq_data_link/'
 
 
+
+
+def dcf(request):
+    # select a company from the sector view to load the dcf view
+    # dcf --> dcf view
+
+    def write_to_ajax_json_data():
+        ''' based on user selection of parameter values write to ajax json data file'''
+        pass
+
+    context = {
+
+    }
+    return render(request, 'dcf.html', context)
+
+
+
+
+
 def fundamentals(request):
     ticker = request.POST.get("ticker")
     print(ticker)
@@ -129,14 +148,4 @@ def fundamentals(request):
     return render(request, 'fundamentals.html', context)
 
 
-
-
-
-def dcf(request):
-    # select a company from the sector view to load the dcf view
-    # dcf --> dcf view
-    context = {
-
-    }
-    return render(request, 'dcf.html', context)
 

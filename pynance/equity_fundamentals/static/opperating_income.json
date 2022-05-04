@@ -1,0 +1,150 @@
+{
+    "data": [
+        {
+            "metric": "revenue",
+            "y-4": "1/17/2016",
+            "y-3": "supplier1",
+            "y-2": "$10",
+            "y-1": "Cash",
+            "y": "Cash",
+            "y+1": "Cash",
+            "y+2": "Cash",
+            "y+3": "Cash",
+            "y+4": "Cash",
+            "fmt":"major"
+
+
+        },
+        {
+            "metric": "total expenses",
+            "y-4": "1/17/2016",
+            "y-3": "supplier1",
+            "y-2": "$10",
+            "y-1": "Cash",
+            "y": "Cash",
+            "y+1": "Cash",
+            "y+2": "Cash",
+            "y+3": "Cash",
+            "y+4": "Cash",
+            "fmt":"minor"
+        },
+        {
+            "metric": "net income",
+            "y-4": "1/17/2016",
+            "y-3": "supplier1",
+            "y-2": "$10",
+            "y-1": "Cash",
+            "y": "Cash",
+            "y+1": "Cash",
+            "y+2": "Cash",
+            "y+3": "Cash",
+            "y+4": "Cash",
+            "fmt":"major"
+        },
+        {
+            "metric": "operating expense",
+            "y-4": "1/17/2016",
+            "y-3": "supplier1",
+            "y-2": "$10",
+            "y-1": "Cash",
+            "y": "Cash",
+            "y+1": "Cash",
+            "y+2": "Cash",
+            "y+3": "Cash",
+            "y+4": "Cash",
+            "fmt":"minor"
+        },
+        {
+            "metric": "financing expense",
+            "y-4": "1/17/2016",
+            "y-3": "supplier1",
+            "y-2": "$10",
+            "y-1": "Cash",
+            "y": "Cash",
+            "y+1": "Cash",
+            "y+2": "Cash",
+            "y+3": "Cash",
+            "y+4": "Cash",
+            "fmt":"minor"
+        },
+
+        {
+            "metric": "tax expense",
+            "y-4": "1/17/2016",
+            "y-3": "supplier1",
+            "y-2": "$10",
+            "y-1": "Cash",
+            "y": "Cash",
+            "y+1": "Cash",
+            "y+2": "Cash",
+            "y+3": "Cash",
+            "y+4": "Cash",
+            "fmt":"minor"
+        },
+        {
+            "metric": "EBIT",
+            "y-4": "1/17/2016",
+            "y-3": "supplier1",
+            "y-2": "$10",
+            "y-1": "Cash",
+            "y": "Cash",
+            "y+1": "Cash",
+            "y+2": "Cash",
+            "y+3": "Cash",
+            "y+4": "Cash",
+            "fmt":"major"
+        },
+        {
+            "metric": "D&A",
+            "y-4": "1/17/2016",
+            "y-3": "supplier1",
+            "y-2": "$10",
+            "y-1": "Cash",
+            "y": "Cash",
+            "y+1": "Cash",
+            "y+2": "Cash",
+            "y+3": "Cash",
+            "y+4": "Cash",
+            "fmt":"minor"
+        },
+        {
+            "metric": "EBITDA",
+            "y-4": "1/17/2016",
+            "y-3": "supplier1",
+            "y-2": "$10",
+            "y-1": "Cash",
+            "y": "Cash",
+            "y+1": "Cash",
+            "y+2": "Cash",
+            "y+3": "Cash",
+            "y+4": "Cash",
+            "fmt":"major"
+        },
+        {
+            "metric": "Effective Tax Rate",
+            "y-4": "1/17/2016",
+            "y-3": "supplier1",
+            "y-2": "$10",
+            "y-1": "Cash",
+            "y": "Cash",
+            "y+1": "Cash",
+            "y+2": "Cash",
+            "y+3": "Cash",
+            "y+4": "Cash",
+            "fmt":"minor"
+        },
+        {
+            "metric": "NOPAT",
+            "y-4": "1/17/2016",
+            "y-3": "supplier1",
+            "y-2": "$10",
+            "y-1": "Cash",
+            "y": "Cash",
+            "y+1": "Cash",
+            "y+2": "Cash",
+            "y+3": "Cash",
+            "y+4": "Cash",
+            "fmt":"major"
+        }
+    ]
+}
