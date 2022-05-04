@@ -149,8 +149,14 @@ class TimeSeries():
     
 
     def prophet_forecast(self):
-        from fbprophet import Prophet
-        
+        from sys import platform
+        if platform == "linux" or platform == "linux2":
+            from prophet import Prophet # linux
+        elif platform == "darwin":
+            from fbprophet import Prophet # OS X
+        elif platform == "win32":
+            from fbprophet import Prophet # Windows...
+            
         data = self.data.reset_index()
         data.rename(columns={'Date': 'ds', self.column: 'y'}, inplace=True)
 

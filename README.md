@@ -98,3 +98,6 @@ kill pid --##--
 re run nohup
 
 sudo apt install tree
+
+
+git reset --hard origin/master
