@@ -7,7 +7,7 @@ import pandas as pd
 data_source = 'yahoo'
 start_date = '2000-01-01'
 end_date = '2022-04-30'
-frames = []``
+frames = []
 for ticker in tickers:
     stockdata = data.DataReader(ticker, data_source, start_date, end_date)['Close']
     stockdata =  pd.DataFrame(stockdata).rename(columns={'Close':ticker})

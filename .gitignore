@@ -1,8 +1,8 @@
 secrets.json
 
-portrebopaly/vendors/exports/
-portrebopaly/vendors/exports/*
-
+pynance/vendors/exports/
+pynance/vendors/exports/*
+pynance\time_series\static\img\*
 
 docs/_todo.txt
 # Elastic Beanstalk Files
@@ -10,5 +10,6 @@ docs/_todo.txt
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
+*/img/*.png
 
 _tmp/*

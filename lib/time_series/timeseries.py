@@ -78,8 +78,9 @@ class TimeSeries():
         '''
         from statsmodels.tsa.seasonal import seasonal_decompose
         components = seasonal_decompose(self.data, model=model, period=1) # freq is required else error thrown
+        print(self.data)
         if plot == True:
-            ts = (self.data
+            ts = (pd.DataFrame(self.data)
                 .assign(Trend=components.trend)
                 .assign(Seasonality=components.seasonal)
                 .assign(Residual=components.resid))
@@ -87,6 +88,7 @@ class TimeSeries():
                 ts.plot(subplots=True, figsize=(14, 8), title=['Original Series', 'Trend Component', 'Seasonal Component','Residuals'], legend=False)
                 plt.suptitle('Seasonal Decomposition', fontsize=14)
                 sns.despine()
+                # fig.set_size_inches(5, 8)
                 plt.tight_layout()
                 plt.subplots_adjust(top=.91)
         
@@ -148,7 +150,7 @@ class TimeSeries():
         return self.data
     
 
-    def prophet_forecast(self):
+    def prophet_forecast(self, train_start, train_end, test_start, test_end):
         from sys import platform
         if platform == "linux" or platform == "linux2":
             from prophet import Prophet # linux
@@ -160,9 +162,11 @@ class TimeSeries():
         data = self.data.reset_index()
         data.rename(columns={'Date': 'ds', self.column: 'y'}, inplace=True)
 
-        size = int(len(data))
-        df_train = data.iloc[ int(-size*.4):, :] 
-        df_test = data.iloc[ int(size*.4):, :]
+        # FIXME and take user input
+        size = len(data)
+        df_train = data.iloc[ int(-size*.10): , :] 
+        df_test = data.iloc[   int(-size*.20): ,  :]
+
 
         model_prophet = Prophet(seasonality_mode='additive')
         model_prophet.add_seasonality(name='monthly', period=30.5, fourier_order=5)
@@ -171,7 +175,9 @@ class TimeSeries():
         df_future = model_prophet.make_future_dataframe(periods=365)
         df_pred = model_prophet.predict(df_future)
         model_prophet.plot(df_pred)
-        plt.savefig(os.path.join(img_dirp, f'img/{self.column}_forecast.png'))
+        plt.tight_layout()
+        plt.title('Prophet Forecast')
+        plt.savefig(os.path.join(img_dirp, f'img/prophet_forecast.png'))
 
         model_prophet.plot_components(df_pred)
         plt.tight_layout()
