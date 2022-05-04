@@ -1,30 +1,31 @@
 http://34.207.78.246/treasury_rates/
+<br>
 http://ec2-34-207-78-246.compute-1.amazonaws.com:8000/treasury_rates/
-
-***pystan & fbprophet ***
-windows (run conda prompt as admim)
-conda install numpy cython -c conda-forge
-conda install pystan -c conda-forge
-conda install fbprophet
-dependeny: pip install pystan~=2.14
+<br>
+**pystan & fbprophet **
+windows (run conda prompt as admim)<br>
+conda install numpy cython -c conda-forge<br>
+conda install pystan -c conda-forge<br>
+conda install fbprophet<br>
+dependeny: pip install pystan~=2.14<br>
 ...
 https://stackoverflow.com/questions/53178281/installing-fbprophet-python-on-windows-10
---
-linux
---conda
-cd /tmp
-curl -O https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
+--<br><br>
+linux<br>
+--conda<br>
+cd /tmp<br>
+curl -O https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh<br>
 bash Anaconda3-2021.05-Linux-x86_64.sh
 ... use -u flag to update existing install
 
-source ~/.bashrc
-conda list
-conda create --name my_env python=3
-
-Make sure compilers (gcc, g++, build-essential) and Python development tools (python-dev, python3-dev) are installed. In Red Hat systems, install the packages gcc64 and gcc64-c++. If you are using a VM, be aware that you will need at least 4GB of memory to install prophet, and at least 2GB of memory to use prophet.
+source ~/.bashrc<br>
+conda list<br>
+conda create --name my_env python=3<br>
+<br><br>
+Make sure compilers (gcc, g++, build-essential) and Python development tools (python-dev, python3-dev) are installed. In Red Hat systems, install the packages gcc64 and gcc64-c++. If you are using a VM, be aware that you will need at least 4GB of memory to install prophet, and at least 2GB of memory to use prophet.<br>
 <b>conda install -c conda-forge prophet<b>
 dependency: conda install -c conda-forge pystan
-
+<br><br>
 --ec2: OSError: [Errno 28] No space left on device
 df -h
 lsblk
