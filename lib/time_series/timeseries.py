@@ -115,7 +115,7 @@ class TimeSeries():
         self.data.hist()
 
         if plot == True:
-            matplotlib.use('TkAgg') 
+            # matplotlib.use('TkAgg') 
             X = np.log(X) #log transform
             plt.hist(X)
             # plt.show()
