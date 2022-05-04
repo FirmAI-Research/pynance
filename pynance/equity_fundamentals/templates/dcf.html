@@ -5,35 +5,399 @@
 
 
 {% block content %}
-<h1 style="color:teal">Dcf</h1>
+<h1 style="color:teal">Discounted Cash Flow Model</h1>
 
 
+<table id="test" class="display" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th></th>
+            <th>name</th>
+            <th>2015</th>
+            <th>2016</th>
+            <th>2017</th>
+            <th>2018</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
 
 
 <section class="container-large py-4">
     <div class="row">
         <div class="col-md-12">
-            <h2>Tabs</h2>
+            <h3 style="color:teal">FCF to Equity</h3>
             <ul id="tabs" class="nav nav-tabs">
-                <li class="nav-item"><a href="" data-target="#home1" data-toggle="tab" class="nav-link small text-uppercase">Home</a></li>
-                <li class="nav-item"><a href="" data-target="#profile1" data-toggle="tab" class="nav-link small text-uppercase active">Profile</a></li>
-                <li class="nav-item"><a href="" data-target="#messages1" data-toggle="tab" class="nav-link small text-uppercase">Messages</a></li>
+                <li class="nav-item"><a href="" data-target="#forecastFcf" data-toggle="tab"
+                        class="nav-link small text-uppercase">Forecast FCF</a></li>
+                <li class="nav-item"><a href="" data-target="#profile1" data-toggle="tab"
+                        class="nav-link small text-uppercase active">FCF Growth Rate</a></li>
+                <li class="nav-item"><a href="" data-target="#messages1" data-toggle="tab"
+                        class="nav-link small text-uppercase">Discount Rate</a></li>
+                <li class="nav-item"><a href="" data-target="#messages1" data-toggle="tab"
+                        class="nav-link small text-uppercase">Terminal Value</a></li>
+                <li class="nav-item"><a href="" data-target="#messages1" data-toggle="tab"
+                        class="nav-link small text-uppercase">Relative Value</a></li>
             </ul>
             <br>
             <div id="tabsContent" class="tab-content">
-                <div id="home1" class="tab-pane fade">
-                    <div class="list-group"><a href="" class="list-group-item d-inline-block"><span class="float-right badge badge-pill badge-dark">51</span> Home Link</a> <a href="" class="list-group-item d-inline-block"><span class="float-right badge badge-pill badge-dark">8</span> Link 2</a> <a href="" class="list-group-item d-inline-block"><span class="float-right badge badge-pill badge-dark">23</span> Link 3</a> <a href="" class="list-group-item d-inline-block text-muted">Link n..</a></div>
+
+                <div id="forecastFcf" class="tab-pane fade active show">
+                    <div style="width:33%;float:left;">
+                        <table class="table table-striped">
+                            <tr>
+                                <th class="table-primary">metric</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                            </tr>
+                            <tr>
+                                <td>Revenue</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td>Net Income</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center">Adjusted Net Income</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>                            
+                            <tr>
+                                <td>Operating Expense</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center">Adjusted Opperating Income</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>                           
+                            <tr>
+                                <td>Financing Expense</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td>Interest Expense</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>                               
+                            <tr>
+                                <td style="text-align:right">EBIT</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>   
+                            <tr>
+                                <td>Depreciation & Amoritization</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr> 
+                            <tr>
+                                <td>Tax Expense</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>                                   
+                            <tr>
+                                <td style="text-align:right">EBITDA</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>     
+                            <tr>
+                                <td style="text-align:center">Effective Tax Rate</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>     
+                            <tr>
+                                <td style="text-align:right">NOPAT</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>                                                                                                                                                    
+                        </table>
+
+
+                        <table class="table table-striped">
+                            <tr>
+                                <th class="table-primary">metric</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                            </tr>
+                            <tr>
+                                <td>Capex</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td>Current Assets</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>  
+                            <tr>
+                                <td>C&CE</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>        
+                            <tr>
+                                <td>Current Liabilities</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>    
+                            <tr>
+                                <td style="text-align:right">Change in Non-Cash Working Capital</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>                                                                                                                                                                                                                                          
+                        </table>
+
+
+                        <table class="table table-striped">
+                            <tr>
+                                <th class="table-primary">metric</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                            </tr>
+                            <tr>
+                                <td>Net Income</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>   
+                            <tr>
+                                <td  style="text-align:center">Capex</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>  
+                            <tr>
+                                <td  style="text-align:center">Depreciation</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>        
+                            <tr>
+                                <td  style="text-align:center">Change in Non-Cash Working Capital</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>    
+                            <tr>
+                                <td style="text-align:center">Net Debt Issued/Repaid</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>  
+                            <tr>
+                                <td style="text-align:right">Free Cash Flow to Equity (FCFE)</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>                                                                                                                                                                                                                                                                     
+                        </table>
+
+
+
+                        <table class="table table-striped">
+                            <tr>
+                                <th class="table-primary">metric</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                            </tr>
+                            <tr>
+                                <td>Dividends Paid</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td>Payout Ratio</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>   
+                            <tr>
+                                <td>Equity Repurchased</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>  
+                            <tr>
+                                <td>Shareholder Equity</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>      
+                            <tr>
+                                <td>Cash to Shareholders / FCFE</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>                                                                                                                                                                                                                                                                 
+                        </table>
+
+
+
+
+                    </div>
+
+
+                    <div style="width:33%;float:left;padding-left: 50px;">
+                        <table class="table table-striped">
+                            <tr>
+                                <th>Geom. Avg.</th>
+                                <th>CAGR</th>
+                                <th>Growth Rate</th>
+                                <th>Rate being Used</th>
+                            </tr>
+                            <tr>
+                                <td class="table-default">2</td>
+                                <td class="table-default">2</td>
+                                <td class="table-default">
+                                    <input type="range" class="form-range" min="0" max="5" step="0.5" id="customRange3"
+                                        oninput="this.nextElementSibling.value = this.value"
+                                        style="float:left;width:60%;">
+                                    <output style="float:left;width:10%;padding-left:25px;">24</output>
+                                </td>
+                                <td class="table-default">2</td>
+                            </tr>
+                        </table>
+                    </div>
+
+
+                    <div style="width:33%;float:left;padding-left: 50px;">
+                        <table class="table table-striped">
+                            <tr>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                                <th class="table-primary">2015</th>
+                            </tr>
+                            <tr>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
-                <div id="profile1" class="tab-pane fade active show">
+
+                <div id="profile1" class="tab-pane fade">
+
+
+
+
                     <div class="row pb-2">
                         <div class="col-md-7">
-                            <p>Tabs can be used to contain a variety of content &amp; elements. They are a good way to group <a href="" class="link">relevant content</a>. Display initial content in context to the user. Enable the user to flow through <a href="" class="link">more</a> information as needed. </p>
+                            <p>Tabs can be used to contain a variety of content &amp; elements. They are a good way to
+                                group <a href="" class="link">relevant content</a>. Display initial content in context
+                                to the user. Enable the user to flow through <a href="" class="link">more</a>
+                                information as needed. </p>
                         </div>
-                        <div class="col-md-5"><img src="//dummyimage.com/1005x559.png/5fa2dd/ffffff" class="float-right img-fluid img-rounded"></div>
+                        <div class="col-md-5"><img src="//dummyimage.com/1005x559.png/5fa2dd/ffffff"
+                                class="float-right img-fluid img-rounded"></div>
                     </div>
                 </div>
                 <div id="messages1" class="tab-pane fade">
-                    <div class="list-group"><a href="" class="list-group-item d-inline-block"><span class="float-right badge badge-pill badge-dark">44</span> Message 1</a> <a href="" class="list-group-item d-inline-block"><span class="float-right badge badge-pill badge-dark">8</span> Message 2</a> <a href="" class="list-group-item d-inline-block"><span class="float-right badge badge-pill badge-dark">23</span> Message 3</a> <a href="" class="list-group-item d-inline-block text-muted">Message n..</a></div>
+                    <div class="list-group"><a href="" class="list-group-item d-inline-block"><span
+                                class="float-right badge badge-pill badge-dark">44</span> Message 1</a> <a href=""
+                            class="list-group-item d-inline-block"><span
+                                class="float-right badge badge-pill badge-dark">8</span> Message 2</a> <a href=""
+                            class="list-group-item d-inline-block"><span
+                                class="float-right badge badge-pill badge-dark">23</span> Message 3</a> <a href=""
+                            class="list-group-item d-inline-block text-muted">Message n..</a></div>
                 </div>
             </div>
         </div>
@@ -42,115 +406,80 @@
 
 
 
-
-<div style="width:33%;float:left;">
-
-    <table class="table table-striped">
-
-        <tr>
-            <th class= "table-primary">metric</th>
-            <th class= "table-primary">2015</th>
-            <th class= "table-primary">2015</th>
-            <th class= "table-primary">2015</th>
-            <th class= "table-primary">2015</th>
-            <th class= "table-primary">2015</th>
-
-
-
-        </tr>
-        <tr>
-            <td>Revenue</td>
-            <td>0</td>
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-            <td>4</td>
-        </tr>
-        <tr>
-            <td>Revenue</td>
-            <td>0</td>
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-            <td>4</td>
-        </tr>
-    </table>
-
-
-</div>
-
-
-<div style="width:33%;float:left;padding-left: 50px;">
-
-    <table class="table table-striped">
-
-        <tr>
-            <th>Geom. Avg.</th>
-            <th>CAGR</th>
-            <th>Growth Rate</th>
-            <th>Rate being Used</th>
-
-        </tr>
-        <tr>
-            <td class= "table-default">2</td>
-            <td class= "table-default">2</td>
-            <td class= "table-default">
-                <input type="range" class="form-range" min="0" max="5" step="0.5" id="customRange3"
-                    oninput="this.nextElementSibling.value = this.value" style="float:left;width:60%;">
-                <output style="float:left;width:10%;padding-left:25px;">24</output>
-            </td>
-            <td class= "table-default">2</td>
-
-        </tr>
-
-
-    </table>
-
-
-
-
-</div>
-
-
-<div style="width:33%;float:left;padding-left: 50px;">
-
-    <table class="table table-striped">
-
-        <tr>
-            <th class= "table-primary">2015</th>
-            <th class= "table-primary">2015</th>
-            <th class= "table-primary">2015</th>
-            <th class= "table-primary">2015</th>
-            <th class= "table-primary">2015</th>
-
-
-
-        </tr>
-        <tr>
-            <td>0</td>
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-            <td>4</td>
-
-        </tr>
-
-
-    </table>
-
-
-</div>
+<style type="text/css">
+td.details-control {
+    background: url('https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_open.png') no-repeat center center;
+    cursor: pointer;
+}
+tr.shown td.details-control {
+    background: url('https://raw.githubusercontent.com/DataTables/DataTables/1.10.7/examples/resources/details_close.png') no-repeat center center;
+}
+  </style>
 
 {% endblock content %}
-
-
-
 
 {% block js %}
 
 <script>
 
+/* Formatting function for row details - modify as you need */
+function format ( d ) {
+    console.log(d.name);
+    var trs='';
+    $.each($(d.name),function(key,value){
+    	trs+='<tr><td>'+value+'</td><td>'+d.name[key]+'</td></tr>';
+    })
+    // `d` is the original data object for the row
+    return '<table class="table table-border table-hover">'+
+           '<thead>'+
+              '<th>Product</th>'+
+            	'<th>Price</th>'+  
+           '</thead><tbody>' +
+           	
+           trs+
+        '</tbody></table>';
+}
 
+$(document).ready(function() {
+
+
+    var table = $('#test').DataTable({
+        "ajax": '{% static "data.json" %}',
+        "columns": [
+            {
+                "class":          'details-control',
+                "orderable":      false,
+                "data":           null,
+                "defaultContent": ''
+            },
+            { "data": "name"},
+            { "data": "2015"},
+            { "data": "2016"},
+            { "data": "2017"},
+            { "data": "2018"}
+        ]
+    });
+
+    // Add event listener for opening and closing details
+   $('#test tbody').on('click', 'td.details-control', function () {
+        var tr = $(this).closest('tr');
+        var row = table.row( tr );
+
+        if ( row.child.isShown() ) {
+          // This row is already open - close it
+          row.child.hide();
+          tr.removeClass('shown');
+        }
+        else {
+          // Open this row
+          row.child( format(row.data()) ).show();
+          tr.addClass('shown');
+        }
+    });
+
+
+
+});
 
 </script>
 {% endblock js %}
