@@ -177,7 +177,6 @@ class Arima(TimeSeries):
             return ret[n - 1:] / n
             
         matplotlib.use('TkAgg') # NOTE: necessary due to inheritence of TimeSeries which uses 'Agg'
-
         x = self.data
         lags = min(10, int(len(x)/5)) if lags is None else lags
         fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(14, 8))

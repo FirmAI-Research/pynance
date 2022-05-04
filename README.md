@@ -2,8 +2,37 @@ http://34.207.78.246/treasury_rates/
 http://ec2-34-207-78-246.compute-1.amazonaws.com:8000/treasury_rates/
 
 
+***pystan & fbprophet ***
+windows (run conda prompt as admim)
+conda install numpy cython -c conda-forge
+conda install pystan -c conda-forge
+conda install fbprophet
+--
+pip install pystan~=2.14
+
+linux
+--conda
+cd /tmp
+curl -O https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
+bash Anaconda3-2021.05-Linux-x86_64.sh
+... use -u flag to update existing install
+
+source ~/.bashrc
+conda list
+conda create --name my_env python=3
+
+conda install -c conda-forge pystan
+conda install -c conda-forge fbprophet
+
+--ec2: OSError: [Errno 28] No space left on device
+df -h
+lsblk
+df -hT   ---> /dev/root
+sudo resize2fs /dev/root
+<Reboot ec2 instance after adding storage to volume>
+
 ***wip***
-currently django full stack hosted with apache on ubuntu ec2<br>
+django hosted with apache on ubuntu ec2<br>
 cloudtables via https://datatables.net/ (datables)<br>
 highcharts.js<br>
 

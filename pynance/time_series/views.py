@@ -18,11 +18,11 @@ def time_series_models(request):
 def forecast(request):  
     
     # FIXME
-    ts = TimeSeries(data='/Users/michaelsands/data/stock_prices.csv', column='AMZN')
-    ts.decomposition(model='additive')
-    ts.check_stationarity()
-    ts.auto_correlation( lags=24 )
-    ts.prophet_forecast()
+    # ts = TimeSeries(data='./time_series/static/stock_prices.csv', column='AMZN')
+    # ts.decomposition(model='additive')
+    # ts.check_stationarity()
+    # ts.auto_correlation( lags=24 )
+    # ts.prophet_forecast()
 
     img_dirp = os.path.join(os.getcwd(), 'pynance/static/img')
 

@@ -3,7 +3,6 @@ https://machinelearningmastery.com/time-series-data-stationary-python/
 Machine Learning for Algorithmic Trading
 https://github.com/PacktPublishing/Machine-Learning-for-Algorithmic-Trading-Second-Edition/blob/master/09_time_series_models/01_tsa_and_stationarity.ipynb
 '''
-from cv2 import CC_STAT_WIDTH
 import pandas as pd 
 import numpy as np
 import sys,os
@@ -117,7 +116,7 @@ class TimeSeries():
             matplotlib.use('TkAgg') 
             X = np.log(X) #log transform
             plt.hist(X)
-            plt.show()
+            # plt.show()
 
 
     def difference(self, interval=5):
