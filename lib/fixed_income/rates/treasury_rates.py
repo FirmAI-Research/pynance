@@ -55,14 +55,17 @@ class TreasuryRates:
 
     def point_in_time_curves(self):
         date_x = cal.closest_market_day(datetime( cal.today().year, 1, 2)).strftime('%Y-%m-%d') # Year End
-        date_y = cal.closest_market_day(cal.previous_month_end(offset=-1)).strftime('%Y-%m-%d')
-        date_z = cal.closest_market_day(cal.previous_month_end()).strftime('%Y-%m-%d')
+        date_y = cal.closest_market_day(cal.previous_month_end(offset=-2)).strftime('%Y-%m-%d')
+        date_z = cal.closest_market_day(cal.previous_month_end(offset=-1)).strftime('%Y-%m-%d')
+        date_w = cal.closest_market_day(cal.previous_month_end()).strftime('%Y-%m-%d')
 
         x = self.df.loc[self.df.date == date_x]
         y = self.df.loc[self.df.date == date_y]
         z = self.df.loc[self.df.date == date_z]
+        w = self.df.loc[self.df.date == date_w]
+
         t = pd.DataFrame(self.df.iloc[-1]).transpose()
-        df = pd.concat([x, y,z,t], axis=0).set_index('date').transpose()
+        df = pd.concat([x, y,z,w, t], axis=0).set_index('date').transpose()
         print(df)
         return self.to_highcharts(df)
 

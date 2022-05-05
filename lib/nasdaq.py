@@ -102,6 +102,7 @@ class Nasdaq:
 
 
 class Metrics(Nasdaq):
+    
     name = 'SHARADAR/Daily'
 
     ticker_cols = ['ticker', 'name','exchange','category','cusips', 'sector', 'industry', 'scalemarketcap', 'scalerevenue', 'currency']

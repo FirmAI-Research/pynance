@@ -1,28 +1,60 @@
 from django.shortcuts import render
+from matplotlib.font_manager import json_dump
 import pandas as pd
 import sys
 import os
 import json
-
-from lib.nasdaq import Fundamentals, Metrics, Tickers
+import nasdaqdatalink
+from lib.nasdaq import Fundamentals, Metrics, Tickers, Nasdaq
 from lib.calendar import Calendar
 cal = Calendar()
+from dateutil.relativedelta import relativedelta
+import datetime
+
+cwd = os.getcwd()
 
 iodir = os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))) + '/_tmp/nasdaq_data_link/'
 
 
-
-
 def dcf(request):
     # select a company from the sector view to load the dcf view
     # dcf --> dcf view
+    ticker = 'AMZN'
+
+    ndq = Nasdaq()
+    ndq.authenticate()
+    ndq_data = nasdaqdatalink.get_table('SHARADAR/SF1',  dimension = 'MRQ', ticker = ticker) # calendardate=cal.previous_quarter_end()
+
+    qtr_end_dates = cal.quarter_end_list(start_date=datetime.datetime.now() - relativedelta(years=2), end_date=cal.today())
 
     def write_to_ajax_json_data():
         ''' based on user selection of parameter values write to ajax json data file'''
-        pass
+        fp = os.path.join(cwd, 'equity_fundamentals', 'static', 'opperating_income.json')
+        print(fp)
+        with open(fp, 'r') as f:
+            data = json.load(f)
+
+        y = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-1]]
+        yminus1 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-2]]
+        yminus2 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-3]]
+        yminus3 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-4]]
+        yminus4 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-5]]
+        
+        for i in range(len(data['data'])): # iterate thrugh each dictionary in the list
+            source_name= data['data'][i].get('source_name')
+            if source_name != 'None':    
+                data['data'][i]['y'] = "{: ,}".format(y[source_name].iloc[0])
+                data['data'][i]['y-1'] = "{: ,}".format(yminus1[source_name].iloc[0])
+                data['data'][i]['y-2'] = "{: ,}".format(yminus2[source_name].iloc[0])
+                data['data'][i]['y-3'] = "{: ,}".format(yminus3[source_name].iloc[0])
+                data['data'][i]['y-4'] = "{: ,}".format(yminus4[source_name].iloc[0])
+        json_dump(data, fp)
+
+    write_to_ajax_json_data()
 
     context = {
+        'qtr_end_dates': qtr_end_dates[-5:],
 
     }
     return render(request, 'dcf.html', context)

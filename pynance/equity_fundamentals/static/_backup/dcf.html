@@ -31,18 +31,16 @@
 
                 <!-- // Div Tab 1 ******************************************************************************************************************** -->
                 <div id="forecastFcf" class="tab-pane fade active show">
-                    <h3 style="color:teal">Financial Performance</h3>
+                    <h3 style="color:teal">Opperating Income</h3>
                     <table id="oppinc" class="display stripe" cellspacing="0" width="100%">
                         <thead>
                             <tr>
                                 <th></th>
                                 <th>metric</th>
-
-                                {% for date in qtr_end_dates %}
-                                <th>{{date}}</th>
-
-                                {% endfor %}
-
+                                <th>2015</th>
+                                <th>2016</th>
+                                <th>2017</th>
+                                <th>2018</th>
                                 <th>2015</th>
                                 <th>2016</th>
                                 <th>2017</th>
@@ -115,8 +113,7 @@
     }
 
     td.metricMajor {
-        background-color: darkslategray;
-        /*//#56A5EC */
+        background-color: #56A5EC;
         color: white;
         opacity: 0.7;
         font-weight: bold;
@@ -148,18 +145,12 @@
             trs += '<tr><td>' + value + '</td><td>' + d.desc[key] + '</td></tr>';
         })
         // `d` is the original data object for the row
-        return '<p>' + d.desc + '</p>' +
+        return '<p>'+  d.desc  +'</p>' 
             '<table class="table table-border table-hover">' +
             '<thead>' +
-            '<th>Period over Period Percent Change</th>' +
-
-            '<tr>' +
-            '<td>x%</td>' +
-            '<td>x%</td>' +
-            '<td>x%</td>' + '<td>x%</td>' + '<td>x%</td>' + '<td>x%</td>' +
-            '</tr>' +
-
-            '</thead><tbody>' +
+            '<td>metric</td>' +
+            '<th>h2</th>' +
+            '</thead>body<tbody>' +
             '</tbody></table>';
     }
 
@@ -233,7 +224,7 @@
             "columnDefs": [
                 { "width": "20%", "targets": 1 }
             ],
-
+  
             "ajax": '{% static "adjustments.json" %}',
             "columns": [
                 {
