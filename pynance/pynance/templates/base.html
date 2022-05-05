@@ -54,10 +54,9 @@
                 </button>
                 <div class="collapse navbar-collapse justify-content-lg-between" id="navbarNav">
                     <ul class="navbar-nav">
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link" href="" style="color:teal">Home</a>
-                        </li>
-
+                        </li> -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false" style="color:teal">
@@ -66,15 +65,28 @@
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" href="{% url 'treasury_rates' %}"
                                         style="color:teal">Treasury Rates</a></li>
-                                <li><a class="dropdown-item" href="{% url 'market_return_regression' %}"
-                                        style="color:teal">Market Regression</a></li>
+                                <!-- <li>
+                                    <hr class="dropdown-divider">
+                                </li> -->
+                                <li><a class="dropdown-item" href="#" style="color:teal"></a></li>
+                            </ul>
+                        </li>                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false" style="color:teal">
+                                Equity Fundamentals
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{% url 'dcf' %}" style="color:teal">Financials & DCF</a>
+                                </li>
+                                <li><a class="dropdown-item" href="{% url 'fundamentals' %}" style="color:teal">Sector
+                                        View</a></li>
                                 <!-- <li>
                                     <hr class="dropdown-divider">
                                 </li> -->
                                 <li><a class="dropdown-item" href="#" style="color:teal"></a></li>
                             </ul>
                         </li>
-                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false" style="color:teal">
@@ -82,23 +94,9 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" href="{% url 'forecast' %}" style="color:teal">Forecast</a></li>
+                                <li><a class="dropdown-item" href="{% url 'market_return_regression' %}"
+                                    style="color:teal">Market Regression</a></li>                                
                                 <li><a class="dropdown-item" href="{% url 'time_series_models' %}" style="color:teal">Model Workflow</a></li>
-                                <!-- <li>
-                                    <hr class="dropdown-divider">
-                                </li> -->
-                                <li><a class="dropdown-item" href="#" style="color:teal"></a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false" style="color:teal">
-                                Equity
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="{% url 'fundamentals' %}" style="color:teal">Sector
-                                        View</a></li>
-                                <li><a class="dropdown-item" href="{% url 'dcf' %}" style="color:teal">Dcf</a>
-                                </li>
                                 <!-- <li>
                                     <hr class="dropdown-divider">
                                 </li> -->

@@ -68,7 +68,6 @@ class Nasdaq:
         outliers = [x for x in outliers_high ] + [y for y in outliers_low]
 
         Qs = [actual_loval, Q1, median, Q3, actual_hival]
-
         # print(arr)
         # print(Qs)
         return Qs, outliers
@@ -88,6 +87,7 @@ class Nasdaq:
         xdf.reset_index(inplace=True)
         return xdf
 
+
     def get_modified_time(self, path_to_file):
         """
         See http://stackoverflow.com/a/39501288/1709587 for explanation.
@@ -102,7 +102,7 @@ class Nasdaq:
 
 
 class Metrics(Nasdaq):
-    
+
     name = 'SHARADAR/Daily'
 
     ticker_cols = ['ticker', 'name','exchange','category','cusips', 'sector', 'industry', 'scalemarketcap', 'scalerevenue', 'currency']
