@@ -20,7 +20,10 @@ iodir = os.path.dirname(os.path.dirname(os.path.dirname(
 def dcf(request):
     # select a company from the sector view to load the dcf view
     # dcf --> dcf view
-    ticker = 'AMZN'
+    ticker = str(request.POST.get("tickers"))
+    if ticker in ['', 'None', None]:
+        ticker = 'AMZN'
+    print(ticker)
 
     ndq = Nasdaq()
     ndq.authenticate()

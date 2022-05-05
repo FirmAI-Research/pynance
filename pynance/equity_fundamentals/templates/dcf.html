@@ -4,7 +4,32 @@
 
 
 {% block content %}
-<h1 style="color:teal">Equity Fundamentals</h1>
+<h1 style="color:teal">Equity Fundamentals</h1><br>
+
+
+
+<form action="" method="POST">
+    {% csrf_token %}
+
+    <div style="display:block">
+
+        <div class="form-group" style="width:30%; float:left">
+            <input class="form-control" name='tickers' id="tickers" placeholder="Enter a Ticker for a Public Company (That has reported MRQ earnings)">
+        </div>
+
+        <div style="clear:both;"></div>
+    </div>
+
+    </div>
+    <div style="float:left;width:30%;">
+        <button type="submit" name="submit" class="btn btn-outline-success btn-lg btn-block">Run</button>
+    </div>
+</form>
+
+<div style="clear:both;"></div>
+
+
+
 
 
 <section class="container-large py-4">
