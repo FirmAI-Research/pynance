@@ -11,27 +11,83 @@
 <form action="" method="POST">
     {% csrf_token %}
 
-    <div style="display:block">
+    <!-- <div style="display:block"> -->
 
+
+
+    <!-- </div> -->
+
+    <div class="form-group" style="width:100%; float:left">
         <div class="form-group" style="width:30%; float:left">
             <input class="form-control" name='tickers' id="tickers"
                 placeholder="Enter a Ticker for a Public Company (That has reported MRQ earnings)">
+                <button type="submit" name="submit" class="btn btn-outline-success btn-lg btn-block">Run</button>
+
         </div>
 
-        <div style="clear:both;"></div>
-    </div>
+        <table class = " " style="width:30%; float:left; margin-left: 5%;">
+            <tr>
+                <td>
+                    <div>
+                        <input class="form-control" name='netIncGrowthRate' id="netIncGrowthRate"
+                            placeholder="Net Income Growth Rate">
+                        <label for="netIncGrowthRate">Net Income Growth Rate:</label>
+                        <input type="range" min="0" max="10" value="5" step=0.01 class="slider"
+                            name="netIncGrowthRateSlider" id="netIncGrowthRateSlider"
+                            oninput="netIncGrowthRate.value=netIncGrowthRateSlider.value">
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <input class="form-control" name='x' id="x"
+                            placeholder="Net Income Growth Rate">
+                        <label for="x">Net Income Growth Rate:</label>
+                        <input type="range" min="0" max="10" value="5" step=0.01 class="slider"
+                            name="x" id="x"
+                            oninput="x.value=x.value">
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div>
+                        <input class="form-control" name='x' id="x"
+                            placeholder="Net Income Growth Rate">
+                        <label for="x">Net Income Growth Rate:</label>
+                        <input type="range" min="0" max="10" value="5" step=0.01 class="slider"
+                            name="x" id="x"
+                            oninput="x.value=x.value">
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <input class="form-control" name='x' id="x"
+                            placeholder="Net Income Growth Rate">
+                        <label for="x">Net Income Growth Rate:</label>
+                        <input type="range" min="0" max="10" value="5" step=0.01 class="slider"
+                            name="x" id="x"
+                            oninput="x.value=x.value">
+                    </div>
+                </td>                
+            </tr>
+            <tr>
+                <td rowspan="2" colspan="9">
+                    <button type="submit" name="submit" class="btn btn-outline-success btn-lg " style="width:100%">Calculate</button>
+                    
+
+                </td>
+            </tr>
+
+        </table>
 
     </div>
+    <!-- <div style="clear:both;"></div> -->
+
     <div style="float:left;width:30%;">
-        <button type="submit" name="submit" class="btn btn-outline-success btn-lg btn-block">Run</button>
     </div>
 </form>
 
 <div style="clear:both;"></div>
-
-<p id="test">test</p>
-
-
 
 <section class="container-large py-4">
     <div class="row">
@@ -160,9 +216,9 @@
     }
 
     .slider-width {
-        width:600px !important;
-        display:inline-block;
-        float:left;
+        width: 600px !important;
+        display: inline-block;
+        float: left;
     }
 </style>
 
@@ -173,6 +229,7 @@
 {% block js %}
 
 <script>
+
 
     /* Formatting function for row details - modify as you need */
     function format(d) {
@@ -185,9 +242,6 @@
 
         return '<p>' + d.desc + '</p>'
             + '<div>'
-            + ' <div  style = "display:inline-block;padding-left:69%" class="slidecontainer"> <input class = "slider-width" type="range" min="1" max="100" value="5" class="slider" id="myRange1"></div>' // range slider
-
-
             + '<table class="table table-striped table-bordered center" style = "width:39%;margin-left:30%">'
             + '<thead><tr><th>Delta 4</th><th>Delta 3</th><th>Delta 2</th><th>Delta 1</th></tr></thead>'
             + '<tr>' + '<td>' + d.delta4 + '</td>' + '<td>' + d.delta3 + '</td>' + '<td>' + d.delta2 + '</td>' + '<td>' + d.delta1 + '</td>' + '</tr>'
@@ -195,6 +249,9 @@
     }
 
     $(document).ready(function () {
+
+        // document.getElementById("netIncGrowthRate").value = document.getElementById("netIncGrowthRateSlider").value
+
 
         // OPPERATING INCOME TABLE ****************************************************************************************
         var table_oppinc = $('#oppinc').DataTable({
@@ -273,7 +330,7 @@
         //onclick function to change value of cell in table
         $('#oppinc tbody').on('click', 'td', function () {
             var table = $(this).closest('table').DataTable();
-            value =  document.getElementById('myRange1').value
+            value = document.getElementById('myRange1').value
             table.cell(this).data(value)
 
         });
