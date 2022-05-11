@@ -34,32 +34,34 @@ def dcf(request):
 
     def write_to_json_for_ajax():
         ''' based on user selection of parameter values write to ajax json data file'''
-        fp = os.path.join(cwd, 'equity_fundamentals', 'static', 'opperating_income.json') # TODO; iterate through all files in the static folder so long as same structure
-        print(fp)
-        with open(fp, 'r') as f:
-            data = json.load(f)
+        fp1 = os.path.join(cwd, 'equity_fundamentals', 'static', 'opperating_income.json') # TODO; iterate through all files in the static folder
+        fp2 = os.path.join(cwd, 'equity_fundamentals', 'static', 'adjustments.json')
+        
+        for fp in [fp1, fp2]:
+            with open(fp, 'r') as f:
+                data = json.load(f)
 
-        y = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-1]]
-        yminus1 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-2]]
-        yminus2 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-3]]
-        yminus3 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-4]]
-        yminus4 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-5]]
+            y = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-1]]
+            yminus1 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-2]]
+            yminus2 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-3]]
+            yminus3 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-4]]
+            yminus4 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-5]]
 
-        for i in range(len(data['data'])): # iterate thrugh each dictionary in the list
-            source_name= data['data'][i].get('source_name')
-            if source_name != '':    
-                data['data'][i]['y'] = "{: ,}".format(y[source_name].iloc[0])
-                data['data'][i]['y-1'] = "{: ,}".format(yminus1[source_name].iloc[0])
-                data['data'][i]['y-2'] = "{: ,}".format(yminus2[source_name].iloc[0])
-                data['data'][i]['y-3'] = "{: ,}".format(yminus3[source_name].iloc[0])
-                data['data'][i]['y-4'] = "{: ,}".format(yminus4[source_name].iloc[0])
+            for i in range(len(data['data'])): # iterate thrugh each dictionary in the list
+                source_name= data['data'][i].get('source_name')
+                if source_name != '':    
+                    data['data'][i]['y'] = "{: ,}".format(y[source_name].iloc[0])
+                    data['data'][i]['y-1'] = "{: ,}".format(yminus1[source_name].iloc[0])
+                    data['data'][i]['y-2'] = "{: ,}".format(yminus2[source_name].iloc[0])
+                    data['data'][i]['y-3'] = "{: ,}".format(yminus3[source_name].iloc[0])
+                    data['data'][i]['y-4'] = "{: ,}".format(yminus4[source_name].iloc[0])
 
-                data['data'][i]['delta1'] = "{:.2%}".format((y[source_name].iloc[0] - yminus1[source_name].iloc[0]) / yminus1[source_name].iloc[0])
-                data['data'][i]['delta2'] = "{:.2%}".format((yminus1[source_name].iloc[0] - yminus2[source_name].iloc[0]) / yminus2[source_name].iloc[0])
-                data['data'][i]['delta3'] = "{:.2%}".format((yminus2[source_name].iloc[0] - yminus3[source_name].iloc[0]) / yminus3[source_name].iloc[0])
-                data['data'][i]['delta4'] = "{:.2%}".format((yminus3[source_name].iloc[0] - yminus4[source_name].iloc[0]) / yminus4[source_name].iloc[0])
+                    data['data'][i]['delta1'] = "{:.2%}".format((y[source_name].iloc[0] - yminus1[source_name].iloc[0]) / yminus1[source_name].iloc[0])
+                    data['data'][i]['delta2'] = "{:.2%}".format((yminus1[source_name].iloc[0] - yminus2[source_name].iloc[0]) / yminus2[source_name].iloc[0])
+                    data['data'][i]['delta3'] = "{:.2%}".format((yminus2[source_name].iloc[0] - yminus3[source_name].iloc[0]) / yminus3[source_name].iloc[0])
+                    data['data'][i]['delta4'] = "{:.2%}".format((yminus3[source_name].iloc[0] - yminus4[source_name].iloc[0]) / yminus4[source_name].iloc[0])
 
-        json_dump(data, fp)
+            json_dump(data, fp)
 
     write_to_json_for_ajax()
 

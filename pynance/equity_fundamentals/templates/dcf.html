@@ -14,7 +14,8 @@
     <div style="display:block">
 
         <div class="form-group" style="width:30%; float:left">
-            <input class="form-control" name='tickers' id="tickers" placeholder="Enter a Ticker for a Public Company (That has reported MRQ earnings)">
+            <input class="form-control" name='tickers' id="tickers"
+                placeholder="Enter a Ticker for a Public Company (That has reported MRQ earnings)">
         </div>
 
         <div style="clear:both;"></div>
@@ -28,7 +29,7 @@
 
 <div style="clear:both;"></div>
 
-
+<p id="test">test</p>
 
 
 
@@ -67,9 +68,12 @@
                                 <th>{{date}}</th>
                                 {% endfor %}
 
+
                             </tr>
                         </thead>
                         <tbody>
+
+
                         </tbody>
                     </table>
                     <br><br>
@@ -128,7 +132,7 @@
     }
 
     td.metricMajor {
-        background-color: darkslategray;
+        background-color: darkslategray !important;
         /*//#56A5EC */
         color: white;
         opacity: 0.7;
@@ -149,6 +153,17 @@
         opacity: 0.4;
 
     }
+
+
+    .columnHighlight {
+        background-color: yellowgreen !important;
+    }
+
+    .slider-width {
+        width:600px !important;
+        display:inline-block;
+        float:left;
+    }
 </style>
 
 {% endblock content %}
@@ -167,10 +182,16 @@
             trs += '<tr><td>' + value + '</td><td>' + d.desc[key] + '</td></tr>';
         })
         // `d` is the original data object for the row
+
         return '<p>' + d.desc + '</p>'
-            + '<table class="table table-striped table-bordered center" style = "width:38%;margin-left:30%">'
+            + '<div>'
+            + ' <div  style = "display:inline-block;padding-left:69%" class="slidecontainer"> <input class = "slider-width" type="range" min="1" max="100" value="5" class="slider" id="myRange1"></div>' // range slider
+
+
+            + '<table class="table table-striped table-bordered center" style = "width:39%;margin-left:30%">'
             + '<thead><tr><th>Delta 4</th><th>Delta 3</th><th>Delta 2</th><th>Delta 1</th></tr></thead>'
             + '<tr>' + '<td>' + d.delta4 + '</td>' + '<td>' + d.delta3 + '</td>' + '<td>' + d.delta2 + '</td>' + '<td>' + d.delta1 + '</td>' + '</tr>'
+            + '</div>'
     }
 
     $(document).ready(function () {
@@ -245,7 +266,18 @@
                 row.child(format(row.data())).show();
                 tr.addClass('shown');
             }
+
+
         });
+
+        //onclick function to change value of cell in table
+        $('#oppinc tbody').on('click', 'td', function () {
+            var table = $(this).closest('table').DataTable();
+            value =  document.getElementById('myRange1').value
+            table.cell(this).data(value)
+
+        });
+
         //************************************************************************************************************************* 
 
 
