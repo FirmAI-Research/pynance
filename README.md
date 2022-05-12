@@ -2,6 +2,15 @@ http://34.207.78.246/treasury_rates/
 <br>
 http://ec2-34-207-78-246.compute-1.amazonaws.com:8000/treasury_rates/
 <br>
+
+
+
+jdbc:postgresql://pynance.ckdvk4iveujs.us-east-1.rds.amazonaws.com:5432/postgres
+* use postgres as database name. postgres does not automaticaly create a database with the name specified in aws setup. using the database identifier specified during setup will result in a connection failure. test connection with postgres instead.
+
+
+
+
 **pystan & fbprophet **
 windows (run conda prompt as admim)<br>
 conda install numpy cython -c conda-forge<br>
@@ -102,3 +111,4 @@ sudo apt install tree
 
 
 git reset --hard origin/master
+conda activate pynance_venvenv
