@@ -8,6 +8,7 @@ from lib.nasdaq import Fundamentals, Metrics, Tickers, Nasdaq
 from lib.calendar import Calendar
 cal = Calendar()
 from dateutil.relativedelta import relativedelta
+from postgres import Postgres
 
 
 
@@ -54,7 +55,7 @@ def build_percentiles_frame(df):
     return xdf
 
 
-def build_ranks_by_company_frame(fundamentals, sector_prcentiles):
+def build_ranks_by_company_frame(fundamentals):
     frames = []
     for c in get_numeric_cols(fundamentals):
         frames.append(fundamentals[c].rank(pct=True, ascending = True))
@@ -80,12 +81,28 @@ def populate_fundamentals_percentiles():
     unique_sectors_list = df.sector.unique().tolist()
     unique_industries_list = df.industry.unique().tolist()
 
-    # for sector in unique_sectors_list:
-    asector = df.loc[df.sector == 'Financial Services']
-    sector_prcentiles = build_percentiles_frame(asector)
-    company_ranks = build_ranks_by_company_frame(fundamentals, sector_prcentiles)
-    print(sector_prcentiles)
-    print(company_ranks)
+    # @Sectors
+    for sector_str in unique_sectors_list:
+        asector = df.loc[df.sector == sector_str]
+        sector_prcentiles = build_percentiles_frame(asector)
+        company_ranks = build_ranks_by_company_frame(asector)
+        print(sector_prcentiles)
+        print(company_ranks)
 
+        engine = Postgres().engine
+        sector_prcentiles.to_sql(f'Sector_Percentiles_{sector_str.replace(" ", "_")}', engine)
+        company_ranks.to_sql(f'Sector_Ranks_{sector_str.replace(" ", "_")}', engine)
+
+    # @Industry
+    for industry_str in unique_industries_list:
+        aindustry= df.loc[df.industry == industry_str]
+        industry_prcentiles = build_percentiles_frame(asector)
+        company_ranks = build_ranks_by_company_frame(aindustry)
+        print(industry_prcentiles)
+        print(company_ranks)
+
+        engine = Postgres().engine
+        industry_prcentiles.to_sql(f'Industry_Percentiles_{industry_str.replace(" ", "_")}', engine)
+        company_ranks.to_sql(f'Industry_Ranks_{industry_str.replace(" ", "_")}', engine)
     
 populate_fundamentals_percentiles()
