@@ -74,10 +74,10 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false" style="color:teal">
-                                Equity Fundamentals
+                                Equity
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="{% url 'dcf' %}" style="color:teal">Financials & DCF</a>
+                                <li><a class="dropdown-item" href="{% url 'financials' %}" style="color:teal">Financials</a>
                                 </li>
                                 <li><a class="dropdown-item" href="{% url 'fundamentals' %}" style="color:teal">Sector
                                         View</a></li>
@@ -170,8 +170,13 @@
 
 
 
+
     <!-- Custom script -->
     {% block js %}
+
+    <script>
+
+    </script>
 
     {% endblock js %}
 

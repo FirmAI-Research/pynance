@@ -4,81 +4,34 @@
 
 
 {% block content %}
-<h1 style="color:teal">Equity Fundamentals</h1><br>
+<h1 style="color:teal">Financial Statements</h1><br>
 
 
 
 <form action="" method="POST">
     {% csrf_token %}
 
-    <!-- <div style="display:block"> -->
-
-
-
-    <!-- </div> -->
-
-    <div class="form-group" style="width:100%; float:left">
-        <div class="form-group" style="width:30%; float:left">
+    <div class="form-group" style="width:100%;  display:inline-block; ">
+        <div class="form-group" style="width:30%; float:left;padding-right: 1%;">
             <input class="form-control" name='tickers' id="tickers"
                 placeholder="Enter a Ticker for a Public Company (That has reported MRQ earnings)">
-                <button type="submit" name="submit" class="btn btn-outline-success btn-lg btn-block">Run</button>
-
+            <button type="submit" name="submit" class="btn btn-outline-success btn-lg btn-block">Run</button>
         </div>
 
-        <table class = " " style="width:30%; float:left; margin-left: 5%;">
-            <tr>
-                <td>
-                    <div>
-                        <input class="form-control" name='netIncGrowthRate' id="netIncGrowthRate"
-                            placeholder="Net Income Growth Rate">
-                        <label for="netIncGrowthRate">Net Income Growth Rate:</label>
-                        <input type="range" min="0" max="10" value="5" step=0.01 class="slider"
-                            name="netIncGrowthRateSlider" id="netIncGrowthRateSlider"
-                            oninput="netIncGrowthRate.value=netIncGrowthRateSlider.value">
-                    </div>
-                </td>
-                <td>
-                    <div>
-                        <input class="form-control" name='x' id="x"
-                            placeholder="Net Income Growth Rate">
-                        <label for="x">Net Income Growth Rate:</label>
-                        <input type="range" min="0" max="10" value="5" step=0.01 class="slider"
-                            name="x" id="x"
-                            oninput="x.value=x.value">
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div>
-                        <input class="form-control" name='x' id="x"
-                            placeholder="Net Income Growth Rate">
-                        <label for="x">Net Income Growth Rate:</label>
-                        <input type="range" min="0" max="10" value="5" step=0.01 class="slider"
-                            name="x" id="x"
-                            oninput="x.value=x.value">
-                    </div>
-                </td>
-                <td>
-                    <div>
-                        <input class="form-control" name='x' id="x"
-                            placeholder="Net Income Growth Rate">
-                        <label for="x">Net Income Growth Rate:</label>
-                        <input type="range" min="0" max="10" value="5" step=0.01 class="slider"
-                            name="x" id="x"
-                            oninput="x.value=x.value">
-                    </div>
-                </td>                
-            </tr>
-            <tr>
-                <td rowspan="2" colspan="9">
-                    <button type="submit" name="submit" class="btn btn-outline-success btn-lg " style="width:100%">Calculate</button>
-                    
+        <div class="card" style="width: 18rem;  display:inline-block; float:right">
+            <div class="card-header">
+                Parameters
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Ticker {{ticker}}</li>
+                <li class="list-group-item">Last Update: {{as_of_date}}</li>
+            </ul>
+        </div>
 
-                </td>
-            </tr>
-
-        </table>
+        <div style=" display:inline-block; float:right; padding-top:2%; padding-right:1%;">
+            <a href='{% static "dcf.xlsx" %}' download><img class="fit-picture" src='{% static "xl_download.png" %}'
+                    width="75px" height="75px"></a>
+        </div>
 
     </div>
     <!-- <div style="clear:both;"></div> -->
@@ -96,7 +49,7 @@
                 <li class="nav-item"><a href="" data-target="#forecastFcf" data-toggle="tab"
                         class="nav-link small text-uppercase active">Financials</a></li>
                 <li class="nav-item"><a href="" data-target="#profile1" data-toggle="tab"
-                        class="nav-link small text-uppercase">FCF Growth Rate</a></li>
+                        class="nav-link small text-uppercase">FCF Growth</a></li>
                 <li class="nav-item"><a href="" data-target="#messages1" data-toggle="tab"
                         class="nav-link small text-uppercase">Discount Rate</a></li>
                 <li class="nav-item"><a href="" data-target="#messages1" data-toggle="tab"
@@ -109,7 +62,7 @@
 
                 <!-- // Div Tab 1 ******************************************************************************************************************** -->
                 <div id="forecastFcf" class="tab-pane fade active show">
-                    <h3 style="color:teal">Financial Performance</h3>
+                    <h3 style="color:teal">Opperations</h3>
                     <table id="oppinc" class="display stripe" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -120,9 +73,7 @@
                                 <th>{{date}}</th>
                                 {% endfor %}
 
-                                {% for date in future_qtr_end_dates %}
-                                <th>{{date}}</th>
-                                {% endfor %}
+
 
 
                             </tr>
@@ -143,9 +94,6 @@
                                 <th>{{date}}</th>
                                 {% endfor %}
 
-                                {% for date in future_qtr_end_dates %}
-                                <th>{{date}}</th>
-                                {% endfor %}
                             </tr>
                         </thead>
                         <tbody>
@@ -210,7 +158,6 @@
 
     }
 
-
     .columnHighlight {
         background-color: yellowgreen !important;
     }
@@ -242,10 +189,11 @@
 
         return '<p>' + d.desc + '</p>'
             + '<div>'
-            + '<table class="table table-striped table-bordered center" style = "width:39%;margin-left:30%">'
+            + '<table class="table table-striped table-bordered center" style = "float:right;width:60%;" >'
             + '<thead><tr><th>Delta 4</th><th>Delta 3</th><th>Delta 2</th><th>Delta 1</th></tr></thead>'
             + '<tr>' + '<td>' + d.delta4 + '</td>' + '<td>' + d.delta3 + '</td>' + '<td>' + d.delta2 + '</td>' + '<td>' + d.delta1 + '</td>' + '</tr>'
             + '</div>'
+
     }
 
     $(document).ready(function () {
@@ -258,11 +206,7 @@
             "paging": false,
             "searching": false,
             "info": false,
-            "columnDefs": [
-                { "width": "20%", "targets": 1 }
-            ],
-
-            "ajax": '{% static "opperating_income.json" %}',
+            "ajax": '{% static "forAjax/opperations.json" %}',
             "columns": [
                 {
                     "class": 'details-control',
@@ -276,10 +220,6 @@
                 { "data": "y-2" },
                 { "data": "y-1" },
                 { "data": "y" },
-                { "data": "y+1" },
-                { "data": "y+2" },
-                { "data": "y+3" },
-                { "data": "y+4" }
             ],
 
             "createdRow": function (row, data, index) {
@@ -295,6 +235,11 @@
                     $('td', row).eq(1).addClass('metric');
                 }
             },
+
+            "columnDefs": [{
+                "width": "20%", "targets": 1
+            }],
+            //
 
             /* calculate percent change with in row*/
             // 'rowCallback': function (row, data, index) {
@@ -323,17 +268,14 @@
                 row.child(format(row.data())).show();
                 tr.addClass('shown');
             }
-
-
         });
 
         //onclick function to change value of cell in table
-        $('#oppinc tbody').on('click', 'td', function () {
-            var table = $(this).closest('table').DataTable();
-            value = document.getElementById('myRange1').value
-            table.cell(this).data(value)
-
-        });
+        // $('#oppinc tbody').on('click', 'td', function () {
+        //     var table = $(this).closest('table').DataTable();
+        //     // value = document.getElementById('myRange1').value
+        //     table.cell(this).data('xyz')
+        // });
 
         //************************************************************************************************************************* 
 
@@ -348,7 +290,7 @@
                 { "width": "20%", "targets": 1 }
             ],
 
-            "ajax": '{% static "adjustments.json" %}',
+            "ajax": '{% static "forAjax/adjustments.json" %}',
             "columns": [
                 {
                     "class": 'details-control',
@@ -362,10 +304,7 @@
                 { "data": "y-2" },
                 { "data": "y-1" },
                 { "data": "y" },
-                { "data": "y+1" },
-                { "data": "y+2" },
-                { "data": "y+3" },
-                { "data": "y+4" }
+
             ],
 
             "createdRow": function (row, data, index) {
@@ -388,7 +327,7 @@
         // Add event listener for opening and closing details
         $('#adj tbody').on('click', 'td.details-control', function () {
             var tr = $(this).closest('tr');
-            var row = table_adj.row(tr);
+            var row = table_oppinc.row(tr);
 
             if (row.child.isShown()) {
                 // This row is already open - close it

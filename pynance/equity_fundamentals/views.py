@@ -17,64 +17,71 @@ cwd = os.getcwd()
 iodir = os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))) + '/_tmp/nasdaq_data_link/'
 
-def dcf(request):
-    # select a company from the sector view to load the dcf view
-    # dcf --> dcf view
+
+# GOOD
+
+def financials(request):
+
     ticker = str(request.POST.get("tickers"))
     if ticker in ['', 'None', None]:
         ticker = 'AMZN'
     print(ticker)
+    print(request.POST)
 
     ndq = Nasdaq()
     ndq.authenticate()
     ndq_data = nasdaqdatalink.get_table('SHARADAR/SF1',  dimension = 'MRQ', ticker = ticker) # calendardate=cal.previous_quarter_end()
-
     qtr_end_dates = cal.quarter_end_list(start_date=datetime.datetime.now() - relativedelta(years=2), end_date=cal.today())
-    future_qtr_end_dates = cal.quarter_end_list(start_date=cal.today(), end_date=datetime.datetime.now() + relativedelta(years=2))
 
     def write_to_json_for_ajax():
-        ''' based on user selection of parameter values write to ajax json data file'''
-        fp1 = os.path.join(cwd, 'equity_fundamentals', 'static', 'opperating_income.json') # TODO; iterate through all files in the static folder
-        fp2 = os.path.join(cwd, 'equity_fundamentals', 'static', 'adjustments.json')
+        ''' write values to json files used to populate jquery datatables via ajax '''
         
+        # collect paths to json file for each datatable
+        fp1 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'opperations.json')
+        fp2 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'adjustments.json')
+
+        # iterate through each file that needs to be writen to
         for fp in [fp1, fp2]:
             with open(fp, 'r') as f:
                 data = json.load(f)
 
-            y = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-1]]
-            yminus1 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-2]]
-            yminus2 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-3]]
-            yminus3 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-4]]
-            yminus4 = ndq_data.loc[ndq_data.calendardate == qtr_end_dates[-5]]
+            # build dictionary with keys == date and values == pd.series of fundamental equity data for that specific date
+            fundamentals_dict = {}
+            for date in qtr_end_dates[-5:]:
+                fundamentals_dict[date] = ndq_data.loc[ndq_data.calendardate == date]
 
-            for i in range(len(data['data'])): # iterate thrugh each dictionary in the list
+            # iterate through each dictionary item and write values to the desired node of the json file
+            ajax_labels =[  'y-4', 'y-3', 'y-2', 'y-1','y',]
+            ajax_delta_labels = ['delta5', 'delta4','delta3','delta2','delta1']
+            for i in range(len(data['data'])): 
                 source_name= data['data'][i].get('source_name')
-                if source_name != '':    
-                    data['data'][i]['y'] = "{: ,}".format(y[source_name].iloc[0])
-                    data['data'][i]['y-1'] = "{: ,}".format(yminus1[source_name].iloc[0])
-                    data['data'][i]['y-2'] = "{: ,}".format(yminus2[source_name].iloc[0])
-                    data['data'][i]['y-3'] = "{: ,}".format(yminus3[source_name].iloc[0])
-                    data['data'][i]['y-4'] = "{: ,}".format(yminus4[source_name].iloc[0])
+                for ix, label in enumerate(ajax_labels):
+                    if source_name != '':    
+                        data['data'][i][label] = "{: ,}".format(list(fundamentals_dict.values())[ix][source_name].iloc[0])
+                    else:
+                        data['data'][i][label] = "None"
 
-                    data['data'][i]['delta1'] = "{:.2%}".format((y[source_name].iloc[0] - yminus1[source_name].iloc[0]) / yminus1[source_name].iloc[0])
-                    data['data'][i]['delta2'] = "{:.2%}".format((yminus1[source_name].iloc[0] - yminus2[source_name].iloc[0]) / yminus2[source_name].iloc[0])
-                    data['data'][i]['delta3'] = "{:.2%}".format((yminus2[source_name].iloc[0] - yminus3[source_name].iloc[0]) / yminus3[source_name].iloc[0])
-                    data['data'][i]['delta4'] = "{:.2%}".format((yminus3[source_name].iloc[0] - yminus4[source_name].iloc[0]) / yminus4[source_name].iloc[0])
-
+                for ix, label in enumerate(ajax_delta_labels):
+                    if label != 'delta5':
+                        try:
+                            data['data'][i][label] = "{:.2%}".format((list(fundamentals_dict.values())[ix][source_name].iloc[0] - list(fundamentals_dict.values())[ix-1][source_name].iloc[0]) / list(fundamentals_dict.values())[ix-1][source_name].iloc[0])
+                        except KeyError as e:
+                            pass
             json_dump(data, fp)
 
     write_to_json_for_ajax()
 
     context = {
         'qtr_end_dates': qtr_end_dates[-5:],
-        'future_qtr_end_dates':future_qtr_end_dates[:4],
-
+        'ticker': ticker,
+        'as_of_date':ndq_data.lastupdated.iloc[0]
     }
-    return render(request, 'dcf.html', context)
+
+    return render(request, 'financials.html', context)
 
 
 
-
+# BAD
 
 def fundamentals(request):
     ticker = request.POST.get("ticker")
