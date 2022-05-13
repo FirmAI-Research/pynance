@@ -32,8 +32,6 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <p>This page can take a full minute to load. Queries retreive prior quarter end fundamental data
-                            for all companies in the same sector as the user input ticker.</p><br>
                         <p>Some companies may not have reported quarter end data yet. This could result in an error.
                         </p>
                     </div>
@@ -55,15 +53,9 @@
     <div style="clear:both;"></div>
 
     <div style="display:block">
-        <!-- <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled>
-            <label class="form-check-label" for="inlineCheckbox3">Disabled</label>
-        </div> -->
+
     </div>
 
-    <!-- <div style="float:left;width:20%;padding-top:1%;">
-        <button type="submit" name="submit" class="btn btn-outline-success btn-lg btn-block">Run</button>
-    </div> -->
 </form>
 
 
@@ -123,70 +115,7 @@
     </table>
 
     <br>
-    <h3 style="color:teal">Selected Ticker</h3>
 
-    <table id="ticker_view" class="display" style="width:100%">
-        <thead>
-            <tr>
-                {% for key, v in ticker_data.items %}
-                <th>{{key}}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in ticker_values %}
-            <tr>
-                {% for value in item %}
-                <td style="min-width:100px;">{{value}}</td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <br>
-    <h3 style="color:teal">Selected Ticker Percentile Ranks</h3>
-
-    <table id="company_pct_rank_view" class="display" style="width:100%">
-        <thead>
-            <tr>
-                {% for key, v in company_pct_rank_data.items %}
-                <th>{{key}}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in company_pct_rank_values %}
-            <tr>
-                {% for value in item %}
-                <td style="min-width:100px;">{{value}}</td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <br>
-    <h3 style="color:teal">All Companies in Sector</h3>
-
-    <table id="all_sector_view" class="display" style="width:100%">
-        <thead>
-            <tr>
-                {% for key, v in all_sector_data.items %}
-                <th>{{key}}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in sector_values %}
-            <tr>
-                {% for value in item %}
-                <td style="min-width:100px;">{{value}}</td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 
 
 
@@ -212,46 +141,8 @@
                 "scrollCollapse": true,
             });
 
-            var table = $('#ticker_view').DataTable({
-                // "ordering": true,
-                "info": false,
-                // "order": [[0, "desc"]],
-                "paging": false,
-                "searching": false,
-                "scrollY": "650px",
-                "sScrollX": "100%",
-                "scrollCollapse": true,
-            });
-
-
-            var table = $('#company_pct_rank_view').DataTable({
-                // "ordering": true,
-                "info": false,
-                // "order": [[0, "desc"]],
-                "paging": false,
-                "searching": false,
-                "scrollY": "650px",
-                "sScrollX": "100%",
-                "scrollCollapse": true,
-            });
-
-
-            var table = $('#all_sector_view').DataTable({
-                "ordering": true,
-                "info": false,
-                "order": [[0, "desc"]],
-                "paging": true,
-                "searching": true,
-                "scrollY": "650px",
-                "sScrollX": "100%",
-                "scrollCollapse": true,
-            });
 
         });
-
-
-
-
 
 
 
@@ -262,7 +153,7 @@
             },
 
             title: {
-                text: 'Sector ROE'
+                text: 'ROE | v. Sector & Industry'
             },
 
             legend: {
@@ -270,7 +161,7 @@
             },
 
             xAxis: {
-                categories: ['Sector'],
+                categories: ['1', '2'],
                 title: {
                     text: 'Experiment No.'
                 }
@@ -298,9 +189,9 @@
 
                 {
                     name: 'Selected Company',
-                    data: [
-                        JSON.parse("{{qs_json|escapejs}}")
-                    ],        // access context variable passed through view; use |escapejs instead of |safe
+                    data: 
+                        JSON.parse("{{data_json|escapejs}}")
+                    ,        // access context variable passed through view; use |escapejs instead of |safe
 
                     tooltip: {
                         headerFormat: '<em>Experiment No {point.key}</em><br/>'
@@ -309,12 +200,11 @@
                     name: 'Company',
                     color: Highcharts.getOptions().colors[0],
                     type: 'scatter',
-                    data: [ // x, y positions where 0 is the first category
-                        JSON.parse("{{selected_pe_json|escapejs}}")
+                    data: 
+                        JSON.parse("{{selected_company_value|escapejs}}")
 
-                        // add outlier series here??
 
-                    ],
+                    ,
                     marker: {
                         fillColor: 'red',
                         lineWidth: 1,
