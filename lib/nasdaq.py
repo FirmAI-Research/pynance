@@ -169,6 +169,7 @@ class Fundamentals(Nasdaq):
             print(f'Modified: {pd.to_datetime(self.get_modified_time(fp))}')
             print(f'Today: {cal.today()}')
             df = nasdaqdatalink.get_table(self.name, dimension="MRQ", calendardate=[self.calendardate],  paginate=True) 
+            df['shequity'] = df['assets'] - (df['liabilities'] )
             df['roe'] = df['netinc'] / (df['equity'] )
             df['roc'] = df['netinc'] / (df['equity'] + df['debt'])
             df['roa'] = df['netinc'] / df['assets']

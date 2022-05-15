@@ -8,6 +8,7 @@ import nasdaqdatalink
 from lib.nasdaq import Fundamentals, Metrics, Tickers, Nasdaq
 from lib.calendar import Calendar
 from db.postgres import Postgres
+from lib import numeric
 
 cal = Calendar()
 from dateutil.relativedelta import relativedelta
@@ -20,7 +21,6 @@ iodir = os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))) + '/_tmp/nasdaq_data_link/'
 
 
-# GOOD
 
 def financials(request):
 
@@ -83,7 +83,6 @@ def financials(request):
 
 
 
-# BAD
 
 def fundamentals(request):
     ticker = request.POST.get("ticker")
@@ -94,18 +93,27 @@ def fundamentals(request):
 
     ndq = Nasdaq()
     ndq.authenticate()
-    
+
     ticker_data = nasdaqdatalink.get_table('SHARADAR/TICKERS', ticker = ticker)
     industry = ticker_data['industry'].iloc[0]
     industry_of_selected_ticker = industry.replace(' ','_')
     sector = ticker_data['sector'].iloc[0]
+    # TODO move to nasdaq class and call method to build
+    data_of_selected_company = pd.DataFrame(nasdaqdatalink.get_table('SHARADAR/SF1',  dimension = 'MRQ', ticker = ticker).iloc[0]).transpose() # most recent row
+    data_of_selected_company = data_of_selected_company[['calendardate', 'netinc', 'equity', 'debt','assets','pe','pb','ps', 'evebit', 'ebit', 'divyield', 'marketcap', 'ev', 'ebitda', 'fcf','opinc','revenue', 'intexp']]
+    data_of_selected_company['ev/ebitda'] = data_of_selected_company['ev'] / data_of_selected_company['ebitda']
+    data_of_selected_company['p/cf'] = data_of_selected_company['marketcap'] / data_of_selected_company['fcf']
+    data_of_selected_company['opp margin'] = data_of_selected_company['opinc'] / data_of_selected_company['revenue']
+    data_of_selected_company['interest coverage'] = data_of_selected_company['ebit'] / data_of_selected_company['intexp']
+    data_of_selected_company['roe'] = data_of_selected_company['netinc'] / (data_of_selected_company['equity'] )
+    data_of_selected_company['roc'] = data_of_selected_company['netinc'] / (data_of_selected_company['equity'] + data_of_selected_company['debt'])
+    data_of_selected_company['roa'] = data_of_selected_company['netinc'] / data_of_selected_company['assets']
 
-    data_of_selected_company = nasdaqdatalink.get_table('SHARADAR/SF1',  dimension = 'MRQ', ticker = ticker).iloc[0].transpose() # most recent row
-    calendardate = data_of_selected_company['calendardate']
+    calendardate = pd.to_datetime(data_of_selected_company['calendardate'].values[0]).strftime('%Y-%m-%d')
 
     engine = Postgres().engine
 
-    metric_list = ['pe', 'pb']
+    metric_list = ['pe', 'roe']
     box_plot_values = []
     company_values = []
 
@@ -114,17 +122,18 @@ def fundamentals(request):
         # Sector
         sector_percentiles = pd.read_sql_table('Sector_Percentiles_Technology', engine)  # a list of values representing the min, max, median, 1st and 3rd quartile
         sector_percentiles_values = [float(x) for x in sector_percentiles[metric]]
-        sector_ranks = pd.read_sql_table('Sector_Ranks_Technology', engine) 
         # Industry
         industry_percentiles = pd.read_sql_table(f'Industry_Percentiles_{industry_of_selected_ticker}', engine)
         industry_percentiles_values = [float(x) for x in industry_percentiles[metric]]
-        industry_ranks = pd.read_sql_table(f'Industry_Ranks_{industry_of_selected_ticker}', engine) 
         # Values
         box_plot_values.append( [sector_percentiles_values] + [industry_percentiles_values] )
-        company_values.append(   [data_of_selected_company[metric] ]  + [data_of_selected_company[metric] ]  )
+        company_values.append(   [data_of_selected_company[metric].values[0] ]  + [data_of_selected_company[metric].values[0] ]  )
         print(box_plot_values)
         print(company_values)
 
+
+    for c in [x for x in data_of_selected_company.columns if x != 'calendardate']:
+        data_of_selected_company[c] = "{:,}".format(float(data_of_selected_company[c]))
 
     context = {
 
@@ -140,19 +149,9 @@ def fundamentals(request):
         'selected_company_values_2': company_values[1],
 
 
+        'company_fundamentals':data_of_selected_company,
+        'values':data_of_selected_company.values.tolist(),
 
-
-        # 'pctile_frame': pctile_frame,
-        # 'values': pctile_frame.values.tolist(),
-
-        # 'ticker_data': ticker_data,
-        # 'ticker_values': ticker_data.values.tolist(),
-
-        # 'all_sector_data': all_companies_in_sector,
-        # 'sector_values': all_companies_in_sector.values.tolist(),
-
-        # 'company_pct_rank_data': company_pct_rank_data,
-        # 'company_pct_rank_values': company_pct_rank_data.values.tolist(),
     }
 
 

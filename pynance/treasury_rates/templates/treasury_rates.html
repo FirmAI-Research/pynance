@@ -8,55 +8,126 @@
 <h1 style="color:teal">U.S. Treasury Rates</h1>
 
 
-<figure class="highcharts-figure">
-    <div id="point_in_time_curves" style="width:50%;height:50%; float:left"></div>
-</figure>
+<section class="container-large py-8">
+    <div class="row">
+        <div class="col-lg-12">
+            <ul id="tabs" class="nav nav-tabs">
+                <li class="nav-item"><a href="#period_change" data-target="#period_change" data-toggle="tab"
+                        class="nav-link small text-uppercase active">Periodic Change</a></li>
+                <li class="nav-item"><a href="" data-target="#daily_rates" data-toggle="tab"
+                        class="nav-link small text-uppercase">Daily Rates</a></li>
+                <li class="nav-item"><a href="" data-target="#all_tenors" data-toggle="tab"
+                        class="nav-link small text-uppercase">All Tenors</a></li>
 
-<figure class="highcharts-figure">
-    <div id="spiderweb" style="width:50%;height:50%; float:left"></div>
-</figure>
+            </ul>
+            <br>
 
+            <div id="tabsContent" class="tab-content">
 
-<!-- pass pd.DataFrame variable from view and populate highcharts table -->
-<table id="rates_table" class="display" style="width:100%">
-    <thead>
-        <tr>
-            {% for key, v in rates_table.items %}
-            <th>{{key}}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in values %}
-        <tr>
-            {% for value in item %}
-            <td>{{value}}</td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-    <!-- table footers are optional -->
-    <tfoot>
-        <tr>
-            {% for key, v in rates_table.items %}
-            <th>{{key}}</th>
-            {% endfor %}
-        </tr>
-    </tfoot>
-</table>
+                <!-- // Div Tab 1 ******************************************************************************************************************** -->
+                <div id="period_change" class="tab-pane fade active show">
 
 
+                    <figure class="highcharts-figure">
+                        <div id="point_in_time_curves" style="width:50%;height:50%; float:left"></div>
+                    </figure>
 
-<figure class="highcharts-figure">
-    <div id="change_distribution" style="width:50%;height:75%; float:left"></div>
-</figure>
+                    <figure class="highcharts-figure">
+                        <div id="spiderweb" style="width:50%;height:50%; float:left"></div>
+                    </figure>
+
+                    <h3 style="color:teal">Periodic Changes</h3>
+                    <!-- pass pd.DataFrame variable from view and populate highcharts table -->
+                    <table id="periodic_change_table" class="display" style="width:100%">
+                        <thead>
+                            <tr>
+                                {% for key, v in periodic_nominal_changes.items %}
+                                <th>{{key}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in periodic_nominal_changes_values %}
+                            <tr>
+                                {% for value in item %}
+                                <td>{{value}}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <!-- table footers are optional -->
+                    </table>
 
 
-<figure class="highcharts-figure">
-    <div id="all_tenors_over_time" style="width:50%;height:75%; float:left"></div>
-</figure>
+
+                    <!-- <figure class="highcharts-figure">
+                        <div id="change_distribution" style="width:50%;height:75%; float:left"></div>
+                    </figure> -->
 
 
+
+                </div>
+
+
+                <!-- // Div Tab 1 ******************************************************************************************************************** -->
+                <div id="daily_rates" class="tab-pane fade">
+
+                    <!-- pass pd.DataFrame variable from view and populate highcharts table -->
+                    <table id="rates_table" class="display" style="width:100%">
+                        <thead>
+                            <tr>
+                                {% for key, v in rates_table.items %}
+                                <th>{{key}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in values %}
+                            <tr>
+                                {% for value in item %}
+                                <td>{{value}}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <!-- table footers are optional -->
+                    </table>
+
+                </div>
+
+
+
+                <!-- // Div Tab 1 ******************************************************************************************************************** -->
+                <div id="all_tenors" class="tab-pane fade">
+
+                    <figure class="highcharts-figure">
+                        <div id="all_tenors_over_time" style="width:100%;height:100%; float:left"></div>
+                    </figure>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<div style="clear:both;"></div>
+
+<div style='display:block;height:30%;width:10%'></div>
+<!-- blank spacer to add new widgets below the charts populated atop of the tab -->
+
+
+
+<style type="text/css">
+    /* bootstrap hack: fix content width inside hidden tabs */
+    .tab-content>.active,
+    .pill-content>.active {
+        display: block;
+        visibility: visible;
+        position: absolute;
+        width: 100%;
+    }
+</style>
 
 
 
@@ -66,12 +137,15 @@
 
 
 
-
 {% block js %}
 
 
 <script>
-
+    // Most likely your table is hidden initially which prevents jQuery DataTables from calculating column widths. If table is in the tab, you need to adjust headers when tab becomes visible.
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $($.fn.dataTable.tables(true)).DataTable()
+            .columns.adjust();
+    });
 
     $(document).ready(function () {
 
@@ -105,8 +179,34 @@
             }
         });
 
-    });
 
+
+        var table = $('#periodic_change_table').DataTable({
+            "ordering": true,
+            "info": true,
+            "order": [[0, "asc"]],
+            "scrollY": "500px",
+            "scrollCollapse": true,
+            "paging": false,
+            "stateSave": true,
+            "searching": false,
+
+            'rowCallback': function (row, data, index) {
+                for (let i = 1; i < data.length + 1; i++) {                      // iterate through each column in the row (data) array excluding the date index
+                    if (data[i] > 0) {
+                        $(row).find(`td:eq(${i})`).css('color', 'green'); // string literal uses backtick key
+                    }
+                    else if (data[i] < 0) {
+                        $(row).find(`td:eq(${i})`).css('color', 'red');
+                    }
+                }
+            }
+
+
+        });
+
+
+    });
 
 
     // 
@@ -234,55 +334,55 @@
 
 
 
-    Highcharts.chart('change_distribution', {
-        chart: {
-            type: 'area'
-        },
-        title: {
-            text: 'Daily Change by Tenor'
-        },
-        subtitle: {
-            text: 'Rolling five days; Source: treasury.gov'
-        },
-        xAxis: {
-            tickmarkPlacement: 'on',
-            title: {
-                enabled: false
-            },
-            categories: JSON.parse("{{change_x_axis|escapejs}}")
+    // Highcharts.chart('change_distribution', {
+    //     chart: {
+    //         type: 'area'
+    //     },
+    //     title: {
+    //         text: 'Daily Change by Tenor'
+    //     },
+    //     subtitle: {
+    //         text: 'Rolling five days; Source: treasury.gov'
+    //     },
+    //     xAxis: {
+    //         tickmarkPlacement: 'on',
+    //         title: {
+    //             enabled: false
+    //         },
+    //         categories: JSON.parse("{{change_x_axis|escapejs}}")
 
-        },
-        yAxis: {
-            title: {
-                text: 'Daily Change'
-            },
-            labels: {
-                formatter: function () {
-                    return this.value;
-                }
-            }
-        },
-        tooltip: {
-            split: true,
-            valueSuffix: ' ',
-            pointFormat: '<span style="color:{series.color}">{series.name}: <b>{point.y:,.2f}</b><br/>'
+    //     },
+    //     yAxis: {
+    //         title: {
+    //             text: 'Daily Change'
+    //         },
+    //         labels: {
+    //             formatter: function () {
+    //                 return this.value;
+    //             }
+    //         }
+    //     },
+    //     tooltip: {
+    //         split: true,
+    //         valueSuffix: ' ',
+    //         pointFormat: '<span style="color:{series.color}">{series.name}: <b>{point.y:,.2f}</b><br/>'
 
-        },
-        plotOptions: {
-            area: {
-                stacking: 'percent',
-                lineColor: '#666666',
-                lineWidth: 1,
-                marker: {
-                    enabled: false,
-                    lineWidth: 0,
-                    lineColor: '#666666'
-                }
-            }
-        },
-        series: JSON.parse("{{weekly_change|escapejs}}"),        // access context variable passed through view; use |escapejs instead of |safe
+    //     },
+    //     plotOptions: {
+    //         area: {
+    //             stacking: 'percent',
+    //             lineColor: '#666666',
+    //             lineWidth: 1,
+    //             marker: {
+    //                 enabled: false,
+    //                 lineWidth: 0,
+    //                 lineColor: '#666666'
+    //             }
+    //         }
+    //     },
+    //     series: JSON.parse("{{weekly_change|escapejs}}"),        // access context variable passed through view; use |escapejs instead of |safe
 
-    });
+    // });
 
 
 
@@ -300,7 +400,7 @@
         },
 
         title: {
-            text: '5 day Absolute Change',
+            text: 'Daily Absolute Change',
             x: -80
         },
 

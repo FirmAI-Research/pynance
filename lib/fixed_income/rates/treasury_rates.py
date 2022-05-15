@@ -1,4 +1,6 @@
 from datetime import datetime
+import pandas as pd
+import numpy as np 
 from re import L, X
 import requests
 from bs4 import BeautifulSoup
@@ -7,7 +9,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import json
 from lib.calendar import Calendar
-
+from lib import numeric
 cal = Calendar()
 
 class TreasuryRates:
@@ -52,6 +54,22 @@ class TreasuryRates:
                 df[c] = pd.to_numeric(df[c])       
         self.df = df
         return self.df
+
+
+    def periodic_nominal_changes(self):
+        x = self.df.drop('date', axis=1)
+        change5day = pd.DataFrame(x.iloc[-1] - x.iloc[-5]).transpose()
+        change10day = pd.DataFrame(x.iloc[-1] - x.iloc[-10]).transpose()
+        change30day = pd.DataFrame(x.iloc[-1] - x.iloc[-30]).transpose()
+        change_df = pd.concat([change5day, change10day, change30day], axis=0)
+        for c in change_df.columns:
+            change_df[c] = change_df[c].apply(lambda x: np.round(x, 2))
+        dates = [ self.df.date.iloc[-5], self.df.date.iloc[-10], self.df.date.iloc[-30] ]
+        change_df['Change Since'] = dates
+        change_df = change_df[[change_df.columns[-1]] + list(change_df.columns)[:-1]]
+        
+        return change_df
+
 
     def point_in_time_curves(self):
         date_x = cal.closest_market_day(datetime( cal.today().year, 1, 2)).strftime('%Y-%m-%d') # Year End

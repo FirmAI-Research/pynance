@@ -24,11 +24,16 @@ def index(request):
 
     weekly_change_spider, change_x_axis_spider = tr.change_distribution_spider()
 
+    periodic_nominal_changes = tr.periodic_nominal_changes()
+
 
     context = {
         
         'rates_table':rates_table,
         'values':rates_table.values.tolist(),
+
+        'periodic_nominal_changes':periodic_nominal_changes,
+        'periodic_nominal_changes_values':periodic_nominal_changes.values.tolist(),
 
         'points_in_time_json':points_in_time_json,
 

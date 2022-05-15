@@ -3,12 +3,10 @@
 {% load static %}
 
 
-
 {% block content %}
 <h1 style="color:teal">Equity Fundamentals</h1>
 
 <h3 style="color:teal">Sector View</h3>
-
 
 
 <form action="" method="POST">
@@ -16,34 +14,15 @@
 
     <div style="display:block">
 
-        <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-            Help
-        </button>
-        <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Note</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                   
-                </div>
-            </div>
-        </div>
-
-
         <div class="form-group" style="width:20%; float:left">
             <input class="form-control" name='ticker' id="ticker" placeholder="Enter a Ticker...">
         </div>
 
     </div>
 
-    <div class="card" style="display:inline-block;width: 18rem;">
+    <div style="clear:both;"></div>
+
+    <div class="card" style="display:inline-block;width: 30rem;">
         <div class="card-header">
             Parameters
         </div>
@@ -52,20 +31,14 @@
             <li class="list-group-item">Sector: {{sector}}</li>
             <li class="list-group-item">Industry: {{industry}}</li>
             <li class="list-group-item">Calendar Date: {{calendardate}}</li>
-
-
         </ul>
     </div>
-    <div style="clear:both;"></div>
 
     <div style="display:block">
 
     </div>
 
 </form>
-
-
-
 
 
 
@@ -96,6 +69,28 @@
                     </figure>
 
 
+                    <!-- pass pd.DataFrame variable from view and populate highcharts table -->
+                    <table id="companyFundamentals" class="display" style="width:100%">
+                        <thead>
+                            <tr>
+                                {% for key, v in company_fundamentals.items %}
+                                <th>{{key}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in values %}
+                            <tr>
+                                {% for value in item %}
+                                <td>{{value}}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <!-- table footers are optional -->
+
+                    </table>
+
 
                 </div>
 
@@ -122,8 +117,6 @@
 
 
 
-
-
 <style type="text/css">
     /* bootstrap hack: fix content width inside hidden tabs */
     .tab-content>.active,
@@ -146,16 +139,7 @@
 
     $(document).ready(function () {
 
-        var table = $('#sector_view').DataTable({
-            "ordering": true,
-            "info": false,
-            "order": [[0, "asc"]],
-            "paging": false,
-            "searching": false,
-            "scrollY": "650px",
-            "sScrollX": "100%", //NOTE: these sScrollX and scrollCollapse were necesary to ensure column headers move with x axis scrollbar
-            "scrollCollapse": true,
-        });
+
 
 
     });
@@ -220,7 +204,6 @@
                 data:
                     JSON.parse("{{selected_company_values_1|escapejs}}")
 
-
                 ,
                 marker: {
                     fillColor: 'red',
@@ -248,7 +231,7 @@
         },
 
         title: {
-            text: 'PB | v. Sector & Industry'
+            text: 'ROE | v. Sector & Industry'
         },
 
         legend: {
@@ -315,6 +298,42 @@
     });
 
 
+    // Percentiles TABLE ****************************************************************************************
+
+    var table = $('#companyFundamentals').DataTable({
+        "ordering": true,
+        "info": true,
+        "order": [[0, "asc"]],
+        // "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+        "scrollY": "500px",
+        "scrollCollapse": true,
+        "paging": false,
+        "stateSave": true,
+        "searching": false,
+        "scrollY": "650px",
+        "sScrollX": "100%", // NOTE: these sScrollX and scrollCollapse were necesary to ensure column headers move with x axis scrollbar
+        "scrollCollapse": true,
+        // rowCallback only has the current row data with in context. custom function to save each row's data on callback iteration and reference it for comparison in the next row
+        'rowCallback': function (row, data, index) {
+            if (typeof previousRowData === 'undefined') {
+                previousRowData = data                                    // the previousRowData variable will not exist until the end of the first iteration of the rowCallback function
+            }
+            else {
+                for (let i = 1; i < data.length + 1; i++) {                      // iterate through each column in the row (data) array excluding the date index
+                    if (data[i] > previousRowData[i]) {
+                        $(row).find(`td:eq(${i})`).css('color', 'green'); // string literal uses backtick key
+                    }
+                    else if (data[i] < previousRowData[i]) {
+                        $(row).find(`td:eq(${i})`).css('color', 'red');
+                    }
+                }
+                previousRowData = data  // set previous rows data eq to the row that was just iterated through
+            }
+        },
+        "columnDefs": [
+            { "type": "numeric-comma", targets: 3 }
+          ]   
+    });
 
 
 </script>
