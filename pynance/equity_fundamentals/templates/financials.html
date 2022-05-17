@@ -176,7 +176,7 @@
     }
 
     td.metric {
-        text-align: left;
+        text-align: right;
     }
 
     td.forecastCol {
@@ -307,10 +307,6 @@
             "paging": false,
             "searching": false,
             "info": false,
-            "columnDefs": [
-                { "width": "20%", "targets": 1 }
-            ],
-
             "ajax": '{% static "forAjax/adjustments.json" %}',
             "columns": [
                 {
@@ -325,7 +321,6 @@
                 { "data": "y-2" },
                 { "data": "y-1" },
                 { "data": "y" },
-
             ],
 
             "createdRow": function (row, data, index) {
@@ -340,15 +335,18 @@
                 } else {
                     $('td', row).eq(1).addClass('metric');
                 }
+            },
 
-            }
+            "columnDefs": [{
+                "width": "20%", "targets": 1
+            }],
 
         });
 
         // Add event listener for opening and closing details
         $('#adj tbody').on('click', 'td.details-control', function () {
             var tr = $(this).closest('tr');
-            var row = table_oppinc.row(tr);
+            var row = table_adj.row(tr);
 
             if (row.child.isShown()) {
                 // This row is already open - close it
@@ -363,12 +361,14 @@
         });
 
 
+
+
         //*************************************************************************************************************************
         var table_forecastFcfGrowth = $('#forecastFcfGrowth').DataTable({
             "paging": false,
             "searching": false,
             "info": false,
-            "ajax": '{% static "forAjax/opperations.json" %}',
+            "ajax": '{% static "forAjax/fcfgrowth.json" %}',
             "columns": [
                 {
                     "class": 'details-control',
@@ -402,9 +402,9 @@
         });
 
         // Add event listener for opening and closing details
-        $('#oppinc tbody').on('click', 'td.details-control', function () {
+        $('#forecastFcfGrowth tbody').on('click', 'td.details-control', function () {
             var tr = $(this).closest('tr');
-            var row = table_oppinc.row(tr);
+            var row = table_forecastFcfGrowth.row(tr);
             if (row.child.isShown()) {
                 // This row is already open - close it
                 row.child.hide();
@@ -459,9 +459,9 @@
         });
 
         // Add event listener for opening and closing details
-        $('#oppinc tbody').on('click', 'td.details-control', function () {
+        $('#waccTable tbody').on('click', 'td.details-control', function () {
             var tr = $(this).closest('tr');
-            var row = table_oppinc.row(tr);
+            var row = table_wacc.row(tr);
             if (row.child.isShown()) {
                 // This row is already open - close it
                 row.child.hide();

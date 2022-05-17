@@ -30,9 +30,8 @@ def financials(request):
     print(ticker)
     print(request.POST)
 
-    ndq = Nasdaq()
-    ndq.authenticate()
-    ndq_data = nasdaqdatalink.get_table('SHARADAR/SF1',  dimension = 'MRQ', ticker = ticker) # calendardate=cal.previous_quarter_end()
+    ndq_data = Fundamentals(ticker = ticker).get()
+    print(ndq_data)
     qtr_end_dates = cal.quarter_end_list(start_date=datetime.datetime.now() - relativedelta(years=2), end_date=cal.today())
 
     def write_to_json_for_ajax():
@@ -90,6 +89,7 @@ def fundamentals(request):
     if ticker in [None, '', '[None]']:
         ticker = 'AMZN'
     print(ticker)
+    print(request.POST)
 
     ndq = Nasdaq()
     ndq.authenticate()
@@ -98,16 +98,9 @@ def fundamentals(request):
     industry = ticker_data['industry'].iloc[0]
     industry_of_selected_ticker = industry.replace(' ','_')
     sector = ticker_data['sector'].iloc[0]
-    # TODO move to nasdaq class and call method to build
-    data_of_selected_company = pd.DataFrame(nasdaqdatalink.get_table('SHARADAR/SF1',  dimension = 'MRQ', ticker = ticker).iloc[0]).transpose() # most recent row
-    data_of_selected_company = data_of_selected_company[['calendardate', 'netinc', 'equity', 'debt','assets','pe','pb','ps', 'evebit', 'ebit', 'divyield', 'marketcap', 'ev', 'ebitda', 'fcf','opinc','revenue', 'intexp']]
-    data_of_selected_company['ev/ebitda'] = data_of_selected_company['ev'] / data_of_selected_company['ebitda']
-    data_of_selected_company['p/cf'] = data_of_selected_company['marketcap'] / data_of_selected_company['fcf']
-    data_of_selected_company['opp margin'] = data_of_selected_company['opinc'] / data_of_selected_company['revenue']
-    data_of_selected_company['interest coverage'] = data_of_selected_company['ebit'] / data_of_selected_company['intexp']
-    data_of_selected_company['roe'] = data_of_selected_company['netinc'] / (data_of_selected_company['equity'] )
-    data_of_selected_company['roc'] = data_of_selected_company['netinc'] / (data_of_selected_company['equity'] + data_of_selected_company['debt'])
-    data_of_selected_company['roa'] = data_of_selected_company['netinc'] / data_of_selected_company['assets']
+
+    data_of_selected_company = pd.DataFrame(Fundamentals(ticker = ticker).get().iloc[0]).transpose()
+    data_of_selected_company = data_of_selected_company[['calendardate', 'netinc', 'equity', 'debt','assets','pe','pb','ps', 'evebit', 'ebit', 'divyield', 'marketcap', 'ev', 'ebitda', 'fcf','opinc','revenue', 'intexp', 'roe']]
 
     calendardate = pd.to_datetime(data_of_selected_company['calendardate'].values[0]).strftime('%Y-%m-%d')
 

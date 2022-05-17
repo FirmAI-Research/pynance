@@ -123,6 +123,7 @@ class Metrics(Nasdaq):
         df_tickers = df_tickers[self.ticker_cols]
         return df.merge(df_tickers, how='left', on='ticker')
 
+
     def metrics_by_sector(self, sector=None):
         metrics = self.get()
         self.sector_df = self.merge_meta_data(metrics)
@@ -144,40 +145,62 @@ class Fundamentals(Nasdaq):
     Notes:
     nasdaqdatalink.get_table('SHARADAR/SF1', calendardate={'gte':'2013-12-31'}, ticker='AAPL')
     qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
+
+    # if not os.path.exists(fp) or (pd.to_datetime(pd.to_datetime(self.get_modified_time(fp)).strftime('%Y-%m-%d')) < pd.to_datetime(pd.to_datetime(utc.localize(cal.today())).strftime('%Y-%m-%d'))): 
+    #     print('File does not exist or has not been updated today. Downloading full query results...')
+    # else:
+    #     print('data has been updated today - reading from file')
+    #     df = pd.read_excel(fp)    
     """
     name = 'SHARADAR/SF1'
 
-    fundamental_cols = ['ticker','calendardate', 'assets','capex', 'debt', 'depamor', 'ebit', 'ebitda', 'eps','equity', 'ev',  'fcf', 'gp', 'intangibles', 'intexp', 'inventory',  'liabilities', 'ncf', 'netinc', 'opex', 'opinc', 'pb', 'pe',
-    'price', 'ps', 'receivables', 'revenue', 'rnd', 'tangibles', 'taxassets', 'taxexp', 'taxliabilities', 'workingcapital',
-    'roe','roc','roa']
+    # fundamental_cols = ['ticker','calendardate', 'assets','capex', 'debt', 'depamor', 'ebit', 'ebitda', 'eps','equity', 'ev',  'fcf', 'gp', 'intangibles', 'intexp', 'inventory',  'liabilities', 'ncf', 'netinc', 'opex', 'opinc', 'pb', 'pe',
+    # 'price', 'ps', 'receivables', 'revenue', 'rnd', 'tangibles', 'taxassets', 'taxexp', 'taxliabilities', 'workingcapital',
+    # 'roe','roc','roa']
 
-    ticker_cols = ['name','exchange','category','cusips', 'sector', 'industry', 'scalemarketcap', 'scalerevenue', 'currency']
+    # ticker_cols = ['name','exchange','category','cusips', 'sector', 'industry', 'scalemarketcap', 'scalerevenue', 'currency']
 
     def __init__(self, ticker = None, calendardate = None):        
         super().__init__()
         self.authenticate()
 
         self.calendardate = calendardate
+        self.ticker = ticker
 
 
     def get(self): # NOTE using prior quarter fundamentals for complete dataset
         fp = f'{self.iodir}/all_fundamentals.xlsx'
 
-        if not os.path.exists(fp) or (pd.to_datetime(pd.to_datetime(self.get_modified_time(fp)).strftime('%Y-%m-%d')) < pd.to_datetime(pd.to_datetime(utc.localize(cal.today())).strftime('%Y-%m-%d'))): 
-            print('File does not exist or has not been updated today. Downloading full query results...')
+        # print(f'Modified: {pd.to_datetime(self.get_modified_time(fp))}')
+        print(f'Today: {cal.today()}')
 
-            print(f'Modified: {pd.to_datetime(self.get_modified_time(fp))}')
-            print(f'Today: {cal.today()}')
+        if self.ticker:
+            df = pd.DataFrame(nasdaqdatalink.get_table(self.name, dimension="MRQ", ticker = self.ticker)) 
+        else:    
             df = nasdaqdatalink.get_table(self.name, dimension="MRQ", calendardate=[self.calendardate],  paginate=True) 
-            df['shequity'] = df['assets'] - (df['liabilities'] )
-            df['roe'] = df['netinc'] / (df['equity'] )
-            df['roc'] = df['netinc'] / (df['equity'] + df['debt'])
-            df['roa'] = df['netinc'] / df['assets']
-            df.to_excel(fp)
-        else:
-            print('data has been updated today - reading from file')
-            df = pd.read_excel(fp)
 
+        df['shequity'] = df['assets'] - (df['liabilities'] )
+        df['roe'] = df['netinc'] / (df['equity'] )
+        df['roc'] = df['netinc'] / (df['equity'] + df['debt'])
+        df['roa'] = df['netinc'] / df['assets']
+        df['ev/ebitda'] = df['ev'] / df['ebitda']
+        df['p/cf'] = df['marketcap'] / df['fcf']
+        df['opp margin'] = df['opinc'] / df['revenue']
+        df['interest coverage'] = df['ebit'] / df['intexp']
+        df['adj netinc'] = df['netinc'] + df['rnd'] #  + lease expense
+        df['adj oppinc'] = df['ebit'] + df['rnd'] #  + lease expense
+        df['net capex'] = df['capex'] + df['depamor']
+        df['non cash workingcapital'] = df['assetsc'] - df['cashneq'] - df['liabilitiesc']
+        df['change nc workingcapital'] = df['non cash workingcapital'] - df['non cash workingcapital'].shift(-1, axis=0)
+        df['tax rate'] = round(df['taxexp'] / (df['ebit'] + df['intexp']) *100, 2)
+        df['fcf firm'] = df['opinc'] * (1-df['tax rate'])-(df['capex'] - df['depamor']) - df['change nc workingcapital']
+        df['dps'] = (df['ncfdiv'] + df['prefdivis']) / df['sharesbas'] # dividends per share
+        df['payoutratio'] = df['dps'] / df['eps']
+        df['fcf equity'] = df['netinc'] - (df['capex'] - df['depamor']) - df['change nc workingcapital'] - df['ncfdebt']
+        # df['netprofit']  = df['netinc'] - df['sgna'] 
+
+        df['nopat']  = df['netinc'] - df['sgna'] - df['intexp'] - df['taxexp']
+        # df.to_excel(fp)
 
         return df
 
@@ -191,24 +214,21 @@ class Fundamentals(Nasdaq):
     def fundamentals_by_sector(self, sector=None):
         fdmtl = self.get()
         self.sector_df = self.merge_meta_data(fdmtl)
-        # self.sector_df.to_excel(f'{self.iodir}/nasdaq_fundamentals.xlsx')
         self.sector_df =  self.sector_df.loc[self.sector_df.sector == sector]
         return self.sector_df
 
 
     def view_sector(self):
         self.df = self.sector_df[self.ticker_cols + self.fundamental_cols]
-        # self.df.to_excel(f'{self.iodir}/nasdaq_fundamentals_sector_view.xlsx')
         return self.df
 
 
-    # Misc.
-    def curl(self):
-        # request_url = f"https://data.nasdaq.com/api/v3/datatables/{self.name}.json?api_key={self.api_key}&dimension=MRQ&ticker=AMZN&filingdate.gte=2022-01-01"
-        # res = requests.get(request_url)
-        # df  = pd.DataFrame.from_dict(res.json())
-        # print(df)
-        pass
+    # def curl(self):
+    #     # request_url = f"https://data.nasdaq.com/api/v3/datatables/{self.name}.json?api_key={self.api_key}&dimension=MRQ&ticker=AMZN&filingdate.gte=2022-01-01"
+    #     # res = requests.get(request_url)
+    #     # df  = pd.DataFrame.from_dict(res.json())
+    #     # print(df)
+    #     pass
 
 
     # def get_export(self, dimension='MRQ'):

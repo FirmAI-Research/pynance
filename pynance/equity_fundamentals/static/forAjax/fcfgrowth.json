@@ -1,0 +1,20 @@
+{
+    "data": [
+        {
+            "metric": "Research and Development",
+            "source_name": "rnd",
+            "y-4": " 5,262,000,000",
+            "y-3": " 5,717,000,000",
+            "y-2": " 5,772,000,000",
+            "y-1": " 6,306,000,000",
+            "y": " 6,387,000,000",
+            "fmt": "minor",
+            "desc": "Research and Development",
+            "delta1": "1.28%",
+            "delta2": "9.25%",
+            "delta3": "0.96%",
+            "delta4": "8.65%",
+            "deta3": "3.67%"
+        }
+    ]
+}
