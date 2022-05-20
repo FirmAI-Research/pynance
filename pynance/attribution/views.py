@@ -40,6 +40,7 @@ def famma_french(request):
         'tickers': ", ".join(tickers),
         'weights': ", ".join([str(weight) for weight in weights]),
         # 'model_name': model_name,
+        'statements': ff.statements,
         'date_start': ff.START_DATE,
     }
 

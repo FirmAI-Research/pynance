@@ -5,28 +5,76 @@
 {% block content %}
 <h1 style="color:teal">Famma French</h1>
 
-<h3 style="color:teal">Portfolio</h3>
-
 <form action="" method="POST">
     {% csrf_token %}
 
     <div style="display:block">
 
-        <div class="form-group" style="width:50%; float:left">
+        <div class="form-group" style="width:15%; float:left">
             <label for="tickers">Portfolio Tickers</label>
             <input class="form-control" name='tickers' id="tickers" placeholder="IVE, VWO">
         </div>
 
-        <div class="form-group" style="width:50%;float:left">
+        <div class="form-group" style="width:15%;float:left;padding-left: 2%;">
             <label for="weights">Portfolio Weights</label>
             <input class="form-control" name='weights' id="weights" placeholder="0.5, 0.5">
         </div>
 
+        <div class="form-group" style="width:70%; float:left;padding-left: 2%;">
+            <label for="formFile" class="form-label">Not Configured - Portfolio Returns File Import</label>
+            <input class="form-control" type="file" id="formFile">
+
+        </div>
+        <div style="clear:both;"></div>
+        <div style="margin:0 auto;width:65%;padding-top:1%;padding-bottom: 1%;">
+            <button type="submit" name="submit" class="btn btn-outline-success btn-lg btn-block">Run</button>
+        </div>
+
+    </div>
+
+
+    <div style="display:block">
+
+
         <div style="clear:both;"></div>
 
+        <div class="form-group" style="width:15%;float:left">
+            <div class="card">
+                <div class="card-header">
+                    Parameters
+                </div>
+                <ul class="list-group list-group-flush">
+                    <!-- <li class="list-group-item">{{model_name}}</li> -->
+                    <li class="list-group-item">Portfolio Assets: {{tickers}}</li>
+                    <li class="list-group-item">Portfolio Weights: {{weights}}</li>
+                    <li class="list-group-item">Returns Start Date: {{date_start}}</li>
+                    <li class="list-group-item"> ... </li>
+                    <li class="list-group-item"> ... </li>
 
-        <!-- datepicker -->
-        <!-- <div class="form-group" style="width:50%;float:left;display:flex">
+                </ul>
+            </div>
+        </div>
+
+        <div class="form-group" style="width:85%;;padding-left: 2%;float:left;">
+            <div class="card">
+                <div class="card-header">
+                    Results
+                </div>
+                <ul class="list-group list-group-flush">
+                        {% for item in statements %}
+                        <li class="list-group-item"> {{item}}</li>
+                        {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+
+
+    </div>
+
+
+    <!-- datepicker -->
+    <!-- <div class="form-group" style="width:50%;float:left;display:flex">
 
             <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
@@ -55,7 +103,6 @@
             </script>
         </div> -->
 
-    </div>
 
 
     <div style="clear:both;"></div>
@@ -77,35 +124,11 @@
         <div class="form-check form-check-inline">
             <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled>
             <label class="form-check-label" for="inlineCheckbox3">Disabled</label>
-        </div>
-    </div> -->
+         </div> -->
 
-    <div style="float:left;width:20%;padding-top:1%;">
-        <button type="submit" name="submit" class="btn btn-outline-success btn-lg btn-block">Run</button>
-    </div>
+
+
 </form>
-
-<div style="clear:both;"></div>
-
-
-<div style="padding-top:2%;">
-
-    <div class="card" style="width: 18rem; float:left">
-        <div class="card-header">
-            Parameters
-        </div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">{{model_name}}</li>
-            <li class="list-group-item">Portfolio Assets: {{tickers}}</li>
-            <li class="list-group-item">Portfolio Weights: {{weights}}</li>
-            <li class="list-group-item">Returns Start Date: {{date_start}}</li>
-
-        </ul>
-    </div>
-
-</div>
-
-<div style="clear:both;"></div>
 
 
 <section class="container-large py-4">
@@ -118,6 +141,10 @@
                         class="nav-link small text-uppercase">VaR</a></li>
                 <li class="nav-item"><a href="" data-target="#pca" data-toggle="tab"
                         class="nav-link small text-uppercase">PCA</a></li>
+                <li class="nav-item"><a href="" data-target="#sa" data-toggle="tab"
+                        class="nav-link small text-uppercase disabled">Sensitivity Analysis</a></li>
+                <li class="nav-item"><a href="" data-target="#beta" data-toggle="tab"
+                        class="nav-link small text-uppercase disabled">Beta</a></li>
             </ul>
             <br>
             <div id="tabsContent" class="tab-content">
