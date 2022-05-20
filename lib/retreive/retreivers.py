@@ -25,3 +25,13 @@ for ticker in seriesid:
     frames.append(stockdata)
 df = pd.concat(frames, axis=1)
 df.to_csv('/Users/michaelsands/data/fred_prices.csv')
+
+
+
+def historical_prices_cbind(arr= [],  date_start = '', date_end =None):
+    if date_end==None:
+        date_end = pd.datetime.now().date()
+        print(date_end)
+    df = yf.download(arr,date_start)['Adj Close']
+    print(df.head())
+    return df

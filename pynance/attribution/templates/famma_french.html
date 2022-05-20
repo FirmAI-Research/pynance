@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block content %}
-<h1 style="color:teal">Famma French</h1>
+<h1 style="color:teal">Performance Attribution</h1>
 
 <form action="" method="POST">
     {% csrf_token %}
@@ -50,7 +50,7 @@
                     <li class="list-group-item">Returns Start Date: {{date_start}}</li>
                     <li class="list-group-item"> ... </li>
                     <li class="list-group-item"> ... </li>
-
+                    <li class="list-group-item"> ... </li>
                 </ul>
             </div>
         </div>
@@ -61,9 +61,9 @@
                     Results
                 </div>
                 <ul class="list-group list-group-flush">
-                        {% for item in statements %}
-                        <li class="list-group-item"> {{item}}</li>
-                        {% endfor %}
+                    {% for item in statements %}
+                    <li class="list-group-item"> {{item}}</li>
+                    {% endfor %}
                 </ul>
             </div>
         </div>
@@ -139,8 +139,6 @@
                         class="nav-link small text-uppercase active">Famma French</a></li>
                 <li class="nav-item"><a href="" data-target="#var" data-toggle="tab"
                         class="nav-link small text-uppercase">VaR</a></li>
-                <li class="nav-item"><a href="" data-target="#pca" data-toggle="tab"
-                        class="nav-link small text-uppercase">PCA</a></li>
                 <li class="nav-item"><a href="" data-target="#sa" data-toggle="tab"
                         class="nav-link small text-uppercase disabled">Sensitivity Analysis</a></li>
                 <li class="nav-item"><a href="" data-target="#beta" data-toggle="tab"
@@ -169,10 +167,6 @@
                 </div>
                 <div id="var" class="tab-pane fade">
                     <h3 style="color:teal">var</h3>
-
-                </div>
-                <div id="pca" class="tab-pane fade">
-                    <h3 style="color:teal">pca</h3>
 
                 </div>
             </div>
