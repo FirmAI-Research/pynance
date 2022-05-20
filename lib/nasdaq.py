@@ -192,14 +192,15 @@ class Fundamentals(Nasdaq):
         df['net capex'] = df['capex'] + df['depamor']
         df['non cash workingcapital'] = df['assetsc'] - df['cashneq'] - df['liabilitiesc']
         df['change nc workingcapital'] = df['non cash workingcapital'] - df['non cash workingcapital'].shift(-1, axis=0)
+        df['total expense'] = df['revenue'] - df['netinc']
         df['tax rate'] = round(df['taxexp'] / (df['ebit'] + df['intexp']) *100, 2)
+        df['opp margin'] = round(df['opp margin'] *100, 2)        
         df['fcf firm'] = df['opinc'] * (1-df['tax rate'])-(df['capex'] - df['depamor']) - df['change nc workingcapital']
         df['dps'] = (df['ncfdiv'] + df['prefdivis']) / df['sharesbas'] # dividends per share
         df['payoutratio'] = df['dps'] / df['eps']
         df['fcf equity'] = df['netinc'] - (df['capex'] - df['depamor']) - df['change nc workingcapital'] - df['ncfdebt']
         # df['netprofit']  = df['netinc'] - df['sgna'] 
-
-        df['nopat']  = df['netinc'] - df['sgna'] - df['intexp'] - df['taxexp']
+        df['nopat']  = (df['opinc']) * (1-df['tax rate']/100)
         # df.to_excel(fp)
 
         return df

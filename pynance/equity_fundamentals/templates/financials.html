@@ -58,6 +58,8 @@
                         class="nav-link small text-uppercase">Terminal Value</a></li>
                 <li class="nav-item"><a href="" data-target="#messages1" data-toggle="tab"
                         class="nav-link small text-uppercase">Relative Value</a></li>
+                <li class="nav-item"><a href="" data-target="#ratios" data-toggle="tab"
+                        class="nav-link small text-uppercase">Ratios</a></li>
             </ul>
             <br>
             <div id="tabsContent" class="tab-content">
@@ -118,7 +120,8 @@
                 <!-- // Div Tab 3 ******************************************************************************************************************** -->
                 <div id="wacc" class="tab-pane fade">
                     <h3 style="color:teal">WACC</h3>
-                    <p>capm; calculate and show linreg scatterplot x=market; y=equity; show best fit formula y=mx+b where m = beta (slope) and b is alpha</p>
+                    <p>capm; calculate and show linreg scatterplot x=market; y=equity; show best fit formula y=mx+b
+                        where m = beta (slope) and b is alpha</p>
                     <table id="waccTable" class="display stripe" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -146,8 +149,16 @@
                                 class="float-right badge badge-pill badge-dark">23</span> Message 3</a> <a href=""
                             class="list-group-item d-inline-block text-muted">Message n..</a></div>
                 </div>
+
+                <!-- // Div Tab 4 ******************************************************************************************************************** -->
+                <div id="ratios" class="tab-pane fade">
+
+                    <h3 style="color:teal">Ratios</h3>
+
+                </div>
             </div>
         </div>
+    </div>
     </div>
 </section>
 
@@ -246,10 +257,6 @@
             "createdRow": function (row, data, index) {
                 if (data['fmt'] == 'major') {
                     $('td', row).addClass('metricMajor'); // .eq(1).
-                    // colour forecasts
-                    for (i = 7; i < 12; i++) {
-                        $('td', row).eq(i).addClass('forecastCol'); // .eq(1).
-                    }
                 } else if (data['fmt'] == 'minor') {
                     $('td', row).eq(1).addClass('metricMinor');
                 } else {
@@ -260,18 +267,8 @@
             "columnDefs": [{
                 "width": "20%", "targets": 1
             }],
-            //
 
-            /* calculate percent change with in row*/
-            // 'rowCallback': function (row, data, index) {
-            //     let arr = Array();
-            //     for (var key in data) {
-            //         if (key != 'metric' && key != 'source_name' && key != 'desc' && key != 'fmt') {   /* exclude non numerics */
-            //             arr.push(data[key].replace(',',''));
-            //         }
-            //     }
-            //     console.log(arr);
-            // }
+
         });
 
         // Add event listener for opening and closing details
