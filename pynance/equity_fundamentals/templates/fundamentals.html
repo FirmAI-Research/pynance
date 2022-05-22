@@ -68,6 +68,13 @@
                         <div id="boxplot2" style="width:50%;height:35%; float:left"></div>
                     </figure>
 
+                    <figure class="highcharts-figure">
+                        <div id="linechart1" style="width:50%;height:35%; float:left"></div>
+                    </figure>
+
+                    <figure class="highcharts-figure">
+                        <div id="linechart2" style="width:50%;height:35%; float:left"></div>
+                    </figure>
 
                     <!-- pass pd.DataFrame variable from view and populate highcharts table -->
                     <table id="companyFundamentals" class="display" style="width:100%">
@@ -298,6 +305,123 @@
     });
 
 
+    // Line Chart 1 ******************************************************************************************************************** 
+
+    Highcharts.chart('linechart1', {
+
+
+        title: {
+            text: 'Industry Percentiles'
+        },
+
+        subtitle: {
+            text: 'Source: treasury.gov'
+        },
+
+        yAxis: {
+            title: {
+                text: 'P/E Ratio'
+            },
+        },
+
+        xAxis: {
+            accessibility: {
+                rangeDescription: 'Range: 3 Months'
+            },
+            // categories: ['1 Month', '2 Month', '3 Month', '6 Month', '1 Year', '2 Year', '3 Year', '5 Year', '7 Year', '10 Year', '20 Year', '30 Year']
+        },
+
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+            }
+        },
+
+        series: JSON.parse("{{line_chart_values_1|escapejs}}"),        // access context variable passed through view; use |escapejs instead of |safe
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
+    });
+
+    // Line Chart 1 ******************************************************************************************************************** 
+
+    Highcharts.chart('linechart2', {
+
+
+        title: {
+            text: 'Industry Percentiles'
+        },
+
+        subtitle: {
+            text: 'Source: treasury.gov'
+        },
+
+        yAxis: {
+            title: {
+                text: 'P/E Ratio'
+            },
+        },
+
+        xAxis: {
+            accessibility: {
+                rangeDescription: 'Range: 3 Months'
+            },
+            // categories: ['1 Month', '2 Month', '3 Month', '6 Month', '1 Year', '2 Year', '3 Year', '5 Year', '7 Year', '10 Year', '20 Year', '30 Year']
+        },
+
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+            }
+        },
+
+        series: JSON.parse("{{line_chart_values_2|escapejs}}"),        // access context variable passed through view; use |escapejs instead of |safe
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
+    });
+
+
     // Percentiles TABLE ****************************************************************************************
 
     var table = $('#companyFundamentals').DataTable({
@@ -332,7 +456,7 @@
         },
         "columnDefs": [
             { "type": "numeric-comma", targets: 3 }
-          ]   
+        ]
     });
 
 

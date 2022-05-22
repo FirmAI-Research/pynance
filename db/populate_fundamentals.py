@@ -10,6 +10,14 @@ cal = Calendar()
 from dateutil.relativedelta import relativedelta
 from postgres import Postgres
 
+import warnings
+warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
+warnings.simplefilter(action='ignore', category=RuntimeWarning)
+
+'''
+
+populates tables for each sector and industry of peer percentiles and ranks for the MOST RECENT QUARTER
+'''
 
 
 def get_numeric_cols(df):
@@ -39,7 +47,6 @@ def calculate_box_plot(df, column=None):
 
 def build_percentiles_frame(df):
     numeric_cols = get_numeric_cols(df)
-    print(numeric_cols)
     datalists = []
     for c in df.columns:
         if c in numeric_cols:
@@ -74,7 +81,7 @@ def populate_fundamentals_percentiles():
     tickers = tickers.loc[ ( pd.to_datetime(tickers.lastpricedate) >= pd.to_datetime(cal.previous_quarter_end()) ) & (tickers.currency == 'USD')]
     tickers = tickers[['ticker','name','cusips','sector','industry', 'sicsector', 'sicindustry',  'famaindustry']]
 
-    fun = Fundamentals(calendardate=cal.prior_quarter_end())
+    fun = Fundamentals(calendardate=cal.previous_quarter_end())
     fundamentals = fun.get()
     df = tickers.merge(fundamentals, how='left', on='ticker')
 
@@ -82,27 +89,50 @@ def populate_fundamentals_percentiles():
     unique_industries_list = df.industry.unique().tolist()
 
     # @Sectors
+    sector_frames = []
     for sector_str in unique_sectors_list:
-        asector = df.loc[df.sector == sector_str]
-        sector_prcentiles = build_percentiles_frame(asector)
-        company_ranks = build_ranks_by_company_frame(asector)
-        print(sector_prcentiles)
-        print(company_ranks)
+        try:
+            asector = df.loc[df.sector == sector_str]
+            sector_prcentiles = build_percentiles_frame(asector)
+            sector_prcentiles['sector'] = sector_str
+            sector_prcentiles['date'] = cal.previous_quarter_end()
+            sector_prcentiles['uid'] = sector_str +  ' ' + str(cal.previous_quarter_end())
 
-        engine = Postgres().engine
-        sector_prcentiles.to_sql(f'Sector_Percentiles_{sector_str.replace(" ", "_")}', engine)
-        company_ranks.to_sql(f'Sector_Ranks_{sector_str.replace(" ", "_")}', engine)
+            company_ranks = build_ranks_by_company_frame(asector)
+            company_ranks['sector'] = sector_str
+            company_ranks['date'] = cal.previous_quarter_end()
+            company_ranks['uid'] = sector_str +  ' ' + str(cal.previous_quarter_end())
+
+            engine = Postgres().engine
+            sector_prcentiles.to_sql(f'Percentiles_Sector', engine, if_exists='append')
+            company_ranks.to_sql(f'Ranks_Sector', engine,  if_exists='append')
+            print('[SUCCESS] Sector Percentiles and Ranks for {}'.format(sector_str))
+        except Exception as e:
+            print(f'*****[ERROR]***** {e}')            
 
     # @Industry
     for industry_str in unique_industries_list:
-        aindustry= df.loc[df.industry == industry_str]
-        industry_prcentiles = build_percentiles_frame(asector)
-        company_ranks = build_ranks_by_company_frame(aindustry)
-        print(industry_prcentiles)
-        print(company_ranks)
+        try:
+                
+            aindustry= df.loc[df.industry == industry_str]
+            industry_prcentiles = build_percentiles_frame(asector)
+            industry_prcentiles['industry'] = industry_str
+            industry_prcentiles['date'] = cal.previous_quarter_end()
+            industry_prcentiles['uid'] = industry_str +  ' ' + str(cal.previous_quarter_end())
 
-        engine = Postgres().engine
-        industry_prcentiles.to_sql(f'Industry_Percentiles_{industry_str.replace(" ", "_")}', engine)
-        company_ranks.to_sql(f'Industry_Ranks_{industry_str.replace(" ", "_")}', engine)
-    
-populate_fundamentals_percentiles()
+            company_ranks = build_ranks_by_company_frame(aindustry)
+            company_ranks['industry'] = industry_str
+            company_ranks['date'] = cal.previous_quarter_end()
+            company_ranks['uid'] = industry_str +  ' ' + str(cal.previous_quarter_end())
+
+            engine = Postgres().engine
+            industry_prcentiles.to_sql(f'Percentiles_Industry', engine,  if_exists='append')
+            company_ranks.to_sql(f'Ranks_Industry', engine,  if_exists='append')
+            print('[SUCCESS] Industry Percentiles and Ranks for {}'.format(industry_str))
+
+        except Exception as e:
+            print(f'*****[ERROR]***** {e}')            
+
+
+if __name__ == '__main__':
+    populate_fundamentals_percentiles()

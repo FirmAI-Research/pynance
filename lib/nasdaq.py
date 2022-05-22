@@ -48,6 +48,13 @@ class Nasdaq:
         self.api_key = os.environ["NASDAQ_DATA_LINK_API_KEY"]
 
 
+    def to_highcharts(self, data, single_series=False):
+        if single_series:   # for a series when passed only a single column of a dataframe
+            return json.dumps([{'data': value, 'name': key} for key, value in data.items()])  # FIXME
+        else:        # for a dataframe object with multiple columns
+            return json.dumps([{'data': list(value.values), 'name': key} for key, value in data.items()])
+
+
     def calculate_box_plot(self, df, column=None):
         ''' calculat quartiles of an individual array '''
         arr = pd.to_numeric(df[column]).dropna().values
@@ -160,7 +167,7 @@ class Fundamentals(Nasdaq):
 
     # ticker_cols = ['name','exchange','category','cusips', 'sector', 'industry', 'scalemarketcap', 'scalerevenue', 'currency']
 
-    def __init__(self, ticker = None, calendardate = None):        
+    def __init__(self, ticker = None, calendardate = None, ):        
         super().__init__()
         self.authenticate()
 
@@ -204,6 +211,10 @@ class Fundamentals(Nasdaq):
         # df.to_excel(fp)
 
         return df
+
+
+    def get_calendardate_history(self):
+        return nasdaqdatalink.get_table(self.name, dimension="MRQ", paginate=True).calendardate.unique() 
 
 
     def merge_meta_data(self, df):

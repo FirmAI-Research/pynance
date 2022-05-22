@@ -5,6 +5,7 @@ import sys
 import os
 import json
 import nasdaqdatalink
+from pyparsing import line
 from lib.nasdaq import Fundamentals, Metrics, Tickers, Nasdaq
 from lib.calendar import Calendar
 from db.postgres import Postgres
@@ -94,6 +95,7 @@ def fundamentals(request):
     ndq = Nasdaq()
     ndq.authenticate()
 
+    # boxplots
     ticker_data = nasdaqdatalink.get_table('SHARADAR/TICKERS', ticker = ticker)
     industry = ticker_data['industry'].iloc[0]
     industry_of_selected_ticker = industry.replace(' ','_')
@@ -106,17 +108,19 @@ def fundamentals(request):
 
     engine = Postgres().engine
 
+    # boxplots
     metric_list = ['pe', 'roe']
     box_plot_values = []
     company_values = []
 
     for metric in metric_list:
-
         # Sector
-        sector_percentiles = pd.read_sql_table('Sector_Percentiles_Technology', engine)  # a list of values representing the min, max, median, 1st and 3rd quartile
+        sector_percentiles = pd.read_sql_table('Percentiles_Sector', engine)  # a list of values representing the min, max, median, 1st and 3rd quartile
+        sector_percentiles = sector_percentiles.loc[sector_percentiles.sector == sector]
         sector_percentiles_values = [float(x) for x in sector_percentiles[metric]]
         # Industry
-        industry_percentiles = pd.read_sql_table(f'Industry_Percentiles_{industry_of_selected_ticker}', engine)
+        industry_percentiles = pd.read_sql_table(f'Percentiles_Industry', engine)
+        industry_percentiles = industry_percentiles.loc[industry_percentiles.industry == industry]
         industry_percentiles_values = [float(x) for x in industry_percentiles[metric]]
         # Values
         box_plot_values.append( [sector_percentiles_values] + [industry_percentiles_values] )
@@ -124,9 +128,46 @@ def fundamentals(request):
         print(box_plot_values)
         print(company_values)
 
-
     for c in [x for x in data_of_selected_company.columns if x != 'calendardate']:
         data_of_selected_company[c] = "{:,}".format(float(data_of_selected_company[c]))
+
+
+    # industry percetiles v. metric over time
+    metric_list = ['pe', 'roe']
+
+    data = Fundamentals(ticker = ticker).get()
+
+    line_chart_json_list = []
+
+    for metric in metric_list:
+        metric_data = data[['calendardate', metric]]
+        metric_data['calendardate'] = [x.strftime('%Y%m%d') for x in metric_data['calendardate']]
+        
+        frames = []
+        for k,v in {'Quartile_Values_Over_Time_Median_by_Industry':'Median','Quartile_Values_Over_Time_Upper_by_Industry':'Upper','Quartile_Values_Over_Time_Lower_by_Industry':"Lower"}.items():
+            x = pd.read_sql_table(k, engine) 
+            x = x[['date',metric]].loc[x.industry == industry].rename(columns={'date':'calendardate', metric:v})
+            x['calendardate'] = [ pd.to_datetime(x).strftime('%Y%m%d') for x in x['calendardate']]
+            frames.append(x)
+        cbind = metric_data
+
+        for df in frames:
+            cbind = cbind.merge(df, on ='calendardate')
+
+        for c in cbind:
+            cbind[c] = cbind[c].apply(lambda x: float(x))
+
+        cbind.drop('calendardate', axis=1, inplace=True)
+        linechart_data = ndq.to_highcharts(cbind)
+        linechart_data = json.loads(linechart_data)
+        for i in range(len(linechart_data)):
+            if i > 0:
+                linechart_data[i]["color"] =  '#D3D3D3'
+        line_chart_json_list.append(json.dumps(linechart_data))
+    print(line_chart_json_list[1])
+
+
+
 
     context = {
 
@@ -134,12 +175,14 @@ def fundamentals(request):
         'sector': sector,
         'industry':industry,
         'calendardate':calendardate,
-
+        # boxplots
         'box_plot_values_1': box_plot_values[0],
         'selected_company_values_1': company_values[0],
-
         'box_plot_values_2': box_plot_values[1],
         'selected_company_values_2': company_values[1],
+        # industry percentiles over time
+        'line_chart_values_1':line_chart_json_list[0],
+        'line_chart_values_2':line_chart_json_list[1],
 
 
         'company_fundamentals':data_of_selected_company,
