@@ -14,25 +14,55 @@
 
     <div style="display:block">
 
-        <div class="form-group" style="width:20%; float:left">
-            <input class="form-control" name='ticker' id="ticker" placeholder="Enter a Ticker...">
+        <div class="form-group" style="width:75%; float:left">
+            <input class="form-control" name='ticker' id="ticker" placeholder="Enter a Ticker..."
+                style="width:25%; float:left">
+
+            <select class="form-select" aria-label="Default select example" , name='metric' id="metric"
+                style="width:25%; float:left">
+                {% for column in colnames %}
+                    <option value="{{column}}">{{column}}</option>
+
+                {% endfor %}
+
+            </select>
+
+
+
+            <div style="padding-top:3%;padding-bottom: 1%;width:50%;">
+                <button type="submit" name="submit" class="btn btn-outline-success btn-lg btn-block">Run</button>
+            </div>
+
+            <div class="card" style="display:inline-block;width:18rem;">
+                <div class="card-header">
+                    Parameters
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Ticker: {{selected_ticker}}</li>
+                    <li class="list-group-item">Sector: {{sector}}</li>
+                    <li class="list-group-item">Industry: {{industry}}</li>
+                    <li class="list-group-item">Calendar Date: {{calendardate}}</li>
+                </ul>
+            </div>
+
+
+
         </div>
+
+
+
+
 
     </div>
 
     <div style="clear:both;"></div>
 
-    <div class="card" style="display:inline-block;width: 30rem;">
-        <div class="card-header">
-            Parameters
-        </div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">Ticker: {{selected_ticker}}</li>
-            <li class="list-group-item">Sector: {{sector}}</li>
-            <li class="list-group-item">Industry: {{industry}}</li>
-            <li class="list-group-item">Calendar Date: {{calendardate}}</li>
-        </ul>
-    </div>
+
+
+
+
+
+
 
     <div style="display:block">
 
@@ -64,40 +94,36 @@
                         <div id="boxplot1" style="width:50%;height:35%; float:left"></div>
                     </figure>
 
-                    <figure class="highcharts-figure">
-                        <div id="boxplot2" style="width:50%;height:35%; float:left"></div>
-                    </figure>
 
                     <figure class="highcharts-figure">
                         <div id="linechart1" style="width:50%;height:35%; float:left"></div>
                     </figure>
 
-                    <figure class="highcharts-figure">
-                        <div id="linechart2" style="width:50%;height:35%; float:left"></div>
-                    </figure>
 
                     <!-- pass pd.DataFrame variable from view and populate highcharts table -->
-                    <table id="companyFundamentals" class="display" style="width:100%">
-                        <thead>
-                            <tr>
-                                {% for key, v in company_fundamentals.items %}
-                                <th>{{key}}</th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in values %}
-                            <tr>
-                                {% for value in item %}
-                                <td>{{value}}</td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                        <!-- table footers are optional -->
+                    <div style="display:inline-block;width:100%">
 
-                    </table>
+                        <table id="companyFundamentals" class="display" style="float:left;">
+                            <thead>
+                                <tr>
+                                    {% for key, v in company_fundamentals.items %}
+                                    <th>{{key}}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in values %}
+                                <tr>
+                                    {% for value in item %}
+                                    <td>{{value}}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <!-- table footers are optional -->
+                        </table>
 
+                    </div>
 
                 </div>
 
@@ -228,83 +254,6 @@
 
 
 
-
-    // Chart 2 ******************************************************************************************************************** 
-
-    Highcharts.chart('boxplot2', {
-
-        chart: {
-            type: 'boxplot'
-        },
-
-        title: {
-            text: 'ROE | v. Sector & Industry'
-        },
-
-        legend: {
-            enabled: false
-        },
-
-        xAxis: {
-            categories: ['1', '2'],
-            title: {
-                text: 'Experiment No.'
-            }
-        },
-
-        yAxis: {
-            title: {
-                text: 'ROE'
-            },
-            plotLines: [{
-                // value: 250,
-                color: 'red',
-                width: 1,
-                label: {
-                    // text: 'Theoretical mean: 932',
-                    align: 'center',
-                    style: {
-                        color: 'gray'
-                    }
-                }
-            }],
-        },
-
-        series: [
-
-            {
-                name: 'Selected Company',
-                data:
-                    JSON.parse("{{box_plot_values_2|escapejs}}")
-                ,        // access context variable passed through view; use |escapejs instead of |safe
-
-                tooltip: {
-                    headerFormat: '<em>Experiment No {point.key}</em><br/>'
-                }
-            }, {
-                name: 'Company',
-                color: Highcharts.getOptions().colors[0],
-                type: 'scatter',
-                data:
-                    JSON.parse("{{selected_company_values_2|escapejs}}")
-
-
-                ,
-                marker: {
-                    fillColor: 'red',
-                    lineWidth: 1,
-                    lineColor: Highcharts.getOptions().colors[0]
-                },
-                tooltip: {
-                    pointFormat: 'Observation: {point.y}'
-                }
-            },
-
-        ]
-
-    });
-
-
     // Line Chart 1 ******************************************************************************************************************** 
 
     Highcharts.chart('linechart1', {
@@ -363,65 +312,6 @@
         }
     });
 
-    // Line Chart 1 ******************************************************************************************************************** 
-
-    Highcharts.chart('linechart2', {
-
-
-        title: {
-            text: 'Industry Percentiles'
-        },
-
-        subtitle: {
-            text: 'Source: treasury.gov'
-        },
-
-        yAxis: {
-            title: {
-                text: 'P/E Ratio'
-            },
-        },
-
-        xAxis: {
-            accessibility: {
-                rangeDescription: 'Range: 3 Months'
-            },
-            // categories: ['1 Month', '2 Month', '3 Month', '6 Month', '1 Year', '2 Year', '3 Year', '5 Year', '7 Year', '10 Year', '20 Year', '30 Year']
-        },
-
-        legend: {
-            layout: 'vertical',
-            align: 'right',
-            verticalAlign: 'middle'
-        },
-
-        plotOptions: {
-            series: {
-                label: {
-                    connectorAllowed: false
-                },
-            }
-        },
-
-        series: JSON.parse("{{line_chart_values_2|escapejs}}"),        // access context variable passed through view; use |escapejs instead of |safe
-
-        responsive: {
-            rules: [{
-                condition: {
-                    maxWidth: 500
-                },
-                chartOptions: {
-                    legend: {
-                        layout: 'horizontal',
-                        align: 'center',
-                        verticalAlign: 'bottom'
-                    }
-                }
-            }]
-        }
-    });
-
-
     // Percentiles TABLE ****************************************************************************************
 
     var table = $('#companyFundamentals').DataTable({
@@ -437,23 +327,6 @@
         "scrollY": "650px",
         "sScrollX": "100%", // NOTE: these sScrollX and scrollCollapse were necesary to ensure column headers move with x axis scrollbar
         "scrollCollapse": true,
-        // rowCallback only has the current row data with in context. custom function to save each row's data on callback iteration and reference it for comparison in the next row
-        'rowCallback': function (row, data, index) {
-            if (typeof previousRowData === 'undefined') {
-                previousRowData = data                                    // the previousRowData variable will not exist until the end of the first iteration of the rowCallback function
-            }
-            else {
-                for (let i = 1; i < data.length + 1; i++) {                      // iterate through each column in the row (data) array excluding the date index
-                    if (data[i] > previousRowData[i]) {
-                        $(row).find(`td:eq(${i})`).css('color', 'green'); // string literal uses backtick key
-                    }
-                    else if (data[i] < previousRowData[i]) {
-                        $(row).find(`td:eq(${i})`).css('color', 'red');
-                    }
-                }
-                previousRowData = data  // set previous rows data eq to the row that was just iterated through
-            }
-        },
         "columnDefs": [
             { "type": "numeric-comma", targets: 3 }
         ]
