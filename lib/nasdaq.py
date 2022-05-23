@@ -220,6 +220,14 @@ class Fundamentals(Nasdaq):
         df['fcf equity'] = df['netinc'] + (df['capex'] - df['depamor']) - df['change nc workingcapital'] - df['ncfdebt']
 
         self.df = df
+
+        import yfinance as yf
+        import numpy as np
+        df = yf.download([self.ticker, 'SPY'], '2018-01-01')['Adj Close']
+        price_change = df.pct_change()
+        df = price_change.drop(price_change.index[0])
+        self.wacc(df)
+
         return self.df
 
 
@@ -235,12 +243,12 @@ class Fundamentals(Nasdaq):
         discount future cash flows back to present value using wacc
             capm defines cost of equity as beta
         '''
-        e = self.df['equity']
-        re = self.beta(df_for_beta)
-        rd = self.df['intexp'] / self.df['debt']
-        d = self.df['debt']
+        self.df['bv_equity'] = self.df['equity']
+        self.df['cost_of_equity']  = self.beta(df_for_beta)
+        self.df['cost_of_debt'] = self.df['intexp'] / self.df['debt']
+        self.df['bv_debt']  = self.df['debt']
         tc = self.df['tax rate']
-        return pd.DataFrame((e / (e+d))*re + (d / (e+d))*rd * (1-tc)).iloc[0].values[0]
+        self.df['wacc'] = (self.df['bv_equity'] / (self.df['bv_equity']+self.df['bv_debt']))*self.df['cost_of_equity'] + (self.df['bv_debt'] / (self.df['bv_equity']+self.df['bv_debt']))*self.df['cost_of_debt'] * (1-self.df['tax rate'])
 
 
 

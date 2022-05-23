@@ -1,3 +1,4 @@
+from lib2to3.pgen2.pgen import DFAState
 from django.shortcuts import render
 from matplotlib.font_manager import json_dump
 import pandas as pd
@@ -45,9 +46,10 @@ def financials(request):
         fp1 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'opperations.json')
         fp2 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'adjustments.json')
         fp3 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'fcfgrowth.json')
+        fp4 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'wacc.json')
 
         # iterate through each file that needs to be writen to
-        for fp in [fp1, fp2, fp3]:
+        for fp in [fp1, fp2, fp3, fp4]:
             with open(fp, 'r') as f:
                 data = json.load(f)
 
@@ -78,34 +80,33 @@ def financials(request):
     write_to_json_for_ajax()
 
     # CAPM
-
+    import statsmodels.api as sm
     import yfinance as yf
     import numpy as np
-
     df = yf.download([ticker, 'SPY'], '2018-01-01')['Adj Close']
     price_change = df.pct_change()
     df = price_change.drop(price_change.index[0])
-    x = np.array(df[ticker]).reshape((-1,1))
-    y = np.array(df['SPY'])
-    beta = fun.beta(df)
-
-    import statsmodels.api as sm
     y = df[ticker]
     X = df['SPY']
     model = sm.OLS(y.astype(float), X.astype(float)).fit()
     model_summary = model.summary()
-    # produce scatter plot of SPY vs. ticker (pg.84)
+    # produce scatter plot of SPY vs. ticker (pg.54)
     print(model_summary)
+    json_scatter = []
+    # json_scatter =json.dumps([{'data': list(value.values), 'name': key} ])
+    list_values = []
+    for key, value in df.iterrows():
+        list_values.append([value[0], value[1]])
+    json_scatter = json.dumps(list_values)
 
-
-    print(f'beta is {beta}')
-    print(fun.wacc(df))
+    print(json_scatter)
 
 
     context = {
         'qtr_end_dates': qtr_end_dates[-5:],
         'ticker': ticker,
-        'as_of_date':ndq_data.lastupdated.iloc[0]
+        'as_of_date':ndq_data.lastupdated.iloc[0],
+        'beta_values': json_scatter,
     }
 
     return render(request, 'financials.html', context)
