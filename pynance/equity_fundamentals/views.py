@@ -6,10 +6,12 @@ import os
 import json
 import nasdaqdatalink
 from pyparsing import line
+from lib.learn.regression.regression import Regression
 from lib.nasdaq import Fundamentals, Metrics, Tickers, Nasdaq
 from lib.calendar import Calendar
 from db.postgres import Postgres
 from lib import numeric
+import yfinance
 
 cal = Calendar()
 from dateutil.relativedelta import relativedelta
@@ -31,7 +33,8 @@ def financials(request):
     print(ticker)
     print(request.POST)
 
-    ndq_data = Fundamentals(ticker = ticker).get()
+    fun = Fundamentals(ticker = ticker)
+    ndq_data = fun.get()
     print(ndq_data)
     qtr_end_dates = cal.quarter_end_list(start_date=datetime.datetime.now() - relativedelta(years=2), end_date=cal.today())
 
@@ -41,9 +44,10 @@ def financials(request):
         # collect paths to json file for each datatable
         fp1 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'opperations.json')
         fp2 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'adjustments.json')
+        fp3 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'fcfgrowth.json')
 
         # iterate through each file that needs to be writen to
-        for fp in [fp1, fp2]:
+        for fp in [fp1, fp2, fp3]:
             with open(fp, 'r') as f:
                 data = json.load(f)
 
@@ -72,6 +76,31 @@ def financials(request):
             json_dump(data, fp)
 
     write_to_json_for_ajax()
+
+    # CAPM
+
+    import yfinance as yf
+    import numpy as np
+
+    df = yf.download([ticker, 'SPY'], '2018-01-01')['Adj Close']
+    price_change = df.pct_change()
+    df = price_change.drop(price_change.index[0])
+    x = np.array(df[ticker]).reshape((-1,1))
+    y = np.array(df['SPY'])
+    beta = fun.beta(df)
+
+    import statsmodels.api as sm
+    y = df[ticker]
+    X = df['SPY']
+    model = sm.OLS(y.astype(float), X.astype(float)).fit()
+    model_summary = model.summary()
+    # produce scatter plot of SPY vs. ticker (pg.84)
+    print(model_summary)
+
+
+    print(f'beta is {beta}')
+    print(fun.wacc(df))
+
 
     context = {
         'qtr_end_dates': qtr_end_dates[-5:],
@@ -105,7 +134,7 @@ def fundamentals(request):
     ticker_data = nasdaqdatalink.get_table('SHARADAR/TICKERS', ticker = ticker)
     industry = ticker_data['industry'].iloc[0]
     sector = ticker_data['sector'].iloc[0]
-    view_fields = ['netinc', 'roe','roa','roc', 'pe','pb','ps', 'divyield', 'ev/ebitda', 'p/cf', 'opp margin', 'bvps', 'price','interest coverage', 'payoutratio',selected_metric]
+    view_fields = [selected_metric, 'netinc', 'roe','roa','roc', 'pe','pb','ps', 'divyield', 'ev/ebitda', 'p/cf', 'opp margin', 'bvps', 'price','interest coverage', 'payoutratio',]
     
     data_of_selected_company = pd.DataFrame(Fundamentals(ticker = ticker).get().iloc[0]).transpose()
     data_of_selected_company.rename(columns = {'calendardate': 'date'}, inplace=True)

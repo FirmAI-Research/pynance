@@ -202,15 +202,47 @@ class Fundamentals(Nasdaq):
         df['total expense'] = df['revenue'] - df['netinc']
         df['tax rate'] = round(df['taxexp'] / (df['ebit'] + df['intexp']) *100, 2)
         df['opp margin'] = round(df['opp margin'] *100, 2)        
-        df['fcf firm'] = df['opinc'] * (1-df['tax rate'])-(df['capex'] - df['depamor']) - df['change nc workingcapital']
         df['dps'] = (df['ncfdiv'] + df['prefdivis']) / df['sharesbas'] # dividends per share
         df['payoutratio'] = df['dps'] / df['eps']
-        df['fcf equity'] = df['netinc'] - (df['capex'] - df['depamor']) - df['change nc workingcapital'] - df['ncfdebt']
         # df['netprofit']  = df['netinc'] - df['sgna'] 
         df['nopat']  = (df['opinc']) * (1-df['tax rate']/100)
-        # df.to_excel(fp)
+        df['equity reinvested'] = (df['capex'] - df['depamor']) + df['change nc workingcapital'] - df['ncfdebt']
+        df['retained earnings'] = df['netinc'] + df['ncfdiv'] 
+        df['retention ratio'] = df['retained earnings'] / df['netinc']
 
-        return df
+        df['expected netinc growth'] = df['retention ratio'] * df['roe']
+        df['expected roe growth'] = df['ebit'] * (1 - df['tax rate']/100) / (df['equity'] + df['debt'])
+        df['marginal return on equity'] = (df['netinc'] - df['netinc'].shift(-1, axis=0)) / df['equity']
+        df['reinvestment rate'] = (df['capex'] - df['net capex'] + df['depamor']) / df['ebit'] * (1-df['tax rate']/100)
+        df['expected ebit growth'] = df['reinvestment rate'] * df['roc']
+
+        df['fcf firm'] = df['opinc'] * (1-df['tax rate']) + (df['capex'] - df['depamor']) - df['change nc workingcapital']
+        df['fcf equity'] = df['netinc'] + (df['capex'] - df['depamor']) - df['change nc workingcapital'] - df['ncfdebt']
+
+        self.df = df
+        return self.df
+
+
+    # Cost of Equity
+    def beta(self, df):
+        covariance = df[['SPY', self.ticker]].cov().iloc[0,1]
+        benchmark_variance = df.SPY.var()
+        return covariance / benchmark_variance # beta
+
+
+    def wacc(self, df_for_beta):
+        '''
+        discount future cash flows back to present value using wacc
+            capm defines cost of equity as beta
+        '''
+        e = self.df['equity']
+        re = self.beta(df_for_beta)
+        rd = self.df['intexp'] / self.df['debt']
+        d = self.df['debt']
+        tc = self.df['tax rate']
+        return pd.DataFrame((e / (e+d))*re + (d / (e+d))*rd * (1-tc)).iloc[0].values[0]
+
+
 
 
     def get_calendardate_history(self):
@@ -233,6 +265,8 @@ class Fundamentals(Nasdaq):
     def view_sector(self):
         self.df = self.sector_df[self.ticker_cols + self.fundamental_cols]
         return self.df
+
+
 
 
     # def curl(self):

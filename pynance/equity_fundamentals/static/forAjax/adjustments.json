@@ -190,17 +190,17 @@
     {
       "metric": "Free Cash Flow to Firm",
       "source_name": "fcf firm",
-      "y-4": "-153,162,850,000.0",
-      "y-3": "-52,020,239,999.99999",
-      "y-2": "-79,139,600,000.0",
-      "y-1": " 17,910,000,000.0",
-      "y": "-69,202,100,000.0",
+      "y-4": "-190,552,850,000.0",
+      "y-3": "-94,072,240,000.0",
+      "y-2": "-126,537,600,000.0",
+      "y-1": "-34,634,000,000.0",
+      "y": "-114,642,100,000.0",
       "fmt": "major",
       "desc": "Opperating Income * (1-tax rate)  - (capex  - depreciation) - change in non cash working capital",
-      "delta1": "-486.39%",
-      "delta2": "-122.63%",
-      "delta3": "52.13%",
-      "delta4": "-66.04%"
+      "delta1": "231.01%",
+      "delta2": "-72.63%",
+      "delta3": "34.51%",
+      "delta4": "-50.63%"
     },
     {
       "metric": "Dividends Paid",
@@ -237,17 +237,17 @@
     {
       "metric": "Free Cash Flow to Equity",
       "source_name": "fcf equity",
-      "y-4": " 22,334,000,000.0",
-      "y-3": " 2,655,000,000.0",
-      "y-2": " 27,714,000,000.0",
-      "y-1": " 45,194,000,000.0",
-      "y": " 39,339,000,000.0",
+      "y-4": "-15,056,000,000.0",
+      "y-3": "-39,397,000,000.0",
+      "y-2": "-19,684,000,000.0",
+      "y-1": "-7,350,000,000.0",
+      "y": "-6,101,000,000.0",
       "fmt": "major",
       "desc": "df['netinc'] - (df['capex'] - df['depamor']) - df['change nc workingcapital'] - df['ncfdebt']",
-      "delta1": "-12.96%",
-      "delta2": "63.07%",
-      "delta3": "943.84%",
-      "delta4": "-88.11%"
+      "delta1": "-16.99%",
+      "delta2": "-62.66%",
+      "delta3": "-50.04%",
+      "delta4": "161.67%"
     },
     {
       "metric": "Cash to Shareholder Equity over FCFE",

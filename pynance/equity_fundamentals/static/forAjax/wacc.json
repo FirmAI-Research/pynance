@@ -1,0 +1,21 @@
+{
+    "data": [
+        {
+          "metric": "Revenue",
+          "source_name": "revenue",
+          "y-4": " 108,518,000,000",
+          "y-3": " 113,080,000,000",
+          "y-2": " 110,812,000,000",
+          "y-1": " 137,412,000,000",
+          "y": " 116,444,000,000",
+          "fmt": "major",
+          "desc": "The money generated from normal business operations. It is the top line (or gross income) figure from which costs are subtracted to determine net income.",
+          "delta1": "-15.26%",
+          "delta2": "24.00%",
+          "delta3": "-2.01%",
+          "delta4": "4.20%",
+          "deta3": "-2.01%"
+        }
+    
+    ]
+}
