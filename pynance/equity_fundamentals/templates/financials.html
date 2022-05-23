@@ -49,13 +49,11 @@
                 <li class="nav-item"><a href="" data-target="#opperations" data-toggle="tab"
                         class="nav-link small text-uppercase active">Financials</a></li>
                 <li class="nav-item"><a href="" data-target="#fcfgrowth" data-toggle="tab"
-                        class="nav-link small text-uppercase">Forecast</a></li>
+                        class="nav-link small text-uppercase">Growth</a></li>
                 <li class="nav-item"><a href="" data-target="#wacc" data-toggle="tab"
                         class="nav-link small text-uppercase">Discount</a></li>
                 <li class="nav-item"><a href="" data-target="#messages1" data-toggle="tab"
                         class="nav-link small text-uppercase">Terminal Value</a></li>
-                <li class="nav-item"><a href="" data-target="#messages1" data-toggle="tab"
-                        class="nav-link small text-uppercase">Relative Value</a></li>
                 <li class="nav-item"><a href="" data-target="#ratios" data-toggle="tab"
                         class="nav-link small text-uppercase">Ratios</a></li>
             </ul>
@@ -64,7 +62,7 @@
 
                 <!-- // Div Tab 1 ******************************************************************************************************************** -->
                 <div id="opperations" class="tab-pane fade active show">
-                    <h3 style="color:teal">Opperations</h3>
+                    <h3 style="color:teal">Profitability</h3>
                     <table id="oppinc" class="display stripe" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -78,8 +76,28 @@
                         <tbody>
                         </tbody>
                     </table>
-                    <br><br>
-                    <h3 style="color:teal">Adjustments</h3>
+                    <br>
+                    <h3 style="color:teal">Expenses</h3>
+                    <table id="exp" class="display stripe" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>metric</th>
+                                {% for date in qtr_end_dates %}
+                                <th>{{date}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                   
+                </div>
+
+
+                <!-- // Div Tab 2 ******************************************************************************************************************** -->
+                <div id="fcfgrowth" class="tab-pane fade">
+                    <h3 style="color:teal">Measure Growth</h3>
                     <table id="adj" class="display stripe" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -93,12 +111,7 @@
                         <tbody>
                         </tbody>
                     </table>
-                </div>
-
-
-                <!-- // Div Tab 2 ******************************************************************************************************************** -->
-                <div id="fcfgrowth" class="tab-pane fade">
-                    <h3 style="color:teal">Forecast FCF Growth</h3>
+                    <br>                    
                     <table id="forecastFcfGrowth" class="display stripe" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -367,6 +380,66 @@
             }
         });
 
+
+
+
+        // expenses TABLE ****************************************************************************************
+        var table_exp = $('#exp').DataTable({
+            "paging": false,
+            "searching": false,
+            "info": false,
+            "ajax": '{% static "forAjax/expenses.json" %}',
+            "columns": [
+                {
+                    "class": 'details-control',
+                    "orderable": false,
+                    "data": null,
+                    "defaultContent": ''
+                },
+                { "data": "metric" },
+                { "data": "y-4" },
+                { "data": "y-3" },
+                { "data": "y-2" },
+                { "data": "y-1" },
+                { "data": "y" },
+            ],
+
+            "createdRow": function (row, data, index) {
+                if (data['fmt'] == 'major') {
+                    $('td', row).addClass('metricMajor'); // .eq(1).
+                    // colour forecasts
+                    for (i = 7; i < 12; i++) {
+                        $('td', row).eq(i).addClass('forecastCol'); // .eq(1).
+                    }
+                } else if (data['fmt'] == 'minor') {
+                    $('td', row).eq(1).addClass('metricMinor');
+                } else {
+                    $('td', row).eq(1).addClass('metric');
+                }
+            },
+
+            "columnDefs": [{
+                "width": "20%", "targets": 1
+            }],
+
+        });
+
+        // Add event listener for opening and closing details
+        $('#exp tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = table_exp.row(tr);
+
+            if (row.child.isShown()) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown');
+            }
+            else {
+                // Open this row
+                row.child(format(row.data())).show();
+                tr.addClass('shown');
+            }
+        });
 
 
 

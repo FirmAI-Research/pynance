@@ -43,13 +43,17 @@ def financials(request):
         ''' write values to json files used to populate jquery datatables via ajax '''
         
         # collect paths to json file for each datatable
+        #TODO: os.listdir to read files in directory
         fp1 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'opperations.json')
         fp2 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'adjustments.json')
         fp3 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'fcfgrowth.json')
         fp4 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'wacc.json')
+        fp4 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'wacc.json')
+        fp5 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'expenses.json')
+
 
         # iterate through each file that needs to be writen to
-        for fp in [fp1, fp2, fp3, fp4]:
+        for fp in [fp1, fp2, fp3, fp4, fp5]:
             with open(fp, 'r') as f:
                 data = json.load(f)
 
@@ -93,7 +97,6 @@ def financials(request):
     # produce scatter plot of SPY vs. ticker (pg.54)
     print(model_summary)
     json_scatter = []
-    # json_scatter =json.dumps([{'data': list(value.values), 'name': key} ])
     list_values = []
     for key, value in df.iterrows():
         list_values.append([value[0], value[1]])
