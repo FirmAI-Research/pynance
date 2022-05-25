@@ -52,8 +52,8 @@
                         class="nav-link small text-uppercase">Growth</a></li>
                 <li class="nav-item"><a href="" data-target="#wacc" data-toggle="tab"
                         class="nav-link small text-uppercase">Discount</a></li>
-                <li class="nav-item"><a href="" data-target="#messages1" data-toggle="tab"
-                        class="nav-link small text-uppercase">Terminal Value</a></li>
+                <li class="nav-item"><a href="" data-target="#forecast" data-toggle="tab"
+                        class="nav-link small text-uppercase">Forecast</a></li>
                 <li class="nav-item"><a href="" data-target="#ratios" data-toggle="tab"
                         class="nav-link small text-uppercase">Ratios</a></li>
             </ul>
@@ -163,14 +163,21 @@
 
 
                 <!-- // Div Tab 3 ******************************************************************************************************************** -->
-                <div id="messages1" class="tab-pane fade">
-                    <div class="list-group"><a href="" class="list-group-item d-inline-block"><span
-                                class="float-right badge badge-pill badge-dark">44</span> Message 1</a> <a href=""
-                            class="list-group-item d-inline-block"><span
-                                class="float-right badge badge-pill badge-dark">8</span> Message 2</a> <a href=""
-                            class="list-group-item d-inline-block"><span
-                                class="float-right badge badge-pill badge-dark">23</span> Message 3</a> <a href=""
-                            class="list-group-item d-inline-block text-muted">Message n..</a></div>
+                <div id="forecast" class="tab-pane fade">
+                    <h3 style="color:teal">Forecast & Terminal Value</h3>
+                    <table id="forecastTable" class="display stripe" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>metric</th>
+                                {% for date in qtr_end_dates %}
+                                <th>{{date}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
                 </div>
 
                 <!-- // Div Tab 4 ******************************************************************************************************************** -->
@@ -485,6 +492,62 @@
         $('#forecastFcfGrowth tbody').on('click', 'td.details-control', function () {
             var tr = $(this).closest('tr');
             var row = table_forecastFcfGrowth.row(tr);
+            if (row.child.isShown()) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown');
+            }
+            else {
+                // Open this row
+                row.child(format(row.data())).show();
+                tr.addClass('shown');
+            }
+        });
+
+        //************************************************************************************************************************* 
+
+        //*************************************************************************************************************************
+        var table_forecast = $('#forecastTable').DataTable({
+            "paging": false,
+            "searching": false,
+            "info": false,
+            "ajax": '{% static "forAjax/forecast.json" %}',
+            "columns": [
+                {
+                    "class": 'details-control',
+                    "orderable": false,
+                    "data": null,
+                    "defaultContent": ''
+                },
+                { "data": "metric" },
+                { "data": "y-4" },
+                { "data": "y-3" },
+                { "data": "y-2" },
+                { "data": "y-1" },
+                { "data": "y" },
+            ],
+
+            "createdRow": function (row, data, index) {
+                if (data['fmt'] == 'major') {
+                    $('td', row).addClass('metricMajor'); // .eq(1).
+                    for (i = 7; i < 12; i++) {
+                        $('td', row).eq(i).addClass('forecastCol'); // .eq(1).
+                    }
+                } else if (data['fmt'] == 'minor') {
+                    $('td', row).eq(1).addClass('metricMinor');
+                } else {
+                    $('td', row).eq(1).addClass('metric');
+                }
+            },
+            "columnDefs": [{
+                "width": "20%", "targets": 1
+            }],
+        });
+
+        // Add event listener for opening and closing details
+        $('#forecastTable tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = table_forecast.row(tr);
             if (row.child.isShown()) {
                 // This row is already open - close it
                 row.child.hide();

@@ -69,7 +69,7 @@ def financials(request):
                 source_name= data['data'][i].get('source_name')
                 for ix, label in enumerate(ajax_labels):
                     if source_name != '':    
-                        data['data'][i][label] = "{: ,}".format(list(fundamentals_dict.values())[ix][source_name].iloc[0])
+                        data['data'][i][label] = "{:,.4f}".format(list(fundamentals_dict.values())[ix][source_name].iloc[0])
                     else:
                         data['data'][i][label] = "None"
 
@@ -101,8 +101,6 @@ def financials(request):
     for key, value in df.iterrows():
         list_values.append([value[0], value[1]])
     json_scatter = json.dumps(list_values)
-
-    print(json_scatter)
 
 
     context = {

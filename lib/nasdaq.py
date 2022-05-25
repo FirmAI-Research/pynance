@@ -19,8 +19,9 @@ import datetime
 from datetime import timezone
 from lib.calendar import Calendar
 cal = Calendar()
+import yfinance as yf
+import numpy as np
 import pytz
-
 utc=pytz.UTC
 
 class Nasdaq:
@@ -200,30 +201,34 @@ class Fundamentals(Nasdaq):
         df['non cash workingcapital'] = df['assetsc'] - df['cashneq'] - df['liabilitiesc']
         df['change nc workingcapital'] = df['non cash workingcapital'] - df['non cash workingcapital'].shift(-1, axis=0)
         df['total expense'] = df['revenue'] - df['netinc']
-        df['tax rate'] = round(df['taxexp'] / (df['ebit'] + df['intexp']) *100, 2)
+        df['tax rate'] = round((df['taxexp'] / df['ebt']) *100, 2)
         df['opp margin'] = round(df['opp margin'] *100, 2)        
         df['dps'] = (df['ncfdiv'] + df['prefdivis']) / df['sharesbas'] # dividends per share
         df['payoutratio'] = df['dps'] / df['eps']
-        # df['netprofit']  = df['netinc'] - df['sgna'] 
         df['nopat']  = (df['opinc']) * (1-df['tax rate']/100)
-        df['equity reinvested'] = (df['capex'] - df['depamor']) + df['change nc workingcapital'] - df['ncfdebt']
-        df['retained earnings'] = df['netinc'] + df['ncfdiv'] 
-        df['retention ratio'] = df['retained earnings'] / df['netinc']
 
+
+        df['equity reinvested'] = (df['capex'] - df['depamor']) + df['change nc workingcapital'] - df['ncfdebt']
+        df['retention ratio'] = df['retearn']  / df['netinc']
         df['expected netinc growth'] = df['retention ratio'] * df['roe']
         df['expected roe growth'] = df['ebit'] * (1 - df['tax rate']/100) / (df['equity'] + df['debt'])
         df['marginal return on equity'] = (df['netinc'] - df['netinc'].shift(-1, axis=0)) / df['equity']
-        df['reinvestment rate'] = (df['capex'] - df['net capex'] + df['depamor']) / df['ebit'] * (1-df['tax rate']/100)
+        df['reinvestment rate'] = ((df['capex'] - df['net capex'] + df['change nc workingcapital']) / df['ebit']) * (1-df['tax rate']/100)
         df['expected ebit growth'] = df['reinvestment rate'] * df['roc']
 
-        df['fcf firm'] = df['opinc'] * (1-df['tax rate']) + (df['capex'] - df['depamor']) - df['change nc workingcapital']
-        df['fcf equity'] = df['netinc'] + (df['capex'] - df['depamor']) - df['change nc workingcapital'] - df['ncfdebt']
+
+        df['fcf firm'] = df['opinc'] * (1-df['tax rate']) + (df['capex'] - df['depamor']) - df['change nc workingcapital'] # FIXME
+        df['fcf equity'] = df['netinc'] - (df['capex'].abs() - df['depamor']) - df['change nc workingcapital'].abs() + df['ncfdebt']
+
+
+        df['increase in current assets'] = df['assetsc'] - df['assetsc'].shift(-1, axis=0)
+        df['increase in current liabilities'] = df['liabilitiesc'] - df['liabilitiesc'].shift(-1, axis=0)
+        df['_fcf'] = df['netinc'] + df['depamor'] + df['intexp'] + df['ncfinv'] + df['ncfbus'] + df['ncff']   - df['change nc workingcapital'].abs() - df['capex'].abs()
+
 
         self.df = df
 
-        import yfinance as yf
-        import numpy as np
-        df = yf.download([self.ticker, 'SPY'], '2018-01-01')['Adj Close']
+        df = yf.download([self.ticker, 'SPY'], '2021-01-01')['Adj Close']
         price_change = df.pct_change()
         df = price_change.drop(price_change.index[0])
         self.wacc(df)
@@ -243,12 +248,17 @@ class Fundamentals(Nasdaq):
         discount future cash flows back to present value using wacc
             capm defines cost of equity as beta
         '''
+        rf = 0  # risk free rate
+        Erm = 0.08  # exoected return on market
         self.df['bv_equity'] = self.df['equity']
-        self.df['cost_of_equity']  = self.beta(df_for_beta)
-        self.df['cost_of_debt'] = self.df['intexp'] / self.df['debt']
+        self.df['cost_of_equity']  = rf  + (self.beta(df_for_beta) * (Erm - rf))
+        self.df['cost_of_debt'] = self.df['intexp'] / self.df['debt'].iloc[0:5].mean() # average debt over past 5 periods
         self.df['bv_debt']  = self.df['debt']
         tc = self.df['tax rate']
-        self.df['wacc'] = (self.df['bv_equity'] / (self.df['bv_equity']+self.df['bv_debt']))*self.df['cost_of_equity'] + (self.df['bv_debt'] / (self.df['bv_equity']+self.df['bv_debt']))*self.df['cost_of_debt'] * (1-self.df['tax rate'])
+
+        eq = (self.df['bv_equity'] / (self.df['bv_equity'] + self.df['bv_debt'])) * self.df['cost_of_equity']
+        dbt = (self.df['bv_debt'] / (self.df['bv_equity']+self.df['bv_debt'])) * self.df['cost_of_debt']
+        self.df['wacc'] =  (eq + dbt)  * (1-self.df['tax rate']/100)
 
 
 
