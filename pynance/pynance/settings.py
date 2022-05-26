@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'treasury_rates',
     'equity_fundamentals',
     'attribution',
-    'time_series'
+    'time_series',
+    'portfolio'
 
 
 ]
