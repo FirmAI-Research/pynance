@@ -23,5 +23,6 @@ urlpatterns = [
     path('equity_fundamentals/', include('equity_fundamentals.urls')),
     path('time_series/', include('time_series.urls')),
     path('treasury_rates/', include('treasury_rates.urls')),
+    path('portfolio/', include('portfolio.urls')),
 
 ]

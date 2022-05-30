@@ -10,6 +10,7 @@ from pyparsing import line
 from lib.learn.regression.regression import Regression
 from lib.nasdaq import Fundamentals, Metrics, Tickers, Nasdaq
 from lib.calendar import Calendar
+from lib.sec.extract import Sec
 from db.postgres import Postgres
 from lib import numeric
 import yfinance
@@ -123,7 +124,7 @@ def fundamentals(request):
         selected_metric = 'pe'
 
     if ticker in [None, '', '[None]']:
-        ticker = 'AMZN'
+        ticker = 'KO'
     print(ticker)
     print(request.POST)
 
@@ -163,7 +164,8 @@ def fundamentals(request):
         print(company_values)
 
 
-    colnames = [x for x in sector_percentiles.columns.tolist() if x not in ['level_0', 'index', 'date','uid']]
+    colnames = [x for x in sector_percentiles.columns.tolist() if x not in ['level_0', 'index', 'date','uid']] # all datapoints
+    colnames = ['bvps', 'pe', 'dps', 'eps', 'divyield', 'fcfps', 'grossmargin', 'pe', 'roa', 'roe', 'roc', 'ps',  'opp margin', 'p/cf', 'ev/ebitda', ] # selected datapoints
 
     # industry percetiles v. metric over time
     data = Fundamentals(ticker = ticker).get()
@@ -199,6 +201,7 @@ def fundamentals(request):
     data_of_selected_company['Peer Group'] = 'N/A'
     data_of_selected_company['Description'] = 'Values as reported'
 
+
     for c in [x for x in data_of_selected_company.columns if x not in  ['date', 'Peer Group', 'Description']]:
         try:
             data_of_selected_company[c] = "{:,}".format(float(data_of_selected_company[c]))
@@ -227,6 +230,7 @@ def fundamentals(request):
 
     company_fundamentals = pd.concat([data_of_selected_company, percentile_values_of_industry, percentile_values_of_sector, industry_ranks_of_selected_company, sector_ranks_of_selected_company, ], axis=0, ignore_index=True)
 
+    company_fundamentals = company_fundamentals[ ['Description', 'Peer Group', 'date'] + [x for x in company_fundamentals.columns.tolist() if x not in ['Description', 'Peer Group', 'date']]]
 
     context = {
 
@@ -256,4 +260,18 @@ def fundamentals(request):
     return render(request, 'fundamentals.html', context)
 
 
+
+def sec_reader(request):
+
+    sec = Sec()
+    commentary = sec.get_commentary_text()
+    commentary_df = pd.DataFrame.from_dict(commentary, orient = 'index').reset_index()
+    print(commentary_df)
+    
+
+    context = {
+        'commentary': commentary_df,
+        'commentary_values': commentary_df.values.tolist(),
+    }
+    return render(request, 'sec_reader.html', context)
 

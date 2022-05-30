@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+
+{% block content %}
+
+<h1 style="color:teal">Parse Sec Filings</h1>
+
+
+<section class="container-large py-8">
+    <div class="row">
+        <div class="col-lg-12">
+            <ul id="tabs" class="nav nav-tabs">
+                <li class="nav-item"><a href="#period_change" data-target="#commentary" data-toggle="tab"
+                        class="nav-link small text-uppercase active">Commentary</a></li>
+                <!-- <li class="nav-item"><a href="" data-target="#daily_rates" data-toggle="tab"
+                        class="nav-link small text-uppercase">Daily Rates</a></li>
+                <li class="nav-item"><a href="" data-target="#all_tenors" data-toggle="tab"
+                        class="nav-link small text-uppercase">All Tenors</a></li> -->
+
+            </ul>
+            <br>
+
+            <div id="tabsContent" class="tab-content">
+
+                <!-- // Div Tab 1 ******************************************************************************************************************** -->
+                <div id="commentary" class="tab-pane fade active show">
+
+                    <h3 style="color:teal">Footnote text & Commentary</h3>
+                    <!-- pass pd.DataFrame variable from view and populate highcharts table -->
+                    <table id="commentary_table" class="display" style="width:100%">
+                        <thead>
+                            <tr>
+                                {% for key, v in commentary.items %}
+                                <th>{{key}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in commentary_values %}
+                            <tr>
+                                {% for value in item %}
+                                <td>{{value}}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <!-- table footers are optional -->
+                    </table>
+
+
+
+                    <!-- <figure class="highcharts-figure">
+                        <div id="change_distribution" style="width:50%;height:75%; float:left"></div>
+                    </figure> -->
+
+
+
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<div style="clear:both;"></div>
+
+<div style='display:block;height:30%;width:10%'></div>
+<!-- blank spacer to add new widgets below the charts populated atop of the tab -->
+
+
+<style type="text/css">
+    /* bootstrap hack: fix content width inside hidden tabs */
+    .tab-content>.active,
+    .pill-content>.active {
+        display: block;
+        visibility: visible;
+        position: absolute;
+        width: 100%;
+    }
+</style>
+
+
+
+
+{% endblock content %}
+
+
+
+
+{% block js %}
+
+
+<script>
+    // Most likely your table is hidden initially which prevents jQuery DataTables from calculating column widths. If table is in the tab, you need to adjust headers when tab becomes visible.
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $($.fn.dataTable.tables(true)).DataTable()
+            .columns.adjust();
+    });
+
+    $(document).ready(function () {
+
+        var table = $('#commentary_table').DataTable({
+            "ordering": true,
+            "info": true,
+            "order": [[0, "asc"]],
+            "scrollY": "750px",
+            "scrollCollapse": true,
+            "paging": true,
+            "stateSave": true,
+            "searching": true,
+        });
+
+    });
+
+
+</script>
+
+{% endblock js %}

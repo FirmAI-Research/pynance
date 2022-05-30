@@ -2,6 +2,7 @@ import requests
 import json
 import pandas as pd
 import numpy as np
+from bs4 import BeautifulSoup
 
 class Sec():
 
@@ -12,14 +13,20 @@ class Sec():
         final_url = xbrl_converter_api_endpoint + "?htm-url=" + filing_url + "&token=" + api_key
         response = requests.get(final_url)
         self.xbrl_json = json.loads(response.text)
-        print(self.xbrl_json['StatementsOfIncome'])
-        income_statement = self.get_income_statement(self.xbrl_json)
-        print(income_statement)
-        balance_sheet = self.get_balance_sheet(self.xbrl_json)
-        print(balance_sheet)
-        cash_flows = self.get_cash_flow_statement(self.xbrl_json)
-        print(cash_flows)
+        # print(self.xbrl_json.keys()) # list all keys
 
+        # print(self.xbrl_json['StatementsOfIncome'])
+        # income_statement = self.get_income_statement(self.xbrl_json)
+        # print(income_statement)
+        # balance_sheet = self.get_balance_sheet(self.xbrl_json)
+        # print(balance_sheet)
+        # cash_flows = self.get_cash_flow_statement(self.xbrl_json)
+        # print(cash_flows)
+        # commentary = self.get_commentary_text()
+        # print(commentary)
+
+        with open('data.json', 'w', encoding='utf-8') as f:
+            json.dump(self.xbrl_json, f, ensure_ascii=False, indent=4)
 
 
 
@@ -113,6 +120,15 @@ class Sec():
         return cash_flows.T
 
 
+    def get_commentary_text(self):
+        commentary_dict = {}
+        for xkey in self.xbrl_json.keys():
+            result = self.xbrl_json[xkey]
+            for k,v in result.items():
+                if isinstance(v, str):
+                    soup = BeautifulSoup(v)
+                    commentary_dict[k] = soup.get_text()
+        return commentary_dict
 
     import time
 

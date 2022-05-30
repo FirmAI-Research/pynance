@@ -1,41 +1,47 @@
 import sys, os
 cwd = os.getcwd()
-outdir = cwd + '/output/'
-print(cwd)
 from pathlib import Path
 import matplotlib.pyplot as plt 
-#f =  open(f'{Path(os.getcwd()).parent.absolute()}/data/tiingo.txt', "r")
-f = open(os.getcwd() + '/data/tiingo.txt', "r")
-key = f.read()
-print(key)
-tiingo_key = key
-
-
 import pandas as pd
 import numpy as np
 import datetime
 import decimal
-
 from pandas_datareader import data as pdr
 
 now = datetime.datetime.now()
-
-'''
-@todo:
-~write this using oop~
-0 input to track contributions made to TIRA & RIRA < max
-0 input for employer_match == True
-1 rebal_algo: tolerance, target
-2 rebal_type: relative, absolute
-3 liquidate / raise capital functions
-'''
-
 
 # params
 new_money_in = 1000 
 drift = 0.05
 min_hold_days = 90
 
+class Rebalance:
+
+    def __init__():
+        pass
+
+
+    def get_current_portfolio():
+        pass
+
+
+    def get_target_portfolio():
+        pass
+
+
+    def build_rebalancing_frame():
+        pass
+
+
+    def calculate_drift(df):
+        pass
+
+
+    def calculate_trades(df):
+        pass
+
+
+#-----------------------------------------------------------------------------------------------------------------------
 
 def build_initial_portfolios():
     """
@@ -63,6 +69,7 @@ def build_initial_portfolios():
         ['SHV',0.05,'ETF'],
         ['HYG',0.05,'ETF'],
         ]
+
     # portfolio current holdings "c"
     columns_c = ['accounttype','accountid','lastrebaldate','ticker','assetclass','basisdate','costbasis','shares']
     positions_c = [     ['RIRA','0001','2020-11-16','SPY','ETF','2018-11-16', 260   ,913.483], # roth
@@ -74,12 +81,6 @@ def build_initial_portfolios():
 
                         ['TIRA','0003','2020-11-16','HYG','ETF','2018-11-16', 85   ,3.14], # traditional ira
                         ['TIRA','0003','2020-11-16','IAU','ETF','2018-11-16',  18   ,549.871]        ]
-
-    # abbreviations
-    accounttypes = {'TAXB':'Taxable Brokerage', '401K':'401k', 'RIRA':'Roth-IRA', 'TIRA':'Traditional-IRA'}
-    assetclasses = {'ST':'Equity Stocks', 'BD':'Bonds Fixed-Income', 'CS':'Cash and Commodities', 'RE':'Real-Estate', 'ALT':'Alternatives'}
-    assettypes = {'SEC':'Individual Security', 'ETF':'Exchange Traded Fund', 'MF': 'Mutual Fund', 'IF':'Index Fund'}
-    assetregion = {'D':'Domestic','I':'International'}
 
     # check target portfolio allocations
     targetalloc = pd.DataFrame(columns = columns_t, data = positions_t)
@@ -119,15 +120,7 @@ agg_port.to_csv(outdir +'agg_port.csv')
 @todo: use pandas market calendar to determine n days from now to yesterday, start, & end
 '''
 def retrieve_latest_security_price():
-    """
-            ~ retrieve tiingo data to build historical time series ~
-    :param: 
-    :type: 
-    :param: 
-    :type: 
-    :return: 
-    :rtype: 
-    """
+
     now = datetime.datetime.now()
     yesterday = now - datetime.timedelta(3)
     start = datetime.datetime(yesterday.year, yesterday.month, yesterday.day)
@@ -150,15 +143,7 @@ ohlc = ohlc.to_frame(name='close').reset_index(level=1, drop=True)
 
 
 def  build_initial_drift_df():
-    """
-            ~ retrieve tiingo data to build historical time series ~
-    :param: 
-    :type: 
-    :param: 
-    :type: 
-    :return: 
-    :rtype: 
-    """
+
     start_port_c = pd.merge(agg_port, targetalloc, on ='ticker', how ='outer')
     final_port = pd.merge(start_port_c, ohlc, left_on ='ticker', right_index = True, how = 'left')
     # NaN values represent positions included in the target that do not exist in the current; fill  these values as 0 
@@ -178,15 +163,7 @@ final_port.to_csv(outdir +'final_port.csv')
 
 
 def build_initial_order_df():
-    """
-            ~ retrieve tiingo data to build historical time series ~
-    :param: 
-    :type: 
-    :param: 
-    :type: 
-    :return: 
-    :rtype: 
-    """
+"
     
     '''
     final_port above represents the most naive of potential rebalances  - this is the initial stable df for intuition to be developed on top of
@@ -435,166 +412,166 @@ port.to_csv(outdir +'port4.csv')
 
 
 
-def tax_aware_allocator():
-    """
-            ~   tax consequence pseudo-awareness     ~
-    :param: 
-    :type: 
-    :param: 
-    :type: 
-    :return: 
-    :rtype: 
+# def tax_aware_allocator():
+#     """
+#             ~   tax consequence pseudo-awareness     ~
+#     :param: 
+#     :type: 
+#     :param: 
+#     :type: 
+#     :return: 
+#     :rtype: 
 
         
-    @ todo update to account for curreent contributions < max, employer match, acct holder age, etc.
-    @ todo: use a tier (A,B,C) apporach or decision tree to allocation in different account types iterating through each tier for most suitable placement
-    # establish sort order so we can allocate tax-efficient account space first
+#     @ todo update to account for curreent contributions < max, employer match, acct holder age, etc.
+#     @ todo: use a tier (A,B,C) apporach or decision tree to allocation in different account types iterating through each tier for most suitable placement
+#     # establish sort order so we can allocate tax-efficient account space first
 
-    """
-    dport = None
-    acctsdf = None
-    print(port)
-    '''allocate a final % for each ticker that exists in target allocation df, but does not exist as current position, else skip'''
-    if len(port[port.accounttype.isnull()])>0: 
-        print('Distributing new securities to existing accounts . . .')
-        dport = port.copy()
-        #account-level fund surplus or deficit - must match these with our orphaned securities
-        acctsdf = port.groupby(['accountid','accounttype']).new_value_chg.sum()
-        acctsdf = acctsdf.reset_index().rename(columns={'new_value_chg':'new_value_chg_sum'})
-        actype_sortorder = pd.DataFrame(data=[['RIRA',1],['TIRA',2],['TAXB',3]],columns=['accounttype','order'])
-        acctsdf = pd.merge(acctsdf,actype_sortorder,how='left',left_on='accounttype',right_on='accounttype')
-        #We make a consequential assumption here that any new_money_in will be allocated 100% in one of the Taxable accounts (first in list).
-        #if you have a Roth-IRA which has not met its contribution limits for the year, it may be preferrential to distribute the funds there first.
-        #IF YOU HAVE NO TAXABLE ACCOUNT AND YOU WISH TO REBALANCE WITH new_money_in > 0 this will cause errors - so we assert here:
-        assert(new_money_in == 0 or (len(acctsdf[acctsdf.accounttype == 'TAXB'])>0 and new_money_in > 0))
-        min_idx = acctsdf[acctsdf.accounttype == 'TAXB'].index.min()
-        acctsdf.loc[min_idx,'new_value_chg_sum'] = acctsdf.loc[min_idx,'new_value_chg_sum'] - new_money_in
-        #only return accounts that have space
-        acctsdf = acctsdf[acctsdf.new_value_chg_sum<0].copy()
+#     """
+#     dport = None
+#     acctsdf = None
+#     print(port)
+#     '''allocate a final % for each ticker that exists in target allocation df, but does not exist as current position, else skip'''
+#     if len(port[port.accounttype.isnull()])>0: 
+#         print('Distributing new securities to existing accounts . . .')
+#         dport = port.copy()
+#         #account-level fund surplus or deficit - must match these with our orphaned securities
+#         acctsdf = port.groupby(['accountid','accounttype']).new_value_chg.sum()
+#         acctsdf = acctsdf.reset_index().rename(columns={'new_value_chg':'new_value_chg_sum'})
+#         actype_sortorder = pd.DataFrame(data=[['RIRA',1],['TIRA',2],['TAXB',3]],columns=['accounttype','order'])
+#         acctsdf = pd.merge(acctsdf,actype_sortorder,how='left',left_on='accounttype',right_on='accounttype')
+#         #We make a consequential assumption here that any new_money_in will be allocated 100% in one of the Taxable accounts (first in list).
+#         #if you have a Roth-IRA which has not met its contribution limits for the year, it may be preferrential to distribute the funds there first.
+#         #IF YOU HAVE NO TAXABLE ACCOUNT AND YOU WISH TO REBALANCE WITH new_money_in > 0 this will cause errors - so we assert here:
+#         assert(new_money_in == 0 or (len(acctsdf[acctsdf.accounttype == 'TAXB'])>0 and new_money_in > 0))
+#         min_idx = acctsdf[acctsdf.accounttype == 'TAXB'].index.min()
+#         acctsdf.loc[min_idx,'new_value_chg_sum'] = acctsdf.loc[min_idx,'new_value_chg_sum'] - new_money_in
+#         #only return accounts that have space
+#         acctsdf = acctsdf[acctsdf.new_value_chg_sum<0].copy()
 
-        '''
-        @ todo:
-        '''
-        #establish sort order so we can allocate tax-inefficient assets first
-        aclass_sortorder = pd.DataFrame(data=[['ST',3],['BD',1],['CS',4],['RE',2],['ALT',5]],columns=['assetclass','order'])
-        dport = pd.merge(dport,aclass_sortorder,how='left',left_on='assetclass',right_on='assetclass')
+#         '''
+#         @ todo:
+#         '''
+#         #establish sort order so we can allocate tax-inefficient assets first
+#         aclass_sortorder = pd.DataFrame(data=[['ST',3],['BD',1],['CS',4],['RE',2],['ALT',5]],columns=['assetclass','order'])
+#         dport = pd.merge(dport,aclass_sortorder,how='left',left_on='assetclass',right_on='assetclass')
 
-        # !!!!! We loop twice, first to fit whole securities in accounts with tax location in mind, then again without tax location for anything leftover
-        loop = 0
-        while loop < 2:
-            loop+=1
-            #loop through orphaned tickers and place them in accounts until all assets are allocated or we are forced to split a security across accounts
-            #  in the first loop we do not allow tax-inefficient assets to wind up in Taxable accounts, in the second loop we relax this constraint
-            for index, row in dport[dport.accounttype.isnull()].sort_values(['order','new_value_chg'],ascending=[True,False]).iterrows():
-                #loop through accounts and place the assets
-                for i, r in acctsdf.iterrows():
-                    aid = r.accountid
-                    atype = r.accounttype
-                    bal = r.new_value_chg_sum
-                    #print('Evaluating {}-{} with {} starting bal'.format(aid,atype,bal))
-                    ### !!!!
-                    if loop == 0 and (row.assetclass in ('BD','RE') and atype == 'TAXB'):
-                        continue #skip this case, since we don't want to place Bonds and Real-Estate assets in Taxable accounts
-                    elif loop == 0 and (row.assetclass not in ('BD','RE') and atype != 'TAXB'):
-                        continue #skip this case, since we don't want to place tax-efficient assets into tax sheltered accounts 
+#         # !!!!! We loop twice, first to fit whole securities in accounts with tax location in mind, then again without tax location for anything leftover
+#         loop = 0
+#         while loop < 2:
+#             loop+=1
+#             #loop through orphaned tickers and place them in accounts until all assets are allocated or we are forced to split a security across accounts
+#             #  in the first loop we do not allow tax-inefficient assets to wind up in Taxable accounts, in the second loop we relax this constraint
+#             for index, row in dport[dport.accounttype.isnull()].sort_values(['order','new_value_chg'],ascending=[True,False]).iterrows():
+#                 #loop through accounts and place the assets
+#                 for i, r in acctsdf.iterrows():
+#                     aid = r.accountid
+#                     atype = r.accounttype
+#                     bal = r.new_value_chg_sum
+#                     #print('Evaluating {}-{} with {} starting bal'.format(aid,atype,bal))
+#                     ### !!!!
+#                     if loop == 0 and (row.assetclass in ('BD','RE') and atype == 'TAXB'):
+#                         continue #skip this case, since we don't want to place Bonds and Real-Estate assets in Taxable accounts
+#                     elif loop == 0 and (row.assetclass not in ('BD','RE') and atype != 'TAXB'):
+#                         continue #skip this case, since we don't want to place tax-efficient assets into tax sheltered accounts 
 
-                    if row.new_value_chg + bal <=0: #it fits
-                        bal+=row.new_value_chg
-                        print(' FITS {} in {}-{} with {} remaining'.format(row.ticker,aid,atype,bal))
-                        #update our portfolio
-                        dport.loc[index,'accountid'] = aid
-                        dport.loc[index,'accounttype'] = atype
-                        #update account bal for next loop
-                        acctsdf.loc[i,'new_value_chg_sum'] = bal
-                        break
-                    else:
-                        print(' {} {} does not fit in {}-{}'.format(row.ticker,row.new_value_chg,aid,atype))
+#                     if row.new_value_chg + bal <=0: #it fits
+#                         bal+=row.new_value_chg
+#                         print(' FITS {} in {}-{} with {} remaining'.format(row.ticker,aid,atype,bal))
+#                         #update our portfolio
+#                         dport.loc[index,'accountid'] = aid
+#                         dport.loc[index,'accounttype'] = atype
+#                         #update account bal for next loop
+#                         acctsdf.loc[i,'new_value_chg_sum'] = bal
+#                         break
+#                     else:
+#                         print(' {} {} does not fit in {}-{}'.format(row.ticker,row.new_value_chg,aid,atype))
         
-        print('\nLets see what remains in our accounts after 2 loops . . .')
-        print(acctsdf)
+#         print('\nLets see what remains in our accounts after 2 loops . . .')
+#         print(acctsdf)
 
-    return acctsdf
-acctsdf = tax_aware_allocator()
-
-
+#     return acctsdf
+# acctsdf = tax_aware_allocator()
 
 
 
-def allocate_leftovers():
-    pass
-''' leftovers remaining '''
 
-'''
 
-    #Here we are forced to split a security across multiple accounts because no one account can fit it
-    #  in this loop we allow tax-inefficient assets to wind up in Taxable accounts, but only as a last resort
-    if len(dport[dport.accounttype.isnull()])>0:
-        print('Splitting remaining securities across accounts . . .')
-        #loop through accounts and place portions of asset in each, create a new row in the df for each placement.
-        for index, row in dport[dport.accounttype.isnull()].sort_values(['order','new_value_chg'],ascending=[True,False]).iterrows():
-            final_shares_chg = row.final_shares_chg
-            asset_bal = row.new_value_chg
-            #if its a tax-inefficent asset, order the accounts by 'order'
-            if row.assetclass in ('BD','RE'):
-                acctsdf = acctsdf.sort_values('order',ascending=True)
-            else:
-                acctsdf = acctsdf.sort_values('order',ascending=False)
+# def allocate_leftovers():
+#     pass
+# ''' leftovers remaining '''
+
+# '''
+
+#     #Here we are forced to split a security across multiple accounts because no one account can fit it
+#     #  in this loop we allow tax-inefficient assets to wind up in Taxable accounts, but only as a last resort
+#     if len(dport[dport.accounttype.isnull()])>0:
+#         print('Splitting remaining securities across accounts . . .')
+#         #loop through accounts and place portions of asset in each, create a new row in the df for each placement.
+#         for index, row in dport[dport.accounttype.isnull()].sort_values(['order','new_value_chg'],ascending=[True,False]).iterrows():
+#             final_shares_chg = row.final_shares_chg
+#             asset_bal = row.new_value_chg
+#             #if its a tax-inefficent asset, order the accounts by 'order'
+#             if row.assetclass in ('BD','RE'):
+#                 acctsdf = acctsdf.sort_values('order',ascending=True)
+#             else:
+#                 acctsdf = acctsdf.sort_values('order',ascending=False)
             
-            for i, r in acctsdf.iterrows():
-                bal = r.new_value_chg_sum
-                if asset_bal>-bal:
-                    to_move = -bal
-                    pct_move = -bal/row.new_value_chg
-                    asset_bal+=bal
-                else:
-                    to_move = asset_bal
-                    pct_move = asset_bal/row.new_value_chg
-                    asset_bal=0
-                print(' {} move {} or {}% into account {}-{}. {} bal remaining {}'.format(row.ticker,to_move,pct_move,r.accountid,r.accounttype,row.ticker,asset_bal))
+#             for i, r in acctsdf.iterrows():
+#                 bal = r.new_value_chg_sum
+#                 if asset_bal>-bal:
+#                     to_move = -bal
+#                     pct_move = -bal/row.new_value_chg
+#                     asset_bal+=bal
+#                 else:
+#                     to_move = asset_bal
+#                     pct_move = asset_bal/row.new_value_chg
+#                     asset_bal=0
+#                 print(' {} move {} or {}% into account {}-{}. {} bal remaining {}'.format(row.ticker,to_move,pct_move,r.accountid,r.accounttype,row.ticker,asset_bal))
                 
-                #update our account to reflect this change
-                if asset_bal > 0:
-                    acctsdf.loc[i,'new_value_chg_sum'] = 0.0
-                else:
-                    acctsdf.loc[i,'new_value_chg_sum'] = to_move+bal
+#                 #update our account to reflect this change
+#                 if asset_bal > 0:
+#                     acctsdf.loc[i,'new_value_chg_sum'] = 0.0
+#                 else:
+#                     acctsdf.loc[i,'new_value_chg_sum'] = to_move+bal
                 
-                if (np.floor(pct_move*row.new_shares)*row.close)-row.value > 0:
-                    #create new row in our portfolio for this asset in this account
-                    dport.loc[max(dport.index)+1] = [r.accounttype,
-                                            r.accountid,
-                                            row.ticker,
-                                            row.shares,
-                                            row.assetclass,
-                                            row.close,
-                                            row.value,
-                                            np.floor(pct_move*row.final_shares_chg), #we round down to get back to whole shares
-                                            np.floor(pct_move*row.new_shares),
-                                            np.floor(pct_move*row.new_shares)*row.close,
-                                            (np.floor(pct_move*row.new_shares)*row.close)-row.value, #rounding can cause us to be short of our total allocatable funds
-                                            np.floor(pct_move*row.new_value)/dport.new_value.sum(),
-                                            row.order]
+#                 if (np.floor(pct_move*row.new_shares)*row.close)-row.value > 0:
+#                     #create new row in our portfolio for this asset in this account
+#                     dport.loc[max(dport.index)+1] = [r.accounttype,
+#                                             r.accountid,
+#                                             row.ticker,
+#                                             row.shares,
+#                                             row.assetclass,
+#                                             row.close,
+#                                             row.value,
+#                                             np.floor(pct_move*row.final_shares_chg), #we round down to get back to whole shares
+#                                             np.floor(pct_move*row.new_shares),
+#                                             np.floor(pct_move*row.new_shares)*row.close,
+#                                             (np.floor(pct_move*row.new_shares)*row.close)-row.value, #rounding can cause us to be short of our total allocatable funds
+#                                             np.floor(pct_move*row.new_value)/dport.new_value.sum(),
+#                                             row.order]
     
-                #finally delete the original row from the df
-                dport.drop(dport[dport.accounttype.isnull()].index,inplace=True)
+#                 #finally delete the original row from the df
+#                 dport.drop(dport[dport.accounttype.isnull()].index,inplace=True)
             
-                #double check our work - we just care that distributed funds < total available funds for this ticker
-                assert(dport[dport.ticker==row.ticker].new_value_chg.sum() < row.new_value_chg)
+#                 #double check our work - we just care that distributed funds < total available funds for this ticker
+#                 assert(dport[dport.ticker==row.ticker].new_value_chg.sum() < row.new_value_chg)
 
 
-    #Review our final portfolio with recommended buys/sells in 'final_shares_chg' column
-    if acctsdf is not None:
-        print(acctsdf)
+#     #Review our final portfolio with recommended buys/sells in 'final_shares_chg' column
+#     if acctsdf is not None:
+#         print(acctsdf)
 
-    if dport is not None:
-        #Cleanup
-        dport.drop(columns=['order'],inplace=True)
-        dport = dport[['accounttype','accountid','ticker','shares','assetclass','close','value','new_shares','final_shares_chg','new_value','new_value_chg','final_allocation']]
-        print(dport)
-    else:
-        port = port[['accounttype','accountid','ticker','shares','assetclass','close','value','new_shares','final_shares_chg','new_value','new_value_chg','final_allocation']]
-        print(port)
+#     if dport is not None:
+#         #Cleanup
+#         dport.drop(columns=['order'],inplace=True)
+#         dport = dport[['accounttype','accountid','ticker','shares','assetclass','close','value','new_shares','final_shares_chg','new_value','new_value_chg','final_allocation']]
+#         print(dport)
+#     else:
+#         port = port[['accounttype','accountid','ticker','shares','assetclass','close','value','new_shares','final_shares_chg','new_value','new_value_chg','final_allocation']]
+#         print(port)
 
-'''
+# '''
 
-# if __name__ == '__main__':
-#     init()
+# # if __name__ == '__main__':
+# #     init()
