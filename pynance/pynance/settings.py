@@ -58,7 +58,9 @@ INSTALLED_APPS = [
     'equity_fundamentals',
     'attribution',
     'time_series',
-    'portfolio'
+    'portfolio',
+    'pricing',
+    
 
 
 ]

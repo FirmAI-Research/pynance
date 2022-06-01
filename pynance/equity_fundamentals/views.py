@@ -31,7 +31,7 @@ def financials(request):
 
     ticker = str(request.POST.get("tickers"))
     if ticker in ['', 'None', None]:
-        ticker = 'AMZN'
+        ticker = 'BLK'
     print(ticker)
     print(request.POST)
 
@@ -39,7 +39,8 @@ def financials(request):
     ndq_data = fun.get()
     print(ndq_data)
     qtr_end_dates = cal.quarter_end_list(start_date=datetime.datetime.now() - relativedelta(years=2), end_date=cal.today())
-
+    qtr_end_dates = [x for x in pd.to_datetime(qtr_end_dates)  if x < datetime.datetime.now()]
+    print(qtr_end_dates)
     def write_to_json_for_ajax():
         ''' write values to json files used to populate jquery datatables via ajax '''
         
@@ -49,7 +50,7 @@ def financials(request):
         fp2 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'adjustments.json')
         fp3 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'fcfgrowth.json')
         fp4 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'wacc.json')
-        fp4 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'wacc.json')
+        # fp4 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'wacc.json')
         fp5 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'expenses.json')
 
 
@@ -124,7 +125,7 @@ def fundamentals(request):
         selected_metric = 'pe'
 
     if ticker in [None, '', '[None]']:
-        ticker = 'KO'
+        ticker = 'AMZN'
     print(ticker)
     print(request.POST)
 
