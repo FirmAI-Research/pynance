@@ -84,24 +84,15 @@
 
                                 <li><a class="dropdown-item" href="#" style="color:teal"></a></li>
                             </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false" style="color:teal">
-                                Attribution
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="{% url 'famma_french' %}" style="color:teal">Performance Attribution</a>
-                                </li>
-     
-                            </ul>
-                        </li>  
+                        </li> 
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false" style="color:teal">
                                 Portfolio
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{% url 'famma_french' %}" style="color:teal">Performance Attribution</a>
+                                </li>
                                 <li><a class="dropdown-item" href="{% url 'rebalance' %}" style="color:teal">Rebalance</a>
                                 </li>
                                 <li disabled><a class="dropdown-item" href="{% url 'optimize' %}" style="color:teal" >Optimization</a>
