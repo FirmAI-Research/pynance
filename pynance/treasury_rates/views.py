@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect 
 
 from lib.fixed_income.rates.treasury_rates import TreasuryRates
-from lib.learn.regression.linreg import _StatsModels
+from lib.learn.regression._depr.linreg import _StatsModels
 from lib.calendar import Calendar
 cal = Calendar()
 

@@ -2,6 +2,14 @@
   ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
                                             Nasdaq Data Link                                  
   
+
+      # if not os.path.exists(fp) or (pd.to_datetime(pd.to_datetime(self.get_modified_time(fp)).strftime('%Y-%m-%d')) < pd.to_datetime(pd.to_datetime(utc.localize(cal.today())).strftime('%Y-%m-%d'))): 
+    #     print('File does not exist or has not been updated today. Downloading full query results...')
+    # else:
+    #     print('data has been updated today - reading from file')
+    #     df = pd.read_excel(fp)   
+
+
   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  """
 
@@ -149,24 +157,11 @@ class Fundamentals(Nasdaq):
     5 filter columns:
         ticker, calendardate, lastupdated, dimension, datekey
     full export - https://data.nasdaq.com/api/v3/datatables/SHARADAR/SF1?qopts.export=true&api_key=API_KEY
-
     Notes:
     nasdaqdatalink.get_table('SHARADAR/SF1', calendardate={'gte':'2013-12-31'}, ticker='AAPL')
     qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
-
-    # if not os.path.exists(fp) or (pd.to_datetime(pd.to_datetime(self.get_modified_time(fp)).strftime('%Y-%m-%d')) < pd.to_datetime(pd.to_datetime(utc.localize(cal.today())).strftime('%Y-%m-%d'))): 
-    #     print('File does not exist or has not been updated today. Downloading full query results...')
-    # else:
-    #     print('data has been updated today - reading from file')
-    #     df = pd.read_excel(fp)    
     """
     name = 'SHARADAR/SF1'
-
-    # fundamental_cols = ['ticker','calendardate', 'assets','capex', 'debt', 'depamor', 'ebit', 'ebitda', 'eps','equity', 'ev',  'fcf', 'gp', 'intangibles', 'intexp', 'inventory',  'liabilities', 'ncf', 'netinc', 'opex', 'opinc', 'pb', 'pe',
-    # 'price', 'ps', 'receivables', 'revenue', 'rnd', 'tangibles', 'taxassets', 'taxexp', 'taxliabilities', 'workingcapital',
-    # 'roe','roc','roa']
-
-    # ticker_cols = ['name','exchange','category','cusips', 'sector', 'industry', 'scalemarketcap', 'scalerevenue', 'currency']
 
     def __init__(self, ticker = None, calendardate = None, ):        
         super().__init__()
@@ -179,7 +174,6 @@ class Fundamentals(Nasdaq):
     def get(self): # NOTE using prior quarter fundamentals for complete dataset
         fp = f'{self.iodir}/all_fundamentals.xlsx'
 
-        # print(f'Modified: {pd.to_datetime(self.get_modified_time(fp))}')
         print(f'Today: {cal.today()}')
 
         if self.ticker:
@@ -187,6 +181,7 @@ class Fundamentals(Nasdaq):
         else:    
             df = nasdaqdatalink.get_table(self.name, dimension="MRQ", calendardate=[self.calendardate],  paginate=True) 
 
+        #FIXME: ALL PERCENTAGES SHOUKLD BE IN DECIMAL FORMAT
         df['shequity'] = df['assets'] - (df['liabilities'] )
         df['roe'] = df['netinc'] / (df['equity'] )
         df['roc'] = df['netinc'] / (df['equity'] + df['debt'])
@@ -201,30 +196,22 @@ class Fundamentals(Nasdaq):
         df['non cash workingcapital'] = df['assetsc'] - df['cashneq'] - df['liabilitiesc']
         df['change nc workingcapital'] = df['non cash workingcapital'] - df['non cash workingcapital'].shift(-1, axis=0)
         df['total expense'] = df['revenue'] - df['netinc']
-        df['tax rate'] = round((df['taxexp'] / df['ebt']) *100, 2)
-        df['opp margin'] = round(df['opp margin'] *100, 2)        
+        df['tax rate'] = round((df['taxexp'] / df['ebt']), 2)
+        df['opp margin'] = round(df['opp margin'], 2)        
         df['dps'] = (df['ncfdiv'] + df['prefdivis']) / df['sharesbas'] # dividends per share
         df['payoutratio'] = df['dps'] / df['eps']
         df['nopat']  = (df['opinc']) * (1-df['tax rate']/100)
 
-
-        df['equity reinvested'] = (df['capex'] - df['depamor']) + df['change nc workingcapital'] - df['ncfdebt']
-        df['retention ratio'] = df['retearn']  / df['netinc']
-        df['expected netinc growth'] = df['retention ratio'] * df['roe']
-        df['expected roe growth'] = df['ebit'] * (1 - df['tax rate']/100) / (df['equity'] + df['debt'])
-        df['marginal return on equity'] = (df['netinc'] - df['netinc'].shift(-1, axis=0)) / df['equity']
-        df['reinvestment rate'] = ((df['capex'] - df['net capex'] + df['change nc workingcapital']) / df['ebit']) * (1-df['tax rate']/100)
-        df['expected ebit growth'] = df['reinvestment rate'] * df['roc']
-
-
-        df['fcf firm'] = df['opinc'] * (1-df['tax rate']) + (df['capex'] - df['depamor']) - df['change nc workingcapital'] # FIXME
         df['fcf equity'] = df['netinc'] - (df['capex'].abs() - df['depamor']) - df['change nc workingcapital'].abs() + df['ncfdebt']
 
-
-        df['increase in current assets'] = df['assetsc'] - df['assetsc'].shift(-1, axis=0)
-        df['increase in current liabilities'] = df['liabilitiesc'] - df['liabilitiesc'].shift(-1, axis=0)
-        df['_fcf'] = df['netinc'] + df['depamor'] + df['intexp'] + df['ncfinv'] + df['ncfbus'] + df['ncff']   - df['change nc workingcapital'].abs() - df['capex'].abs()
-
+        # damodaran pg. 178
+        df['retained earnigns'] = df['retearn']
+        df['retention ratio'] = (df['retearn']  / df['netinc']) / 100
+        df['equity reinvested'] = (df['capex'] - df['depamor']) + df['change nc workingcapital'] - df['ncfdebt']
+        df['expected netinc growth'] = df['retention ratio'] * df['roe']
+        df['expected roe growth'] = df['ebit'] * (1 - df['tax rate']) / (df['equity'] + df['debt'])
+        df['equity reinvestment rate'] =   df['expected netinc growth'] /  df['roe']  
+        df['expected ebit growth'] = df['equity reinvestment rate'] * df['roc']
 
         self.df = df
 
@@ -233,6 +220,8 @@ class Fundamentals(Nasdaq):
         df = price_change.drop(price_change.index[0])
         self.wacc(df)
 
+        self.df['value of equity in opperating assets'] = self.df['netinc'] * (1- self.df['equity reinvestment rate']) * ((1 + self.df['expected netinc growth'] ) / self.df['cost_of_equity'] - self.df['expected netinc growth'])
+        self.df['value'] = self.df['value of equity in opperating assets'] / self.df['sharesbas']
         return self.df
 
 
@@ -261,8 +250,6 @@ class Fundamentals(Nasdaq):
         self.df['wacc'] =  (eq + dbt)  * (1-self.df['tax rate']/100)
 
 
-
-
     def get_calendardate_history(self):
         return nasdaqdatalink.get_table(self.name, dimension="MRQ", paginate=True).calendardate.unique() 
 
@@ -283,23 +270,6 @@ class Fundamentals(Nasdaq):
     def view_sector(self):
         self.df = self.sector_df[self.ticker_cols + self.fundamental_cols]
         return self.df
-
-
-
-
-    # def curl(self):
-    #     # request_url = f"https://data.nasdaq.com/api/v3/datatables/{self.name}.json?api_key={self.api_key}&dimension=MRQ&ticker=AMZN&filingdate.gte=2022-01-01"
-    #     # res = requests.get(request_url)
-    #     # df  = pd.DataFrame.from_dict(res.json())
-    #     # print(df)
-    #     pass
-
-
-    # def get_export(self, dimension='MRQ'):
-    #     df = pd.read_csv('./vendors/exports/SHARADAR_SF1_Full_Export.csv')
-    #     prev_qtr = str(Calendar().previous_quarter_end())
-    #     df = df.loc[(df.dimension == dimension) & (df.calendardate == prev_qtr)]
-    #     return df
 
 
 

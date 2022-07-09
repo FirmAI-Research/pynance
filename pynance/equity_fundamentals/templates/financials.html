@@ -48,10 +48,10 @@
             <ul id="tabs" class="nav nav-tabs">
                 <li class="nav-item"><a href="" data-target="#opperations" data-toggle="tab"
                         class="nav-link small text-uppercase active">Financials</a></li>
-                <li class="nav-item"><a href="" data-target="#fcfgrowth" data-toggle="tab"
-                        class="nav-link small text-uppercase">Growth</a></li>
                 <li class="nav-item"><a href="" data-target="#wacc" data-toggle="tab"
                         class="nav-link small text-uppercase">Discount</a></li>
+                <li class="nav-item"><a href="" data-target="#fcfgrowth" data-toggle="tab"
+                        class="nav-link small text-uppercase">Growth</a></li>
                 <li class="nav-item"><a href="" data-target="#forecast" data-toggle="tab"
                         class="nav-link small text-uppercase">Forecast</a></li>
                 <li class="nav-item"><a href="" data-target="#ratios" data-toggle="tab"
@@ -91,43 +91,8 @@
                         <tbody>
                         </tbody>
                     </table>
-                   
+
                 </div>
-
-
-                <!-- // Div Tab 2 ******************************************************************************************************************** -->
-                <div id="fcfgrowth" class="tab-pane fade">
-                    <h3 style="color:teal">Measure Growth</h3>
-                    <table id="adj" class="display stripe" cellspacing="0" width="100%">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>metric</th>
-                                {% for date in qtr_end_dates %}
-                                <th>{{date}}</th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                    <br>                    
-                    <table id="forecastFcfGrowth" class="display stripe" cellspacing="0" width="100%">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>metric</th>
-                                {% for date in qtr_end_dates %}
-                                <th>{{date}}</th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                    <br><br>
-                </div>
-
                 <!-- // Div Tab 3 ******************************************************************************************************************** -->
                 <div id="wacc" class="tab-pane fade">
                     <h3 style="color:teal">WACC</h3>
@@ -147,19 +112,49 @@
                         </tbody>
                     </table>
                     <br><br>
-                
-                
+
+
                     <figure class="highcharts-figure">
                         <div id="beta_scatter" style="width:50%;height:35%; float:left"></div>
                     </figure>
 
-                    
-                
-                
+
+
+
                 </div>
 
-
-
+                <!-- // Div Tab 2 ******************************************************************************************************************** -->
+                <div id="fcfgrowth" class="tab-pane fade">
+                    <h3 style="color:teal">Measure Growth</h3>
+                    <table id="adj" class="display stripe" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>metric</th>
+                                {% for date in qtr_end_dates %}
+                                <th>{{date}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <br>
+                    <table id="forecastFcfGrowth" class="display stripe" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>metric</th>
+                                {% for date in qtr_end_dates %}
+                                <th>{{date}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <br><br>
+                </div>
 
 
                 <!-- // Div Tab 3 ******************************************************************************************************************** -->
@@ -619,72 +614,72 @@
 
         //*************************************************************************************************************************  Scatter plot
         Highcharts.chart('beta_scatter', {
-    chart: {
-        type: 'scatter',
-        zoomType: 'xy'
-    },
-    title: {
-        text: 'Beta - Equity Price Regression on Market Index (SPY)'
-    },
-    subtitle: {
-        text: 'Source: Heinz  2003'
-    },
-    xAxis: {
-        title: {
-            enabled: true,
-            text: 'X '
-        },
-        startOnTick: true,
-        endOnTick: true,
-        showLastLabel: true
-    },
-    yAxis: {
-        title: {
-            text: 'Y'
-        }
-    },
-    legend: {
-        layout: 'vertical',
-        align: 'left',
-        verticalAlign: 'top',
-        x: 100,
-        y: 70,
-        floating: true,
-        backgroundColor: Highcharts.defaultOptions.chart.backgroundColor,
-        borderWidth: 1
-    },
-    plotOptions: {
-        scatter: {
-            marker: {
-                radius: 5,
-                states: {
-                    hover: {
-                        enabled: true,
-                        lineColor: 'rgb(100,100,100)'
-                    }
+            chart: {
+                type: 'scatter',
+                zoomType: 'xy'
+            },
+            title: {
+                text: 'Beta - Equity Price Regression on Market Index (SPY)'
+            },
+            subtitle: {
+                text: 'Source: Heinz  2003'
+            },
+            xAxis: {
+                title: {
+                    enabled: true,
+                    text: 'X '
+                },
+                startOnTick: true,
+                endOnTick: true,
+                showLastLabel: true
+            },
+            yAxis: {
+                title: {
+                    text: 'Y'
                 }
             },
-            states: {
-                hover: {
+            legend: {
+                layout: 'vertical',
+                align: 'left',
+                verticalAlign: 'top',
+                x: 100,
+                y: 70,
+                floating: true,
+                backgroundColor: Highcharts.defaultOptions.chart.backgroundColor,
+                borderWidth: 1
+            },
+            plotOptions: {
+                scatter: {
                     marker: {
-                        enabled: false
+                        radius: 5,
+                        states: {
+                            hover: {
+                                enabled: true,
+                                lineColor: 'rgb(100,100,100)'
+                            }
+                        }
+                    },
+                    states: {
+                        hover: {
+                            marker: {
+                                enabled: false
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<b>{series.name}</b><br>',
+                        pointFormat: '{point.x} cm, {point.y} kg'
                     }
                 }
             },
-            tooltip: {
-                headerFormat: '<b>{series.name}</b><br>',
-                pointFormat: '{point.x} cm, {point.y} kg'
-            }
-        }
-    },
-    series: [{
-        name: '{{ticker}}',
-        color: 'rgba(223, 83, 83, .5)',
-        data: JSON.parse("{{beta_values|escapejs}}")
+            series: [{
+                name: '{{ticker}}',
+                color: 'rgba(223, 83, 83, .5)',
+                data: JSON.parse("{{beta_values|escapejs}}")
 
 
-    }]
-});
+            }]
+        });
 
 
     });

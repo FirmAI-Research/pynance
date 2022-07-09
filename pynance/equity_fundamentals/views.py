@@ -7,7 +7,7 @@ import os
 import json
 import nasdaqdatalink
 from pyparsing import line
-from lib.learn.regression.regression import Regression
+from lib.learn.regression.linear import Regression
 from lib.nasdaq import Fundamentals, Metrics, Tickers, Nasdaq
 from lib.calendar import Calendar
 from lib.sec.extract import Sec
@@ -26,12 +26,11 @@ iodir = os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))) + '/_tmp/nasdaq_data_link/'
 
 
-
 def financials(request):
 
     ticker = str(request.POST.get("tickers"))
     if ticker in ['', 'None', None]:
-        ticker = 'BLK'
+        ticker = 'JNJ'
     print(ticker)
     print(request.POST)
 
@@ -53,7 +52,6 @@ def financials(request):
         # fp4 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'wacc.json')
         fp5 = os.path.join(cwd, 'equity_fundamentals', 'static', 'forAjax', 'expenses.json')
 
-
         # iterate through each file that needs to be writen to
         for fp in [fp1, fp2, fp3, fp4, fp5]:
             with open(fp, 'r') as f:
@@ -71,7 +69,10 @@ def financials(request):
                 source_name= data['data'][i].get('source_name')
                 for ix, label in enumerate(ajax_labels):
                     if source_name != '':    
-                        data['data'][i][label] = "{:,.4f}".format(list(fundamentals_dict.values())[ix][source_name].iloc[0])
+                        try:
+                            data['data'][i][label] = "{:,.4f}".format(list(fundamentals_dict.values())[ix][source_name].iloc[0])
+                        except:
+                            data['data'][i][label] = "None"
                     else:
                         data['data'][i][label] = "None"
 
@@ -79,8 +80,8 @@ def financials(request):
                     if label != 'delta5':
                         try:
                             data['data'][i][label] = "{:.2%}".format((list(fundamentals_dict.values())[ix][source_name].iloc[0] - list(fundamentals_dict.values())[ix-1][source_name].iloc[0]) / list(fundamentals_dict.values())[ix-1][source_name].iloc[0])
-                        except KeyError as e:
-                            pass
+                        except:
+                            data['data'][i][label] = "None"
             json_dump(data, fp)
 
     write_to_json_for_ajax()
