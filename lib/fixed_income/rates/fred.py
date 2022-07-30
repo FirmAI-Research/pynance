@@ -1,1 +1,0 @@
-# retrieve fred data; spreads/rates etc. plot in row by column matrix from view
