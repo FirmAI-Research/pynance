@@ -100,19 +100,6 @@ class PCA_VaR:
 
 
 
-class VaR:
-    '''
-        https://shankarmsy.github.io/posts/pca-sklearn.html
-    '''
-
-    def __init__(self) -> None:
-        pass
-
-
-
-
-
-
 
 
 # stocks_ = historical_prices_cbind(['AMZN', 'BLK', 'JPM', 'NEE'],'1975-01-01',today).dropna() 

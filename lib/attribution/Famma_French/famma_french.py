@@ -6,6 +6,7 @@ import sys
 import os
 import statsmodels.formula.api as smf
 import matplotlib.pyplot as plt
+from functools import reduce
 
 from lib.calendar import Calendar
 cal = Calendar()
@@ -13,8 +14,11 @@ cal = Calendar()
 class FammaFrench():
 
     def __init__(self, symbols, weights) -> None:
+        
         self.symbols = symbols
+        
         self.weights = weights
+        
         self.START_DATE = '2014-01-01'
 
 
@@ -24,7 +28,7 @@ class FammaFrench():
 
         for ix, symbol in enumerate(self.symbols):
             
-            returns = pd.DataFrame(yf.download(symbol, self.START_DATE, cal.today())['Adj Close'].pct_change().dropna())
+            returns = pd.DataFrame(yf.download(symbol, self.START_DATE, cal.today(), progress=False)['Adj Close'].pct_change().dropna())
             
             returns.rename(columns={'Adj Close': symbol}, inplace=True)
 
@@ -35,12 +39,10 @@ class FammaFrench():
             for i in invalid:
             
                 del self.weights[i]
-        
-        print(self.weights)
-        
-        from functools import reduce
-        
-        df = reduce(lambda x, y: pd.merge(x, y, on='Date'), frames)
+                
+        df = reduce(lambda x, y: pd.merge(x, y, on='Date', how = 'outer'), frames) # Each underlying holding may have a different date range available, so outer join and fillna returns as 0
+
+        df.fillna(0, inplace=True)
         
         df['portf_rtn'] = pd.DataFrame(df.dot(self.weights)) # calculate weighted returns via matrix multiplication
 
@@ -48,16 +50,11 @@ class FammaFrench():
 
         df.index = pd.to_datetime(df.index)
         
-        # df = df.resample('M').sum()
-
         return df
 
 
     def get_ff_three_factor(self):
-        '''
-        ff_dict = web.DataReader('F-F_Research_Data_Factors', 'famafrench', start=self.START_DATE)
-        print(ff_dict['DESCR'])
-        '''
+
         df = web.DataReader('F-F_Research_Data_Factors', 'famafrench', start=self.START_DATE)[0]
         
         df = df.div(100)
@@ -68,6 +65,21 @@ class FammaFrench():
         
         df.index = pd.to_datetime(df.index)
         
+        return df
+
+
+    def get_ff_industry_factors(self):
+        
+        df = web.DataReader('10_Industry_Portfolios', 'famafrench', 
+                                        start=self.START_DATE)[0]
+        
+        df = df.div(100)
+        
+        df.index = df.index.strftime('%Y-%m-%d')
+        
+        df.index.name = 'Date'
+        
+        df.index = pd.to_datetime(df.index)
         return df
 
 
@@ -89,7 +101,6 @@ class FammaFrench():
         coeffs_df : pd.DataFrame
             DataFrame containing the intercept and the three factors for each iteration.
         '''
-
         coeffs = []
 
         for start_index in range(len(input_data) - window_size + 1):
@@ -111,34 +122,52 @@ class FammaFrench():
 
         return coeffs_df
 
-    def three_factor(self):
 
-        plt.rcParams["figure.figsize"] = (20, 7)
+    def three_factor_model(self, df):
 
-        ff_data = self.data
-        print(ff_data)
+        ff_data = df
 
-        ff_data.columns = ['mkt', 'smb', 'hml', 'rf', 'portf_rtn']
+        ff_data.columns = ['portf_rtn', 'mkt', 'smb', 'hml', 'rf']
+        
         ff_data['portf_ex_rtn'] = ff_data.portf_rtn - ff_data.rf
 
         ff_model = smf.ols(formula='portf_ex_rtn ~ mkt + smb + hml',
                            data=ff_data).fit()
-        self.ff_model = ff_model
-        print(f'Results for: {" ".join(self.symbols)}')
-        print(ff_model.summary())
+        
+        # print(ff_model.summary())
 
         for c in ff_data.columns:
             ff_data[c] = pd.to_numeric(ff_data[c])
+
         MODEL_FORMULA = 'portf_ex_rtn ~ mkt + smb + hml'
+        
         results_df = self.rolling_factor_model(ff_data,
                                                MODEL_FORMULA,
-                                               window_size=12)
-        results_df.plot(
-            title=f'{" ,".join(self.symbols)} - Rolling Fama-French Three-Factor model')
-        plt.savefig(os.path.join(
-            img_dirp, 'img/ff_performance_attribution.png'))
+                                               window_size=3)
+        
+        return ff_model.summary(), results_df
 
-        return ff_model.summary()
+
+    def industry_factor_model(self, df):
+
+        ff_data = df
+
+        ff_data.columns = ['portf_rtn', 'NoDur', 'Durbl', 'Manuf', 'Enrgy', 'HiTec', 'Telcm', 'Shops', 'Hlth', 'Utils', 'Other']
+        
+        ff_model = smf.ols(formula='portf_rtn ~ NoDur + Durbl + Manuf + Enrgy + HiTec + Telcm + Shops + Hlth + Utils + Other', data=ff_data).fit()
+        
+        for c in ff_data.columns:
+            ff_data[c] = pd.to_numeric(ff_data[c])
+
+        MODEL_FORMULA = 'portf_rtn ~ NoDur + Durbl + Manuf + Enrgy + HiTec + Telcm + Shops + Hlth + Utils + Other'
+        
+        results_df = self.rolling_factor_model(ff_data, 
+                                          MODEL_FORMULA, 
+                                          window_size=3)
+
+        return ff_model.summary(), results_df
+
+
 
 
     def beta(self):
@@ -149,7 +178,8 @@ class FammaFrench():
         return covariance / benchmark_variance # beta
 
 
-    def automate_analysis(self):
+
+    def automate_analysis(self): # FIXME
         statements = []
 
         beta = self.beta()
@@ -169,41 +199,6 @@ class FammaFrench():
             statements.append(f"Based on A 1% change in the {row['varname']} factor, we can expect our portfolio to return {round(row['coef']*0.01,4)}% in excess of the risk free rate.")
         self.statements = statements
 
-
-
-    ''' multiple regression models '''
-
-    # def three_factor(self):
-    #     self.model = smf.formula.ols(
-    #         formula="port_excess ~ mkt_excess + SMB + HML", data=self.df).fit()
-
-    # def four_factor(self):
-    #     self.model = smf.formula.ols(
-    #         formula="port_excess ~ mkt_excess + SMB + HML + Mom", data=self.df).fit()
-
-    # def five_factor(self):
-    #     self.model = smf.formula.ols(
-    #         formula="port_excess ~ mkt_excess + SMB + HML + ST_Rev + LT_Rev + Mom", data=self.df).fit()
-
-    # def print_summary(self):
-    #     print(self.df.tail())
-    #     print(self.model.summary())
-    #     print('Parameters: ', self.model.params)
-    #     print('R2: ', self.model.rsquared)
-
-    # def plot(self):
-    #     ((self.df + 1).cumprod()).plot(figsize=(15, 7))
-    #     plt.title(f"Famma French Factors", fontsize=16)
-    #     plt.ylabel('Portfolio Returns', fontsize=14)
-    #     plt.xlabel('Year', fontsize=14)
-    #     plt.grid(which="major", color='k', linestyle='-.', linewidth=0.5)
-    #     plt.legend()
-    #     plt.yscale('log')
-    #     plt.show()
-
-    # def plot_text(self):
-    #     plt.text(0.01, 0.05, str(self.model.summary()), {
-    #              'fontsize': 10}, fontproperties='monospace')
 
 
     # def capm():

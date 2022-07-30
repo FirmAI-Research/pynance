@@ -1,80 +1,93 @@
 import pandas as pd
 from pandas_datareader import data as pdr
 import numpy as np
-import datetime as dt
 import sys, os 
 from datetime import date
-import matplotlib.pyplot as plt 
-import scipy 
+import yfinance as yf
+from functools import reduce
+from scipy.stats import norm
+
+import matplotlib.mlab as mlab
+import matplotlib.pyplot as plt
+import scipy
+
+from lib.calendar import Calendar
+cal = Calendar()
 
 cwd = os.getcwd()
 p = cwd + '/io/'
 
+class VaR():
 
-initial_investment = 1000000
-conf_level1 = 0.05 # At the 95% confidence interval; losses should not exceed x
+    def __init__(self, symbols, weights, start_date, initial_capital=1000000, conf_level = 0.05 ) -> None:
+        
+        self.symbols = symbols
 
-# Create our portfolio of equities
-tickers = ['AAPL','FB', 'C', 'DIS']
-weights = np.array([0.25,0.25,0.25,0.25])
+        self.weights = weights
+        
+        self.start_date = start_date
 
-def build_portfolio_returns(tickers):
-    import inspect
-    currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-    parentdir = os.path.dirname(os.path.dirname(currentdir))
-    sys.path.append(parentdir)
-    from Performance import Returns as priceRet      # import Performance Module to retrieve portfolio daily price returns as pd.DataFrame()
-    returns = priceRet.price_returns(symbol = tickers, date_start = '2020-04-21', time_sample='D', cumulative= True, plot = True)
-    return returns
-price_returns = build_portfolio_returns(tickers)
+        self.initial_capital = initial_capital
 
-returns = price_returns.pct_change()
-print(returns.tail(3))
-
-cov_matrix = returns.cov()
-print(cov_matrix.tail(3))
-
-avg_rets = returns.mean()
-port_mean = avg_rets.dot(weights)
-
-port_stdev = np.sqrt(weights.T.dot(cov_matrix).dot(weights))
-mean_investment = (1+port_mean) * initial_investment
-stdev_investment = initial_investment * port_stdev
+        self.conf_level = conf_level # At the 95% confidence interval; losses should not exceed x
 
 
-from scipy.stats import norm
-cutoff1 = norm.ppf(conf_level1, mean_investment, stdev_investment)
+    def get_returns(self):
 
-var_1d1 = initial_investment - cutoff1
-print(var_1d1)
+        frames = []
+
+        for ix, symbol in enumerate(self.symbols):
+    
+            returns = pd.DataFrame(yf.download(symbol, self.start_date, cal.today(), progress=False)['Adj Close'].pct_change().dropna())
+
+            returns.rename(columns={'Adj Close': symbol}, inplace=True)
+
+            frames.append(returns) 
+        
+        df = reduce(lambda x, y: pd.merge(x, y, on='Date', how = 'outer'), frames) # Each underlying holding may have a different date range available, so outer join and fillna returns as 0
+
+        df.fillna(0, inplace=True)
+        
+        df['portf_rtn'] = pd.DataFrame(df.dot(self.weights)) # calculate weighted returns via matrix multiplication
+
+        self.portfolio_returns = df
+
+        return df
 
 
-# Calculate n Day VaR
-var_array = []
-num_days = int(252)
-for x in range(1, num_days+1):    
-    var_array.append(np.round(var_1d1 * np.sqrt(x),2))
-    print(str(x) + " day VaR @ 95% confidence: " + str(np.round(var_1d1 * np.sqrt(x),2)))
 
-# Build plot
-plt.xlabel("Day #")
-plt.ylabel("Max portfolio loss (USD)")
-plt.title("Max portfolio loss (VaR) over 15-day period")
-plt.plot(var_array, "r")
-plt.show()
-plt.savefig(f'{p}Portfolio_VaR.png')
+    def calculate_value_at_risk(self):
+        
+        cov_matrix = self.portfolio_returns.iloc[:, :-1].cov() # drop the last column to exclude the weighted portfolio return calculation 'portf_rtn'
+
+        port_stdev = np.sqrt(np.array(self.weights).T.dot(cov_matrix).dot(np.array(self.weights)))
+
+        mean_investment = (1+self.portfolio_returns) * self.initial_capital
+
+        stdev_investment =  self.initial_capital * port_stdev
+
+        cutoff = norm.ppf(self.conf_level, mean_investment, stdev_investment)
+
+        var_1d1 = self.initial_capital - cutoff
+        
+        # Calculate n Day VaR
+        var_array = []
+        for x in range(1, 252+1):    
+            var_array.append(np.round(var_1d1[x] * np.sqrt(x),2))
+            # print(str(x) + " day VaR @ 95% confidence: " + str(np.round(var_1d1[x] * np.sqrt(x),2)))
+
+        plt.xlabel("Day #")
+        plt.ylabel("Max portfolio loss (USD)")
+        plt.title("Max portfolio loss (VaR) over 252-day period")
+        plt.plot(var_array, "r")
+        plt.show()
+
+        # for c in self.portfolio_returns.iloc[:, :-1].columns:
+        #     self.portfolio_returns[c].hist(bins=40, histtype="stepfilled",alpha=0.5)
+        #     x = np.linspace(self.portfolio_returns.iloc[:, :-1] - 3*port_stdev, self.portfolio_returns.iloc[:, :-1]+3*port_stdev,100)
+        #     plt.plot(x, scipy.stats.norm.pdf(x, self.portfolio_returns.iloc[:, :-1], port_stdev), "r")
+        #     plt.title(f"{c} returns (binned) vs. normal distribution")
+        #     plt.show()
 
 
-# VaR assumes that the price returns of our assets are normaly distributed
 
-import matplotlib.mlab as mlab
-import matplotlib.pyplot as plt
-# Repeat for each equity in portfolio
-for c in price_returns.columns:
-    returns[c].hist(bins=40, histtype="stepfilled",alpha=0.5)
-    x = np.linspace(port_mean - 3*port_stdev, port_mean+3*port_stdev,100)
-    plt.plot(x, scipy.stats.norm.pdf(x, port_mean, port_stdev), "r")
-    plt.title(f"{c} returns (binned) vs. normal distribution")
-    plt.savefig(f'{p}histo_{c}.png')
-
-    plt.show()
