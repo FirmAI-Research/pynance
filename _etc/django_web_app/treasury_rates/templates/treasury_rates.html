@@ -1,0 +1,464 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+
+{% block content %}
+
+<h1 style="color:teal">U.S. Treasury Rates</h1>
+
+
+<section class="container-large py-8">
+    <div class="row">
+        <div class="col-lg-12">
+            <ul id="tabs" class="nav nav-tabs">
+                <li class="nav-item"><a href="#period_change" data-target="#period_change" data-toggle="tab"
+                        class="nav-link small text-uppercase active">Periodic Change</a></li>
+                <li class="nav-item"><a href="" data-target="#daily_rates" data-toggle="tab"
+                        class="nav-link small text-uppercase">Daily Rates</a></li>
+                <li class="nav-item"><a href="" data-target="#all_tenors" data-toggle="tab"
+                        class="nav-link small text-uppercase">All Tenors</a></li>
+
+            </ul>
+            <br>
+
+            <div id="tabsContent" class="tab-content">
+
+                <!-- // Div Tab 1 ******************************************************************************************************************** -->
+                <div id="period_change" class="tab-pane fade active show">
+
+
+                    <figure class="highcharts-figure">
+                        <div id="point_in_time_curves" style="width:50%;height:50%; float:left"></div>
+                    </figure>
+
+                    <figure class="highcharts-figure">
+                        <div id="spiderweb" style="width:50%;height:50%; float:left"></div>
+                    </figure>
+
+                    <h3 style="color:teal">Periodic Changes</h3>
+                    <!-- pass pd.DataFrame variable from view and populate highcharts table -->
+                    <table id="periodic_change_table" class="display" style="width:100%">
+                        <thead>
+                            <tr>
+                                {% for key, v in periodic_nominal_changes.items %}
+                                <th>{{key}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in periodic_nominal_changes_values %}
+                            <tr>
+                                {% for value in item %}
+                                <td>{{value}}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <!-- table footers are optional -->
+                    </table>
+
+
+
+                    <!-- <figure class="highcharts-figure">
+                        <div id="change_distribution" style="width:50%;height:75%; float:left"></div>
+                    </figure> -->
+
+
+
+                </div>
+
+
+                <!-- // Div Tab 1 ******************************************************************************************************************** -->
+                <div id="daily_rates" class="tab-pane fade">
+
+                    <!-- pass pd.DataFrame variable from view and populate highcharts table -->
+                    <table id="rates_table" class="display" style="width:100%">
+                        <thead>
+                            <tr>
+                                {% for key, v in rates_table.items %}
+                                <th>{{key}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in values %}
+                            <tr>
+                                {% for value in item %}
+                                <td>{{value}}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <!-- table footers are optional -->
+                    </table>
+
+                </div>
+
+
+
+                <!-- // Div Tab 1 ******************************************************************************************************************** -->
+                <div id="all_tenors" class="tab-pane fade">
+
+                    <figure class="highcharts-figure">
+                        <div id="all_tenors_over_time" style="width:100%;height:100%; float:left"></div>
+                    </figure>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<div style="clear:both;"></div>
+
+<div style='display:block;height:30%;width:10%'></div>
+<!-- blank spacer to add new widgets below the charts populated atop of the tab -->
+
+
+
+<style type="text/css">
+    /* bootstrap hack: fix content width inside hidden tabs */
+    .tab-content>.active,
+    .pill-content>.active {
+        display: block;
+        visibility: visible;
+        position: absolute;
+        width: 100%;
+    }
+</style>
+
+
+
+
+{% endblock content %}
+
+
+
+
+{% block js %}
+
+
+<script>
+    // Most likely your table is hidden initially which prevents jQuery DataTables from calculating column widths. If table is in the tab, you need to adjust headers when tab becomes visible.
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $($.fn.dataTable.tables(true)).DataTable()
+            .columns.adjust();
+    });
+
+    $(document).ready(function () {
+
+        var table = $('#rates_table').DataTable({
+            "ordering": true,
+            "info": true,
+            "order": [[0, "asc"]],
+            // "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+            "scrollY": "500px",
+            "scrollCollapse": true,
+            "paging": false,
+            "stateSave": true,
+            "searching": false,
+
+            // rowCallback only has the current row data with in context. custom function to save each row's data on callback iteration and reference it for comparison in the next row
+            'rowCallback': function (row, data, index) {
+                if (typeof previousRowData === 'undefined') {
+                    previousRowData = data                                    // the previousRowData variable will not exist until the end of the first iteration of the rowCallback function
+                }
+                else {
+                    for (let i = 1; i < data.length + 1; i++) {                      // iterate through each column in the row (data) array excluding the date index
+                        if (data[i] > previousRowData[i]) {
+                            $(row).find(`td:eq(${i})`).css('color', 'green'); // string literal uses backtick key
+                        }
+                        else if (data[i] < previousRowData[i]) {
+                            $(row).find(`td:eq(${i})`).css('color', 'red');
+                        }
+                    }
+                    previousRowData = data  // set previous rows data eq to the row that was just iterated through
+                }
+            }
+        });
+
+
+
+        var table = $('#periodic_change_table').DataTable({
+            "ordering": true,
+            "info": true,
+            "order": [[0, "asc"]],
+            "scrollY": "500px",
+            "scrollCollapse": true,
+            "paging": false,
+            "stateSave": true,
+            "searching": false,
+
+            'rowCallback': function (row, data, index) {
+                for (let i = 1; i < data.length + 1; i++) {                      // iterate through each column in the row (data) array excluding the date index
+                    if (data[i] > 0) {
+                        $(row).find(`td:eq(${i})`).css('color', 'green'); // string literal uses backtick key
+                    }
+                    else if (data[i] < 0) {
+                        $(row).find(`td:eq(${i})`).css('color', 'red');
+                    }
+                }
+            }
+
+
+        });
+
+
+    });
+
+
+    // 
+    Highcharts.chart('point_in_time_curves', {
+
+
+        title: {
+            text: 'Curves at Points in Time'
+        },
+
+        subtitle: {
+            text: 'Source: treasury.gov'
+        },
+
+        yAxis: {
+            title: {
+                text: 'Yield Curves'
+            }
+        },
+
+        xAxis: {
+            accessibility: {
+                rangeDescription: 'Range: 3 Months'
+            },
+            categories: ['1 Month', '2 Month', '3 Month', '6 Month', '1 Year', '2 Year', '3 Year', '5 Year', '7 Year', '10 Year', '20 Year', '30 Year']
+        },
+
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+            }
+        },
+
+        series: JSON.parse("{{points_in_time_json|escapejs}}"),        // access context variable passed through view; use |escapejs instead of |safe
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
+    });
+
+
+
+    // 
+    Highcharts.chart('all_tenors_over_time', {
+
+
+        title: {
+            text: 'All Tenors'
+        },
+
+        subtitle: {
+            text: 'Source: treasury.gov'
+        },
+
+        yAxis: {
+            title: {
+                text: 'Yield Curves'
+            }
+        },
+
+        xAxis: {
+            accessibility: {
+                rangeDescription: ''
+            },
+            // type: "datetime",
+            // labels: {
+            //     format: '{value:%Y-%b-%e}'
+            // },
+            categories: JSON.parse("{{all_tenors_x_axis|escapejs}}")
+
+        },
+
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+                // pointStart: 2022
+
+            }
+        },
+
+        series: JSON.parse("{{all_tenors_over_time|escapejs}}"),        // access context variable passed through view; use |escapejs instead of |safe
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
+    });
+
+
+
+    // Highcharts.chart('change_distribution', {
+    //     chart: {
+    //         type: 'area'
+    //     },
+    //     title: {
+    //         text: 'Daily Change by Tenor'
+    //     },
+    //     subtitle: {
+    //         text: 'Rolling five days; Source: treasury.gov'
+    //     },
+    //     xAxis: {
+    //         tickmarkPlacement: 'on',
+    //         title: {
+    //             enabled: false
+    //         },
+    //         categories: JSON.parse("{{change_x_axis|escapejs}}")
+
+    //     },
+    //     yAxis: {
+    //         title: {
+    //             text: 'Daily Change'
+    //         },
+    //         labels: {
+    //             formatter: function () {
+    //                 return this.value;
+    //             }
+    //         }
+    //     },
+    //     tooltip: {
+    //         split: true,
+    //         valueSuffix: ' ',
+    //         pointFormat: '<span style="color:{series.color}">{series.name}: <b>{point.y:,.2f}</b><br/>'
+
+    //     },
+    //     plotOptions: {
+    //         area: {
+    //             stacking: 'percent',
+    //             lineColor: '#666666',
+    //             lineWidth: 1,
+    //             marker: {
+    //                 enabled: false,
+    //                 lineWidth: 0,
+    //                 lineColor: '#666666'
+    //             }
+    //         }
+    //     },
+    //     series: JSON.parse("{{weekly_change|escapejs}}"),        // access context variable passed through view; use |escapejs instead of |safe
+
+    // });
+
+
+
+
+    //
+    Highcharts.chart('spiderweb', {
+
+        chart: {
+            polar: true,
+            type: 'line'
+        },
+
+        accessibility: {
+            description: 'A spiderweb chart compares the allocated budget against actual spending within an organization. The spider chart has six spokes. Each spoke represents one of the 6 departments within the organization: sales, marketing, development, customer support, information technology and administration. The chart is interactive, and each data point is displayed upon hovering. The chart clearly shows that 4 of the 6 departments have overspent their budget with Marketing responsible for the greatest overspend of $20,000. The allocated budget and actual spending data points for each department are as follows: Sales. Budget equals $43,000; spending equals $50,000. Marketing. Budget equals $19,000; spending equals $39,000. Development. Budget equals $60,000; spending equals $42,000. Customer support. Budget equals $35,000; spending equals $31,000. Information technology. Budget equals $17,000; spending equals $26,000. Administration. Budget equals $10,000; spending equals $14,000.'
+        },
+
+        title: {
+            text: 'Daily Absolute Change',
+            x: -80
+        },
+
+        pane: {
+            size: '100%'
+        },
+
+        xAxis: {
+            categories: ['1 Month', '2 Month', '3 Month', '6 Month', '1 Year', '2 Year', '3 Year', '5 Year', '7 Year', '10 Year', '20 Year', '30 Year'],
+            tickmarkPlacement: 'off',
+            lineWidth: 0,
+            labels: {
+                useHTML: false,
+            }
+        },
+
+        yAxis: {
+            gridLineInterpolation: 'polygon',
+            lineWidth: 0,
+            min: 0
+        },
+
+        tooltip: {
+            shared: false,
+            pointFormat: '<span style="color:{series.color}">{series.name}: <b>{point.y:,.2f}</b><br/>'
+        },
+
+        legend: {
+            align: 'right',
+            verticalAlign: 'middle',
+            layout: 'vertical'
+        },
+
+        series: JSON.parse("{{weekly_change_spider|escapejs}}"),
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 750
+                },
+                chartOptions: {
+                    legend: {
+                        align: 'center',
+                        verticalAlign: 'bottom',
+                        layout: 'horizontal'
+                    },
+                    pane: {
+                        size: '100%'
+                    }
+                }
+            }]
+        }
+
+    });
+
+
+
+
+</script>
+
+{% endblock js %}

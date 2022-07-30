@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+
+{% block content %}
+
+<h1 style="color:teal">Pricing</h1>
+
+
+
+<section class="container-large py-4">
+    <div class="row">
+        <div class="col-md-12">
+            <ul id="tabs" class="nav nav-tabs">
+                <li class="nav-item"><a href="" data-target="#ff" data-toggle="tab"
+                        class="nav-link small text-uppercase active">GIC</a></li>
+                <li class="nav-item"><a href="" data-target="#var" data-toggle="tab"
+                        class="nav-link small text-uppercase">Option</a></li>
+                <li class="nav-item"><a href="" data-target="#sa" data-toggle="tab"
+                        class="nav-link small text-uppercase disabled">Swap</a></li>
+                <li class="nav-item"><a href="" data-target="#beta" data-toggle="tab"
+                        class="nav-link small text-uppercase disabled">Forward</a></li>
+                <li class="nav-item"><a href="" data-target="#beta" data-toggle="tab"
+                        class="nav-link small text-uppercase disabled">Future</a></li>
+            </ul>
+            <br>
+            <div id="tabsContent" class="tab-content">
+
+                <!-- // Div Tab 1 ******************************************************************************************************************** -->
+                <div id="ff" class="tab-pane fade active show">
+
+                    <div style="text-align: center; ">
+                        <h3 style="color:teal">...</h3>
+           
+                    </div>
+
+                    <div>
+          
+                    </div>
+
+
+                </div>
+                <div id="var" class="tab-pane fade">
+                    <h3 style="color:teal">...</h3>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+{% endblock content %}
+
+
+
+
+
+{% block js %}
+
+<script>
+
+    // Data Picker Initialization
+    $('.datepicker_strt').datepicker({
+        // inline: true
+    });
+
+    $('.datepicker_end').datepicker({
+        // inline: true
+    });
+
+
+</script>
+{% endblock js %}
+
