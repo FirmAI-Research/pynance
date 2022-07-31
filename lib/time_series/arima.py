@@ -10,30 +10,21 @@ import matplotlib
 import pandas as pd
 from pandas import read_csv
 from statsmodels.tsa.arima.model import ARIMA as _ARIMA
-
-from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_squared_error
 from math import sqrt
 warnings.filterwarnings("ignore")
-
 import sys, os
-
 import matplotlib.pyplot as plt
-
 from statsmodels.graphics.tsaplots import plot_acf, acf, plot_pacf, pacf
 from statsmodels.tsa.stattools import acf, q_stat, adfuller
 import statsmodels.api as sm
 from scipy import stats as scs
 from scipy.stats import probplot, moment
-from sklearn.metrics import mean_squared_error
 import seaborn as sns
 import numpy as np 
 
-cwd = os.getcwd()
-img_dirp = os.path.join(cwd, '/static/')
-print(img_dirp)
 
-from timeseries import TimeSeries 
+from lib.time_series.timeseries import TimeSeries 
 
 class Arima(TimeSeries):
     ''' auto regressive integrated moving average
@@ -53,18 +44,20 @@ class Arima(TimeSeries):
     q_values = range(0, 3) # moving average order --> use the maximum statistically significant lag from auto correlation plot
     
     adjust p,d,q and train test size to prevent LinAlgError: Schur decomposition solver error.
+
+    https://www.analyticsvidhya.com/blog/2021/07/stock-market-forecasting-using-time-series-analysis-with-arima-model/
     
     '''
     def __init__(   self, 
                     df:pd.DataFrame=None, 
                     col:str = None,
                     order:tuple = None,
-                    train_test_size:float = 0.4
+                    train_test_size = 0.4
                 ):
         self.data = df[col]
         self.col = col
         self.order = order
-        self.train_test_size = 0.50 # % of train / test set to slice
+        self.train_test_size = train_test_size
 
         if order is None:
             raise ValueError('[ERROR] An order of (p, d, q) must be specified for an Arima model')
@@ -84,6 +77,7 @@ class Arima(TimeSeries):
 
         # fit model
         model = _ARIMA(self.series, order=self.order)
+        self.model = model
         self.model_fit = model.fit()
 
         # summary of fit model
@@ -91,8 +85,8 @@ class Arima(TimeSeries):
         
         # line plot of residuals
         residuals = pd.DataFrame(self.model_fit.resid)
-        residuals.plot()
-        plt.show()
+        # residuals.plot()
+        # plt.show()
         
         # density plot of residuals
         residuals.plot(kind='kde')
@@ -169,14 +163,13 @@ class Arima(TimeSeries):
 
 
     def plot_correlogram(self, lags=10, title=None): 
-        # NOTE: without passing residuals this meethod can notbe used by the optimal brute force finder
 
         def moving_average(self, a:pd.array, n:int=3) :
             ret = np.cumsum(a)
             ret[n:] = ret[n:] - ret[:-n]
             return ret[n - 1:] / n
             
-        matplotlib.use('TkAgg') # NOTE: necessary due to inheritence of TimeSeries which uses 'Agg'
+        # matplotlib.use('TkAgg') # NOTE: necessary due to inheritence of TimeSeries which uses 'Agg'
         x = self.data
         lags = min(10, int(len(x)/5)) if lags is None else lags
         fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(14, 8))
@@ -218,7 +211,7 @@ class Arima(TimeSeries):
         fig : matplotlib.figure.Figure
             Created figure
         '''
-        matplotlib.use('TkAgg') # NOTE: necessary due to inheritence of TimeSeries which uses 'Agg'
+        # matplotlib.use('TkAgg') # NOTE: necessary due to inheritence of TimeSeries which uses 'Agg'
 
         # create placeholder subplots
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
@@ -352,56 +345,90 @@ class Arima(TimeSeries):
     
 
     # FIXME
-    def _forecast(self, n_forecasts):
-        auto_arima_pred = self.model_fit.predict(n_periods=n_forecasts, 
-                                    return_conf_int=True, 
-                                    alpha=0.05)
-        print(auto_arima_pred)
-        auto_arima_pred = [pd.DataFrame(auto_arima_pred[0], 
-                                        columns=['prediction']),
-                        pd.DataFrame(auto_arima_pred[1], 
-                                        columns=['ci_lower', 'ci_upper'])]
+    # def _forecast(self, n_forecasts):
+    #     auto_arima_pred = self.model_fit.predict(n_periods=n_forecasts, 
+    #                                 return_conf_int=True, 
+    #                                 alpha=0.05)
+    #     print(auto_arima_pred)
+    #     auto_arima_pred = [pd.DataFrame(auto_arima_pred[0], 
+    #                                     columns=['prediction']),
+    #                     pd.DataFrame(auto_arima_pred[1], 
+    #                                     columns=['ci_lower', 'ci_upper'])]
 
-        auto_arima_pred = pd.concat(auto_arima_pred, 
-                                    axis=1).set_index(self.index)
+    #     auto_arima_pred = pd.concat(auto_arima_pred, 
+    #                                 axis=1).set_index(self.index)
 
-        fig, ax = plt.subplots(1)
+    #     fig, ax = plt.subplots(1)
 
-        ax = sns.lineplot(data=test, color=COLORS[0], label='Actual')
+    #     ax = sns.lineplot(data=test, color=COLORS[0], label='Actual')
 
-        ax.plot(arima_pred.prediction, c=COLORS[1], label='ARIMA(2,1,1)')
-        ax.fill_between(arima_pred.index,
-                        arima_pred.ci_lower,
-                        arima_pred.ci_upper,
-                        alpha=0.3, 
-                        facecolor=COLORS[1])
+    #     ax.plot(arima_pred.prediction, c=COLORS[1], label='ARIMA(2,1,1)')
+    #     ax.fill_between(arima_pred.index,
+    #                     arima_pred.ci_lower,
+    #                     arima_pred.ci_upper,
+    #                     alpha=0.3, 
+    #                     facecolor=COLORS[1])
 
-        ax.plot(auto_arima_pred.prediction, c=COLORS[2], 
-                label='ARIMA(3,1,2)')
-        ax.fill_between(auto_arima_pred.index,
-                        auto_arima_pred.ci_lower,
-                        auto_arima_pred.ci_upper,
-                        alpha=0.2, 
-                        facecolor=COLORS[2])
+    #     ax.plot(auto_arima_pred.prediction, c=COLORS[2], 
+    #             label='ARIMA(3,1,2)')
+    #     ax.fill_between(auto_arima_pred.index,
+    #                     auto_arima_pred.ci_lower,
+    #                     auto_arima_pred.ci_upper,
+    #                     alpha=0.2, 
+    #                     facecolor=COLORS[2])
 
-        ax.set(title="Google's stock price  - actual vs. predicted", 
-            xlabel='Date', 
-            ylabel='Price ($)')
-        ax.legend(loc='upper left')
+    #     ax.set(title="Google's stock price  - actual vs. predicted", 
+    #         xlabel='Date', 
+    #         ylabel='Price ($)')
+    #     ax.legend(loc='upper left')
 
-        plt.tight_layout()
-        #plt.savefig('images/ch3_im25.png')
+    #     plt.tight_layout()
+    #     #plt.savefig('images/ch3_im25.png')
+    #     plt.show()
+
+
+    def arima_forecast(self, train_data, test_data):
+        fitted = self.model.fit()  
+
+        fc = fitted.forecast(steps = 40, alpha=0.05)  # 95% conf
+        conf = pd.DataFrame(fitted.get_forecast(steps = 40, alpha=0.05).conf_int()) # column 0 = lower conf int, column 1 = upper conf int; steps should = number of training periods
+
+        fc_series = pd.Series(np.exp(fc.values.tolist()), index=test_data.index) # NOTE np.exp
+        lower_series = pd.Series(np.exp(conf.iloc[:, 0]).values.tolist(), index=test_data.index)
+        upper_series = pd.Series(np.exp(conf.iloc[:, 1]).values.tolist(), index=test_data.index)
+
+        # Plot
+        plt.figure(figsize=(10,5), dpi=100)
+        plt.plot(train_data, label='training data')
+        plt.plot(test_data, color = 'blue', label='Actual Stock Price')
+        plt.plot(fc_series, color = 'orange',label='Predicted Stock Price')
+        plt.fill_between(lower_series.index, lower_series, upper_series, 
+                        color='k', alpha=.10)
+        plt.title('Stock Price Prediction')
+        plt.xlabel('Time')
+        plt.ylabel('Stock Price')
+        plt.legend(loc='upper left', fontsize=8)
         plt.show()
 
 
+    def forecast_stats(self):
+        # report performance
+        mse = mean_squared_error(test_data, fc)
+        print('MSE: '+str(mse))
+        mae = mean_absolute_error(test_data, fc)
+        print('MAE: '+str(mae))
+        rmse = math.sqrt(mean_squared_error(test_data, fc))
+        print('RMSE: '+str(rmse))
+        mape = np.mean(np.abs(fc - test_data)/np.abs(test_data))
+        print('MAPE: '+str(mape))
+
 #  @test
-fp = '/Users/michaelsands/data/fred_prices.csv'  #'/Users/michaelsands/data/stock_prices.csv'
+# fp = '/Users/michaelsands/data/fred_prices.csv'  #'/Users/michaelsands/data/stock_prices.csv'
 #  10 year treasuries are not stationary; need to differnce
+# df = pd.read_csv(fp).iloc[-1000:,  :]
 
-df = pd.read_csv(fp).iloc[-1000:,  :]
-
-a  =  Arima(df = df, col = 'DGS10', order = (1, 1, 1))
-a.model()
+# a  =  Arima(df = df, col = 'DGS10', order = (1, 1, 1))
+# a.model()
 # a.check_stationarity(difference=False)
 # a.evaluate()
 # a._forecast(10)
@@ -409,4 +436,4 @@ a.model()
 # a.arima_diagnostics(a.model_fit.resid, 40)
 # a.plot_model_summary(a.model_fit.summary())
 # print(a.model_fit.forecast(steps=10))
-a.univariate_time_series_optimal_model()
+# a.univariate_time_series_optimal_model()
