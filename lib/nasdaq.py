@@ -40,7 +40,7 @@ class Nasdaq:
     mydata = nasdaqdatalink.get("EIA/PET_RWTC_D")
 
     """    
-    iodir =  os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/_tmp/nasdaq_data_link/'  
+    iodir =  os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/data/nasdaq_data_link/'  
 
     # equtiy
     def __init__(self):
@@ -48,7 +48,7 @@ class Nasdaq:
 
 
     def authenticate(self):        
-        fp = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/_tmp/nasdaq_data_link.json'
+        fp = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/data/nasdaq_data_link.json'
         with open(fp) as f:
             data = json.load(f)
         #nasdaqdatalink.read_key() 
@@ -176,10 +176,10 @@ class Fundamentals(Nasdaq):
 
         print(f'Today: {cal.today()}')
 
-        if self.ticker:
+        if self.ticker and self.calendardate == None:
             df = pd.DataFrame(nasdaqdatalink.get_table(self.name, dimension="MRQ", ticker = self.ticker)) 
         else:    
-            df = nasdaqdatalink.get_table(self.name, dimension="MRQ", calendardate=[self.calendardate],  paginate=True) 
+            df = nasdaqdatalink.get_table(self.name, dimension="MRQ", calendardate=[self.calendardate], ticker = self.ticker,  paginate=True) 
 
         #FIXME: ALL PERCENTAGES SHOUKLD BE IN DECIMAL FORMAT
         df['shequity'] = df['assets'] - (df['liabilities'] )
@@ -215,13 +215,13 @@ class Fundamentals(Nasdaq):
 
         self.df = df
 
-        df = yf.download([self.ticker, 'SPY'], '2021-01-01')['Adj Close']
-        price_change = df.pct_change()
-        df = price_change.drop(price_change.index[0])
-        self.wacc(df)
+        # df = yf.download(self.ticker, '2021-01-01')['Adj Close']
+        # price_change = df.pct_change()
+        # df = price_change.drop(price_change.index[0])
+        # self.wacc(df)
 
-        self.df['value of equity in opperating assets'] = self.df['netinc'] * (1- self.df['equity reinvestment rate']) * ((1 + self.df['expected netinc growth'] ) / self.df['cost_of_equity'] - self.df['expected netinc growth'])
-        self.df['value'] = self.df['value of equity in opperating assets'] / self.df['sharesbas']
+        # self.df['value of equity in opperating assets'] = self.df['netinc'] * (1- self.df['equity reinvestment rate']) * ((1 + self.df['expected netinc growth'] ) / self.df['cost_of_equity'] - self.df['expected netinc growth'])
+        # self.df['value'] = self.df['value of equity in opperating assets'] / self.df['sharesbas']
         return self.df
 
 
