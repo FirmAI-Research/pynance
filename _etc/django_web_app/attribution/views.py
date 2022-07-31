@@ -7,7 +7,7 @@ from django.shortcuts import render
 
 # from lib.attribution.Famma_French.famma_french import FammaFrench
 from lib.attribution.Famma_French.famma_french_II import FammaFrench
-from lib.attribution.PCA.portfolio_risk_pca import PCA_VaR, VaR
+from lib.attribution.portfolio_risk_pca import PCA_VaR, VaR
 
 from lib.calendar import Calendar
 cal = Calendar()

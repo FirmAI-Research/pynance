@@ -36,7 +36,7 @@ class PCA_VaR:
 
         self.df_factor_loading, self.variance_percent_df, self.variance_ratio_df = self.compute_factors()
 
-        self.portfolio_data = pd.read_csv(fp)
+        # self.portfolio_data = pd.read_csv(fp)
 
         self.build_results()
 
@@ -78,7 +78,7 @@ class PCA_VaR:
         return df_factor_loading, variance_percent_df, variance_ratio_df
 
 
-    def build_results(self):
+    def build_results(self, df):
         '''
         calculating VaR using PCA
         the respective factor loading (from step ‘c’ above) is multiplied by the PV01 for that specific tenor (from step ‘d’ above). This result is then multiplied by the variance of the factor loadings (from step ‘c’ above). We will do this for both the PCs namely PC1 and PC2 .
