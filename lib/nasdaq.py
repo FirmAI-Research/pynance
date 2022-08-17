@@ -292,7 +292,7 @@ class Tickers(Nasdaq):
             print('Tickers File does not exist or has not been updated today. Downloading full query results...')
             print(f'Modified: {pd.to_datetime(self.get_modified_time(fp))}')
             print(f'Today: {cal.today()}')
-            df = nasdaqdatalink.get_table(self.name, table="SF1", paginate=True ) #qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
+            df = nasdaqdatalink.get_table(self.name, ) #qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
             df = df.loc[(df.isdelisted == 'N') & (df.lastpricedate == max(df.lastpricedate)) ]
             df = df.drop_duplicates(subset=['ticker', 'name'])
             df.to_excel(fp)
