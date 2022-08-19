@@ -84,8 +84,7 @@ class TreasuryRates:
 
         t = pd.DataFrame(self.df.iloc[-1]).transpose()
         df = pd.concat([x, y,z,w, t], axis=0).set_index('date').transpose()
-        print(df)
-        return self.to_highcharts(df)
+        return df #self.to_highcharts(df)
 
 
     def all_tenors_over_time(self):
@@ -97,7 +96,7 @@ class TreasuryRates:
         weekly_rows = self.df.iloc[-5:]
         weekly_diff = weekly_rows.set_index('date').diff().dropna(how='all', axis=0).reset_index(drop=False)
         x_axis = json.dumps(weekly_diff.date.apply(lambda x : pd.to_datetime(x).strftime('%b %d %Y')).tolist())
-        return self.to_highcharts(weekly_diff.set_index('date')) , x_axis
+        return weekly_diff#self.to_highcharts(weekly_diff.set_index('date')) , x_axis
 
 
     def change_distribution_spider(self):
