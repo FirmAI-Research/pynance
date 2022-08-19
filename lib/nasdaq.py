@@ -174,7 +174,7 @@ class Fundamentals(Nasdaq):
     def get(self): # NOTE using prior quarter fundamentals for complete dataset
         fp = f'{self.iodir}/all_fundamentals.xlsx'
 
-        print(f'Today: {cal.today()}')
+        # print(f'Today: {cal.today()}')
 
         if self.ticker and self.calendardate == None:
             df = pd.DataFrame(nasdaqdatalink.get_table(self.name, dimension="MRQ", ticker = self.ticker)) 
@@ -289,15 +289,15 @@ class Tickers(Nasdaq):
         fp = f'{self.iodir}/all_tickers.xlsx'
 
         if not os.path.exists(fp) or (pd.to_datetime(pd.to_datetime(self.get_modified_time(fp)).strftime('%Y-%m-%d')) < pd.to_datetime(pd.to_datetime(utc.localize(cal.today())).strftime('%Y-%m-%d')) ): 
-            print('Tickers File does not exist or has not been updated today. Downloading full query results...')
-            print(f'Modified: {pd.to_datetime(self.get_modified_time(fp))}')
-            print(f'Today: {cal.today()}')
+            # print('Tickers File does not exist or has not been updated today. Downloading full query results...')
+            # print(f'Modified: {pd.to_datetime(self.get_modified_time(fp))}')
+            # print(f'Today: {cal.today()}')
             df = nasdaqdatalink.get_table(self.name, ) #qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
             df = df.loc[(df.isdelisted == 'N') & (df.lastpricedate == max(df.lastpricedate)) ]
             df = df.drop_duplicates(subset=['ticker', 'name'])
             df.to_excel(fp)
         else:
-            print('Tickers data has been updated today - reading from file')
+            # print('Tickers data has been updated today - reading from file')
             df = pd.read_excel(fp)
 
         return df

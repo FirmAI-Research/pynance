@@ -19,7 +19,6 @@ warnings.simplefilter(action='ignore', category=RuntimeWarning)
 populates tables for each sector and industry of peer percentiles and ranks for the MOST RECENT QUARTER
 '''
 
-
 def get_numeric_cols(df):
     return df.select_dtypes(exclude=['object', 'datetime64']).columns
 
@@ -115,7 +114,8 @@ def fundamental_peer_percentiles():
             # print('[SUCCESS] Sector Percentiles and Ranks for {}'.format(sector_str))
 
         except Exception as e:
-            print(f'*****[ERROR]***** {e}')            
+            # print(f'*****[ERROR]***** {e}')            
+            pass       
 
     # @Industry
 
@@ -140,7 +140,8 @@ def fundamental_peer_percentiles():
             industry_rank_frames[industry_str] = company_ranks
 
         except Exception as e:
-            print(f'*****[ERROR]***** {e}')          
+            # print(f'*****[ERROR]***** {e}')   
+            pass       
     # 
 
     return unique_sectors_list, unique_industries_list, sector_percentile_frames, sector_rank_frames , industry_percentile_frames, industry_rank_frames
