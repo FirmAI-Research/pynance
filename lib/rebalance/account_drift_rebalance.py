@@ -15,35 +15,9 @@ new_money_in = 1000
 drift = 0.05
 min_hold_days = 90
 
-class Rebalance:
+outdir =  os.path.join(cwd, 'output')
 
-    def __init__():
-        pass
-
-
-    def get_current_portfolio():
-        pass
-
-
-    def get_target_portfolio():
-        pass
-
-
-    def build_rebalancing_frame():
-        pass
-
-
-    def calculate_drift(df):
-        pass
-
-
-    def calculate_trades(df):
-        pass
-
-
-#-----------------------------------------------------------------------------------------------------------------------
-
-def build_initial_portfolios():
+def build_initial_portfolios(columns_t, positions_t, columns_c, positions_c):
     """
     build pandas df for current and target allocations
     :param: new_money_in ~ amount of dollars to deploy
@@ -53,34 +27,6 @@ def build_initial_portfolios():
     :return: 
     :rtype: tuple(pd.DataFrame)
     """
-
-    # portfolio targets "t"
-    columns_t = ['ticker','allocation_target','assetclass']
-    positions_t = [
-        ['SPY',0.1,'ETF'],
-        ['IWM',0.1,'ETF'],
-        ['QQQ',0.1,'ETF'],
-        ['XLF',0.1,'ETF'],
-        ['XLI',0.1,'ETF'],
-        ['EEM',0.1,'ETF'],
-        ['XLV',0.1,'ETF'],
-        ['IAU',0.1,'ETF'],
-        ['TLT',0.1,'ETF'],
-        ['SHV',0.05,'ETF'],
-        ['HYG',0.05,'ETF'],
-        ]
-
-    # portfolio current holdings "c"
-    columns_c = ['accounttype','accountid','lastrebaldate','ticker','assetclass','basisdate','costbasis','shares']
-    positions_c = [     ['RIRA','0001','2020-11-16','SPY','ETF','2018-11-16', 260   ,913.483], # roth
-                        ['RIRA','0001','2020-11-16','QQQ','ETF','2018-11-16', 175  ,514.298],
-                        ['RIRA','0001','2020-11-16','XLF','ETF','2018-11-16',  27  ,151.121],
-
-                        ['401K','0002','2020-11-16','SPY','ETF','2018-11-16',  260  ,772.407], # 401k
-                        ['401K','0002','2020-11-16','IWM','ETF','2018-11-16',  157  ,151.578],
-
-                        ['TIRA','0003','2020-11-16','HYG','ETF','2018-11-16', 85   ,3.14], # traditional ira
-                        ['TIRA','0003','2020-11-16','IAU','ETF','2018-11-16',  18   ,549.871]        ]
 
     # check target portfolio allocations
     targetalloc = pd.DataFrame(columns = columns_t, data = positions_t)
@@ -104,22 +50,14 @@ def build_initial_portfolios():
     agg_port = start_port.groupby(['ticker']).apply(f)
     tickers = set(targetalloc.ticker.unique().tolist()+start_port.ticker.unique().tolist())
 
+    targetalloc.to_csv(outdir +'targetalloc.csv')
+    start_port.to_csv(outdir +'start_port.csv')
+    agg_port.to_csv(outdir +'agg_port.csv')
+
     return  (tickers,  targetalloc, start_port, agg_port)
 
-# build 3 df - 1) target allocation df, 2) current pos df, 3) current pos aggregated by ticker on weighted avg.
-tickers, targetalloc, start_port, agg_port = build_initial_portfolios()
-print(targetalloc.head())
-print(start_port.head())
-print(agg_port.head())
-targetalloc.to_csv(outdir +'targetalloc.csv')
-start_port.to_csv(outdir +'start_port.csv')
-agg_port.to_csv(outdir +'agg_port.csv')
 
-
-'''
-@todo: use pandas market calendar to determine n days from now to yesterday, start, & end
-'''
-def retrieve_latest_security_price():
+def retrieve_latest_security_price(tickers):
 
     now = datetime.datetime.now()
     yesterday = now - datetime.timedelta(3)
@@ -131,18 +69,17 @@ def retrieve_latest_security_price():
     for i, t in enumerate(tickers):
         try:
             if i==0:
-                ohlc = pdr.get_data_tiingo(t, api_key=tiingo_key).tail(1).close
+                ohlc = pdr.get_data_tiingo(t, api_key='ff07cd66ead1c9bf21113b3c2f5eae8e7d17a7cd').tail(1).close
             else:
-                ohlc = ohlc.append(pdr.get_data_tiingo(t, api_key=tiingo_key).tail(1).close)
+                ohlc = ohlc.append(pdr.get_data_tiingo(t, api_key='ff07cd66ead1c9bf21113b3c2f5eae8e7d17a7cd').tail(1).close)
         except:
             bad_tickers.append(t)
-    print(bad_tickers)
+    print('Tickers Not Found: ', bad_tickers)
     return ohlc
-ohlc = retrieve_latest_security_price()
-ohlc = ohlc.to_frame(name='close').reset_index(level=1, drop=True)
 
 
-def  build_initial_drift_df():
+
+def  build_initial_drift_df(agg_port, targetalloc, ohlc):
 
     start_port_c = pd.merge(agg_port, targetalloc, on ='ticker', how ='outer')
     final_port = pd.merge(start_port_c, ohlc, left_on ='ticker', right_index = True, how = 'left')
@@ -156,15 +93,13 @@ def  build_initial_drift_df():
     final_port['allocation'] = final_port.value / final_port.value.sum() # market value of position as % of total
     final_port['correction'] = final_port.allocation_target - final_port.allocation # (drift) difference from target
     final_port['new_money_in'] = new_money_in * final_port.allocation_target # proportion of new money according to targeet
+
+    final_port.to_csv(outdir +'final_port.csv')
     return final_port 
-final_port = build_initial_drift_df()
-final_port.to_csv(outdir +'final_port.csv')
 
 
 
-def build_initial_order_df():
-"
-    
+def build_initial_order_df(final_port):  
     '''
     final_port above represents the most naive of potential rebalances  - this is the initial stable df for intuition to be developed on top of
     '''
@@ -184,16 +119,16 @@ def build_initial_order_df():
     final_port['rebal_flag_newmoney'] = np.where(final_port.new_money_in>0,1,0)
     # determine all securities prepared for  rebal
     final_port['rebal_flag'] = np.where(final_port.rebal_flag_thresh + final_port.rebal_flag_time + final_port.rebal_flag_exit + final_port.rebal_flag_newmoney >= 1,1,0)
-    print(final_port.head())
+    # print(final_port.head())
 
     # orders to place for rebalance
     rebal_port = final_port[final_port.rebal_flag==1].copy()
-    print(rebal_port.head())
+    # print(rebal_port.head())
     rebal_port.to_csv(outdir +'rebal_port.csv')
 
     # no trade orders
     stable_port = final_port[final_port.rebal_flag==0].copy()
-    print(stable_port) 
+    # print(stable_port) 
     stable_port.to_csv(outdir +'stable_port.csv')
 
     #Calculate our current allocation, target, and the change we need to hit target
@@ -218,7 +153,7 @@ def build_initial_order_df():
     rebal_port['new_shares'] = np.round(rebal_port.shares + rebal_port.final_shares_chg,3) # proposal of new shares to purchase based on drift  from percent target
     rebal_port['new_value'] = rebal_port.new_shares * rebal_port.close #due to share rounding, there will be slight variance vs. portfolio starting value
     rebal_port['new_value_chg'] = rebal_port.final_shares_chg * rebal_port.close
-    print(rebal_port.head())
+    # print(rebal_port.head())
     rebal_port.to_csv(outdir +'rebal_port2.csv')
 
     #net of buying and selling should be zero
@@ -227,7 +162,8 @@ def build_initial_order_df():
     assert(np.round(rebal_port.new_value.sum() - rebal_port.value.sum(),3)==np.round((rebal_port.new_value.sum() + stable_port.value.sum()) - final_port.value.sum(),3))
 
     return rebal_port, stable_port
-rebal_port, stable_port = build_initial_order_df()
+
+
 
 '''
 
@@ -236,16 +172,8 @@ below: adjust those new_shares_n to account for tax considerations that result f
 
 '''
 
-def build_execution_df():
-    """
-            ~ retrieve tiingo data to build historical time series ~
-    :param: 
-    :type: 
-    :param: 
-    :type: 
-    :return: 
-    :rtype: 
-    """
+def build_execution_df(stable_port, rebal_port):
+
     #Merge our rebalanced portfolio with our stable portfolio for our execution portfolio
     stable_port['value_chg'] = 0
     stable_port['shares_chg']=0
@@ -263,7 +191,7 @@ def build_execution_df():
     exec_port['final_allocation'] = exec_port.new_value / exec_port.new_value.sum()
 
     # Execution Portfolio
-    print(exec_port)
+    # print(exec_port)
     exec_port.to_csv(outdir +'exec_port.csv')
 
     def plot():
@@ -271,24 +199,14 @@ def build_execution_df():
         graph_port.plot.barh(x='ticker',figsize=(8,5))
         plt.show()
     #plot()
+    exec_port.to_csv(outdir +'exec_port.csv')
+
     return exec_port
 
-exec_port = build_execution_df()
-print(exec_port.head())
-exec_port.to_csv(outdir +'exec_port.csv')
 
 
 
-def merge_drift_and_execution():
-    """
-            ~ retrieve tiingo data to build historical time series ~
-    :param: 
-    :type: 
-    :param: 
-    :type: 
-    :return: 
-    :rtype: 
-    """
+def merge_drift_and_execution(start_port, exec_port ):
     #Join in our rebalanced portfolio and determine how to split value across accounts for a given ticker
     port = pd.merge(start_port[['accounttype','accountid','ticker','shares']], 
                     exec_port[['ticker','assetclass','close','value','final_shares_chg','new_shares','new_value','new_value_chg','final_allocation']], 
@@ -302,34 +220,23 @@ def merge_drift_and_execution():
 
     #check our sub-allocations
     assert(port.groupby('ticker').tick_alloc.sum().sum() == len(port.groupby('ticker').tick_alloc.sum()))
+    port.to_csv(outdir +'port3.csv')
 
     return port 
-port = merge_drift_and_execution()
-print(port.head())
-port.to_csv(outdir +'port3.csv')
 
 
 
 
 
-def catch_edge_cases():
-    """
-            ~ retrieve tiingo data to build historical time series ~
-    :param: 
-    :type: 
-    :param: 
-    :type: 
-    :return: 
-    :rtype: 
-    """
 
+def catch_edge_cases(port):
     #Recalculate the values proportionately
     port['final_shares_chg_n'] = port.final_shares_chg * port.tick_alloc
     port['new_shares_n'] = port.new_shares * port.tick_alloc
     port['new_value_n'] = port.new_value * port.tick_alloc
     port['new_value_chg_n'] = port.new_value_chg * port.tick_alloc
     port['final_allocation_n'] = port.final_allocation * port.tick_alloc
-    print(port)
+    # print(port)
     port.to_csv(outdir +'port.csv')
 
     #double check our final_allocation is 100%
@@ -341,18 +248,17 @@ def catch_edge_cases():
     acctsdf = acctsdf.reset_index().rename(columns={'new_value_chg_n':'new_value_chg_sum'})
     errordf = acctsdf[acctsdf.new_value_chg_sum > 0].copy() #a value >0 at the account-level implies we have allocated buys to an account with insufficient sells
     erroraccts = errordf.accountid.values
-    print(erroraccts)
-
-
-
+    # print(erroraccts)
 
     '''
+    ##########################################################################################################
+    
     @ fix: 
     the final_allocation_n assigned to tickers found w in accounts in erroraccts ends up missing from df - for instance, 
     the allocation to HYG + IAU is determined to sum to 14% but an error is thrown at assertion of 
         assert(np.round(port.final_allocation.sum(),4)==1.0) 
     as final_allocation.sum()==86% in same run -- commenting out the single security account edge case distribution correction solves
-    '''
+
     # if len(errordf) > 0: 
     #     for t in port[port.accountid.isin(erroraccts)].ticker.unique(): #Loop by security (not by account)
     #         print("Correcting distribution for single-security accounts edge case: {}".format(t))
@@ -380,6 +286,9 @@ def catch_edge_cases():
             
     #         print(port[port.ticker == t])
 
+    # ##########################################################################################################
+
+    '''
 
     port['value'] = port.value_orig
     port['final_shares_chg'] = port.final_shares_chg_n
@@ -390,25 +299,24 @@ def catch_edge_cases():
     port.drop(['value_orig','tick_alloc','final_shares_chg_n','new_shares_n','new_value_n','new_value_chg_n','final_allocation_n'],axis=1,inplace=True)
     port.fillna({'value':0.0},inplace=True)
 
-    print(port.final_allocation.sum())
+    # print(port.final_allocation.sum())
     assert(np.round(port.final_allocation.sum(),4)==1.0)
     assert(np.round(np.sum((port.shares+port.final_shares_chg)-port.new_shares))==0)
     assert(np.round(np.sum(port.new_value-(port.new_shares*port.close)))==0)
     assert(np.round(np.sum(port.new_value_chg-(port.final_shares_chg*port.close)))==0)
     port.to_csv(outdir +'port2.csv')
-    print(port.columns)
+    # print(port.columns)
 
     def plot():
         x = port[['ticker','new_value_chg','final_shares_chg','final_allocation']].copy()
         x.plot.barh(x='ticker',figsize=(8,5))
         plt.show()
     #plot()
+    port.to_csv(outdir +'port4.csv')
+
 
     return port 
 
-port = catch_edge_cases()
-print(port.head())
-port.to_csv(outdir +'port4.csv')
 
 
 
