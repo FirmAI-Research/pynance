@@ -15,7 +15,7 @@ new_money_in = 1000
 drift = 0.05
 min_hold_days = 90
 
-outdir =  os.path.join(cwd, 'output')
+outdir =  os.path.join(cwd, 'output\\')
 
 def build_initial_portfolios(columns_t, positions_t, columns_c, positions_c):
     """
