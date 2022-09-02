@@ -4,7 +4,7 @@ import seaborn
 
 
 def call_payoff(sT, strike_price, premium):
-return np.where(sT > strike_price, sT - strike_price, 0) – premium
+    return np.where(sT > strike_price, sT - strike_price, 0) - premium
 spot_price = 323.40
 strike_price_long_call = 370
 premium_long_call = 1.30
@@ -42,7 +42,7 @@ plt.show()
 
 
 def put_payoff(sT, strike_price, premium):
-return np.where(sT < strike_price, strike_price - sT, 0) – premium
+    return np.where(sT < strike_price, strike_price - sT, 0) -  premium
 spot_price = 323.40
 strike_price_long_put = 280
 premium_long_put = 1.20

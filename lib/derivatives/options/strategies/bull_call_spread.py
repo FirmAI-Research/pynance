@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn
 
 def call_payoff(sT, strike_price, premium):
-return np.where(sT > strike_price, sT - strike_price, 0) – premium
+    return np.where(sT > strike_price, sT - strike_price, 0) - premium
 
 
 
@@ -39,8 +39,8 @@ plt.show()
 
 payoff_bull_call_spread = payoff_long_call + payoff_short_call
 
-print "Max Profit:", max(payoff_bull_call_spread)
-print "Max Loss:", min(payoff_bull_call_spread)
+print("Max Profit:", max(payoff_bull_call_spread))
+print ("Max Loss:", min(payoff_bull_call_spread))
 # Plot
 fig, ax = plt.subplots()
 ax.spines['bottom'].set_position('zero')

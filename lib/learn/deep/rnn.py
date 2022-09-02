@@ -30,7 +30,7 @@ def get_equity_data():
     return yf.download(tickers, start_date,end_date)
 
 
-def init():
+def run():
 
     df = get_equity_data()
     print(df.shape)

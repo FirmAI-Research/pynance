@@ -1,7 +1,5 @@
-Import Libraries
 import numpy as np
 import matplotlib.pyplot as plt
-Define Parameters
 # SBIN stock price
 spot_price = 249.25
 # Long call
@@ -12,7 +10,7 @@ sT = np.arange(150,350,1)
 
 
 def call_payoff(sT, strike_price, premium):
-return np.where(sT > strike_price, sT - strike_price, 0) - premium
+    return np.where(sT > strike_price, sT - strike_price, 0) - premium
 
 payoff_long_call = call_payoff (sT, strike_price_long_call, premium_long_call)
 # Plot

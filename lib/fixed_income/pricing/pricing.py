@@ -7,7 +7,7 @@ class Pricing:
     def __init__(self) -> None:
 
         # Everything starts with “evaluation date” which means the date you want to value a instrument.
-        today = ql.Date(15,6,2020)
+        today = ql.Date(15,8,2022)
         ql.Settings.instance().evaluationDate = today
         print(ql.Settings.instance().evaluationDate)
 
@@ -82,8 +82,4 @@ class Pricing:
         return bond
 
 
-
-p = Pricing()
-p.bond()
-p.zero_coupon_bond()
 
