@@ -61,10 +61,11 @@ class TreasuryRates:
         change5day = pd.DataFrame(x.iloc[-1] - x.iloc[-5]).transpose()
         change10day = pd.DataFrame(x.iloc[-1] - x.iloc[-10]).transpose()
         change30day = pd.DataFrame(x.iloc[-1] - x.iloc[-30]).transpose()
-        change_df = pd.concat([change5day, change10day, change30day], axis=0)
+        change90day = pd.DataFrame(x.iloc[-1] - x.iloc[-90]).transpose()
+        change_df = pd.concat([change5day, change10day, change30day, change90day], axis=0)
         for c in change_df.columns:
             change_df[c] = change_df[c].apply(lambda x: np.round(x, 2))
-        dates = [ self.df.date.iloc[-5], self.df.date.iloc[-10], self.df.date.iloc[-30] ]
+        dates = [ self.df.date.iloc[-5], self.df.date.iloc[-10], self.df.date.iloc[-30], self.df.date.iloc[-90] ]
         change_df['Change Since'] = dates
         change_df = change_df[[change_df.columns[-1]] + list(change_df.columns)[:-1]]
         
@@ -93,7 +94,7 @@ class TreasuryRates:
 
 
     def change_distribution(self):
-        weekly_rows = self.df.iloc[-5:]
+        weekly_rows = self.df.iloc[-10:]
         weekly_diff = weekly_rows.set_index('date').diff().dropna(how='all', axis=0).reset_index(drop=False)
         x_axis = json.dumps(weekly_diff.date.apply(lambda x : pd.to_datetime(x).strftime('%b %d %Y')).tolist())
         return weekly_diff#self.to_highcharts(weekly_diff.set_index('date')) , x_axis
