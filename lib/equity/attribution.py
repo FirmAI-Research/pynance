@@ -1,0 +1,1 @@
+# Famma French; Brinson; Contribution of n stocks to S&P500 return
