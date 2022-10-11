@@ -12,7 +12,7 @@ cal = Calendar()
 import nasdaq_data_link as nasdaq
 from nasdaq_data_link import Sharadar
 
-from fundamentals import FundamentalsETL
+from etl.fundamentals_etl import FundamentalsETL
 
 pd.options.display.float_format = '{:,.2f}'.format
 

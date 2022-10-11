@@ -15,19 +15,23 @@ from nasdaq_data_link import Sharadar
 
 class FundamentalsETL:
     # 1. query fundamental data for all companies as of the previous quarter end date
-
     # 2. calculate desired 'custom' metrics on fundamentals
-
     # 3. populate sql table for all companies, with custom metrics, other metrics to be used for ranks, and sector/industry. Table name = EquityFundamentalMetrics
 
-    statement_columns = [
+    id_columns = [
+        'ticker', 'calendardate'
+
+    ]
+
+    dcf_columns = id_columns + [
+        'revenue', 'oppmargin', 'oppinc', 'ebit', 'taxexp', 'ebt'
         
     ]
 
-    rank_columns = [ 
-        'calendardate', 'ticker',
+    peer_compare_columns = id_columns + [ 
         'bvps', 'currentratio', 'de', 'dps', 'divyield', 'eps', 'evebit', 'evebitda', 'fcfps', 'grossmargin', 'netmargin', 'pb', 'pe', 'price', 'roa', 'roe', 'roic', 'ros', 
-        'roc', 'fcfmargin', 'p/cf', 'oppmargin', 'interestcoverage', 'payoutratio', 'tax rate', 'retention ratio', 'expected netinc growth', 'expected roe growth', 'equity reinvestment rate','expected ebit growth'
+        'roc', 'fcfmargin', 'p/cf', 'oppmargin', 'interestcoverage', 'payoutratio', 'tax rate', 'retention ratio', 'expected netinc growth', 'expected roe growth', 
+        'equity reinvestment rate','expected ebit growth'
     ]
 
 
@@ -39,10 +43,7 @@ class FundamentalsETL:
 
         # self.df = nasdaqdatalink.get_table(Sharadar.FUNDAMENTALS.value, dimension="MRQ",   paginate=True) # All MRQ periods; All Tickers
 
-
-    def financial_statement_view():
-        ''' view to be used in construction of balance sheet, income statement, cash flow statement for dcf'''
-        pass
+        self.custom_calculations()
 
 
     def custom_calculations(self):
@@ -63,27 +64,9 @@ class FundamentalsETL:
         df['expected roe growth'] = df['ebit'] *  df['tax rate'] / (df['equity'] + df['debt'])
         df['equity reinvestment rate'] =   df['expected netinc growth'] /  df['roe']  
         df['expected ebit growth'] = df['equity reinvestment rate'] * df['roc']
+        df['sales to capital ratio'] = '' # reinvestment rate
 
-        self.rank_df = df[self.rank_columns]
-
-        print(self.rank_df)
-
-        # included in raw nasdaq query
-        # df['roe'] = df['netinc'] / (df['equity'] )
-        # df['roa'] = df['netinc'] / df['assets']
-        # df['ev/ebitda'] = df['ev'] / df['ebitda']
-        # df['shequity'] = df['assets'] - ['liabilities'] 
-
-        # future improvements
-        # df['adj netinc'] = df['netinc'] + df['rnd'] #  + lease expense
-        # df['adj oppinc'] = df['ebit'] + df['rnd'] #  + lease expense
-        # df['net capex'] = df['capex'] + df['depamor']
-        # df['non cash workingcapital'] = df['assetsc'] - df['cashneq'] - df['liabilitiesc']
-        # df['change nc workingcapital'] = df['non cash workingcapital'] - df['non cash workingcapital'].shift(-1, axis=0)
-        # df['total expense'] = df['revenue'] - df['netinc']
-        # df['nopat']  = (df['opinc']) * (1-df['tax rate']/100)
-        # df['fcf equity'] = df['netinc'] - (df['capex'].abs() - df['depamor']) - df['change nc workingcapital'].abs() + df['ncfdebt']
-        
+        self.df = df
 
 
 
@@ -96,3 +79,7 @@ class RanksETL:
 
     def query(self):
         pass
+
+
+
+
