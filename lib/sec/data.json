@@ -1,4 +1,0 @@
-{
-    "status": 429,
-    "error": "You send a lot of requests. We like that. But you exceeded the free query limit of 100 requests. Upgrade your account to get unlimited access. Visit sec-api.io for more."
-}
