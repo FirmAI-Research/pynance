@@ -1,17 +1,48 @@
+import sys, os
+import nasdaqdatalink
+import pandas as pd
+
+proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+print(proj_root)
+sys.path.append(proj_root)
+
+from calendar_dates import Calendar
+cal = Calendar()
+
+import nasdaq_data_link as nasdaq
+from nasdaq_data_link import Sharadar
+
+from fundamentals import FundamentalsETL
+
+pd.options.display.float_format = '{:,.2f}'.format
+
+
 """ 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
   │                                  Retreive data from NasdaqDataLink                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 """
-def retreive_equity_metrics():
-  import nasdaq_data_link
+def get_nasdaq_data():
 
-retreive_equity_metrics()
+  query = nasdaq.Nasdaq()
+  df = nasdaqdatalink.get_table(Sharadar.METRICS.value, ticker = ['AAPL','AMZN'], date = cal.previous_quarter_end())
+  print(df)
+
+# get_nasdaq_data()
+
+
+
 
 
 
 """ 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │                                  ETL from NasdaqDataLink to SQL DB                                                 │
+  │                                      Equity Fundamentals Ranks                                                     |
   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-"""
+ """
+ # use fundamentals.Ranks  object to calculate ranks and store in database
+def etl_equity_fundamental_ranks():
+  fun = FundamentalsETL()
+  fun.custom_calculations()
+
+etl_equity_fundamental_ranks()
