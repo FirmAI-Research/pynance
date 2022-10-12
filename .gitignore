@@ -1,5 +1,5 @@
 secrets.json
-
+nasdaq_data_link
 nasdaq_data_link.json
 
 pynance/vendors/exports/
@@ -18,3 +18,6 @@ _tmp/*
 
 
 todo.md
+
+
+*.json
