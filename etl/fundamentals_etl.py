@@ -9,6 +9,8 @@ sys.path.append(proj_root)
 from calendar_dates import Calendar
 cal = Calendar()
 
+from numeric import *
+
 import nasdaq_data_link as nasdaq
 from nasdaq_data_link import Sharadar
 
@@ -24,7 +26,7 @@ class FundamentalsETL:
     ]
 
     dcf_columns = id_columns + [
-        'revenue', 'oppmargin', 'oppinc', 'ebit', 'taxexp', 'ebt'
+        'revenue', 'oppmargin', 'opinc', 'ebit', 'taxexp', 'ebt'
         
     ]
 
@@ -44,6 +46,8 @@ class FundamentalsETL:
         # self.df = nasdaqdatalink.get_table(Sharadar.FUNDAMENTALS.value, dimension="MRQ",   paginate=True) # All MRQ periods; All Tickers
 
         self.custom_calculations()
+
+        self.df = self.df[::-1]
 
 
     def custom_calculations(self):
