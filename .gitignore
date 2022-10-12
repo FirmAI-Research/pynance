@@ -1,5 +1,7 @@
 secrets.json
 
+nasdaq_data_link.json
+
 pynance/vendors/exports/
 pynance/vendors/exports/*
 pynance\time_series\static\img\*
