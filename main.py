@@ -3,12 +3,17 @@ import sys, os
 import nasdaqdatalink
 import pandas as pd 
 
-
 from calendar_dates import Calendar
-cal = Calendar()
 
 import nasdaq_data_link as nasdaq
 from nasdaq_data_link import Sharadar
+
+import warnings
+warnings.filterwarnings('ignore')
+
+pd.options.display.float_format = '{:,.4f}'.format
+
+cal = Calendar()
 
 """ 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -18,7 +23,8 @@ from nasdaq_data_link import Sharadar
 from lib.equity.fundamentals import Fundamentals
 from lib.equity.fundamentals import DiscountedCashFlow
 
-fun = Fundamentals( ticker = 'XOM' )
+fun = Fundamentals( ticker = 'JNJ' )
+print(fun)
 dcf = DiscountedCashFlow(fun)
 
 

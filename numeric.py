@@ -4,6 +4,29 @@ from dateutil.parser import parse
 import pandas as pd
 
 
+import contextlib
+import numpy as np
+import pandas as pd
+import pandas.io.formats.format as pf
+
+@contextlib.contextmanager
+def custom_formatting():
+    orig_float_format = pd.options.display.float_format
+    orig_int_format = pf.IntArrayFormatter
+
+    pd.options.display.float_format = '{:0,.2f}'.format
+    class IntArrayFormatter(pf.GenericArrayFormatter):
+        def _format_strings(self):
+            formatter = self.formatter or '{:,d}'.format
+            fmt_values = [formatter(x) for x in self.values]
+            return fmt_values
+    pf.IntArrayFormatter = IntArrayFormatter
+    yield
+    pd.options.display.float_format = orig_float_format
+    pf.IntArrayFormatter = orig_int_format
+
+
+
 def get_num_feats(data=None):
     '''
     Returns the numerical features in a data set

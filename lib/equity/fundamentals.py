@@ -2,6 +2,7 @@
 import sys, os
 import nasdaqdatalink
 import pandas as pd 
+import numpy as np
 from scipy.stats.mstats import gmean
 
 proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -14,6 +15,7 @@ cal = Calendar()
 import nasdaq_data_link as nasdaq
 from nasdaq_data_link import Sharadar
 
+from numeric import custom_formatting
 
 
 class Fundamentals:
@@ -39,8 +41,9 @@ class Fundamentals:
         'equity reinvestment rate','expected ebit growth'
     ]
 
-
     def __init__(self, ticker = None):
+
+        self.ticker = ticker
 
         nasdaq.Nasdaq()
         
@@ -50,6 +53,12 @@ class Fundamentals:
         self.custom_metric_calcs()
 
         self.df = self.df[::-1]
+
+        print(f'Fundamental data loaded for: {ticker}')
+
+
+    def __str__(self):
+        return f'Fundamentals:Object:{self.ticker}'
 
 
     def custom_metric_calcs(self):
@@ -84,7 +93,7 @@ class DiscountedCashFlow():
     n_historical_periods = 5
 
     n_future_periods = 4
-    
+
 
     def __init__(self, fun_obj):
         ''' Constructs a dcf using fundamental data passed in a ~Fundamentals~ object. Raw data is stored in Fundamentals().df
@@ -95,52 +104,72 @@ class DiscountedCashFlow():
 
         self.fundamentals = df.iloc[-self.n_historical_periods:]
 
-        print(self.fundamentals)
+        with custom_formatting():
+            print(self.fundamentals)
         
+        self.view_forecasting_table()
+
+        print(self.forecasting)
+
         self.build_forecasting_table()
 
-        print(self.forecast)
+        # print(self.assumptions)
+
+
+
+    def view_forecasting_table(self):
+        ''' View factors to grow metrics by in future periods; return multiIndex dataframe as view.
+        
+        '''
+
+        def arithmetic(col):
+            return self.fundamentals[col].pct_change().dropna().mean()
+
+        def geometric(col):
+            a = np.log(self.fundamentals[col].pct_change().dropna())
+            return np.exp(a.mean()) 
+
+        def stdev(col):
+            return self.fundamentals[col].pct_change().dropna().std()
+
+
+        self.fields = ['revenue', 'ebitda', 'ebit', 'netinc', 'opinc']
+
+        arrays = [
+            [field for field in self.fields for _ in range(3)],
+            ['arithmetic', 'geometric', 'stdev'] * len(self.fields)
+        ]
+
+        tuples = list(zip(*arrays))
+
+        index = pd.MultiIndex.from_tuples(tuples, names=["field", "calc"])
+
+        values = []
+        for item in self.fields:
+            values.extend([arithmetic(col = item), geometric(col = item), stdev(col = item)])
+        
+        multi_idx = pd.Series(values, index=index).to_frame().transpose()
+
+        self.forecasting = multi_idx
 
 
 
     def build_forecasting_table(self):
-
-        self.forecast = pd.DataFrame()
+        ''' Build table of same shape as self.fundamentals containing the factors by which a companies fundamentals will be scaled. 
+        '''
+        # bull case; bear case; base case
+        self.assumptions = pd.DataFrame(columns = self.fields, index = self.fundamentals.index)
         
-        self.cagr(col = 'revenue')
-        self.arithmetic_average(col = 'revenue')
-        
-        self.cagr(col = 'ebitda')
-        self.arithmetic_average(col = 'ebitda')        
-        
-        self.cagr(col = 'ebit')
-        self.arithmetic_average(col = 'ebit')
-        
-        self.cagr(col = 'netinc')
-        self.arithmetic_average(col = 'netinc')   
-        
-        self.cagr(col = 'opinc')
-        self.arithmetic_average(col = 'opinc')   
+        x = self.forecasting.loc[0, ("revenue", "geometric")]
+        print(x)
 
-
-    def arithmetic_average(self, col):
-        label = col + '_aagr'
-        self.forecast[label] = self.fundamentals[col].pct_change().dropna().mean()
-
-
-    def cagr(self, col):
-        label = col + '_cagr'
-
-        start_value, end_value = self.fundamentals[col][0],  self.fundamentals[col][-1]
-        num_periods = len(self.fundamentals[col])
-        
-        self.forecast[label]  = [(end_value / start_value) ** (1 / (num_periods - 1)) - 1 for x in self.fundamentals[col]]
-
+        print(100 * ((1+x)**(np.arange(self.n_future_periods))))
 
 
 
     def build_assumptions_table(self):
         pass
+
 
 
     def wacc(self):
