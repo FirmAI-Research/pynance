@@ -30,24 +30,35 @@ class Fundamentals:
 
     ]
 
-    dcf_columns = id_columns + [
+    growth_columns = id_columns + [
         'revenue', 'ebitda', 'ebit', 'netinc',  'opinc', 'taxexp', 'ebt'
         
     ]
 
-    peer_compare_columns = id_columns + [ 
+    cf_columns =  id_columns + [
+        'fcf', 'ncf', 'ncfbus', 'ncfcommon', 'ncfdebt', 'ncfdiv', 'ncff', 'ncfi', 'ncfinv', 'ncfo', 'ncfx'
+    ]
+
+    peer_columns = id_columns + [ 
         'bvps', 'currentratio', 'de', 'dps', 'divyield', 'eps', 'evebit', 'evebitda', 'fcfps', 'grossmargin', 'netmargin', 'pb', 'pe', 'price', 'roa', 'roe', 'roic', 'ros', 
-        'roc', 'fcfmargin', 'p/cf', 'oppmargin', 'interestcoverage', 'payoutratio', 'tax rate', 'retention ratio', 'expected netinc growth', 'expected roe growth', 
-        'equity reinvestment rate','expected ebit growth'
+        'roc', 'fcfmargin', 'p/cf', 'oppmargin', 'intcov', 'payoutratio', 'taxrate', 'retentionratio', 'expnetincgrow', 'exproegrow', 
+        'eqreinvestrate','expebitgrow'
     ]
 
     def __init__(self, ticker = None):
 
-        self.ticker = ticker
+        if isinstance(ticker, list):
+            
+            self.ticker = ticker
 
+        elif isinstance(ticker, str):
+
+            self.ticker = ticker
+
+        
         nasdaq.Nasdaq()
         
-        self.df = nasdaqdatalink.get_table(Sharadar.FUNDAMENTALS.value, dimension="MRQ", ticker = ticker,  paginate=True) # All MRQ periods; One Ticker
+        self.df = nasdaqdatalink.get_table(Sharadar.FUNDAMENTALS.value, dimension="MRQ", ticker = self.ticker,  paginate=True) # All MRQ periods; One Ticker
         # self.df = nasdaqdatalink.get_table(Sharadar.FUNDAMENTALS.value, dimension="MRQ",   paginate=True) # All MRQ periods; All Tickers
 
         self.custom_metric_calcs()
@@ -73,67 +84,60 @@ class Fundamentals:
         df['fcfmargin'] = df['fcf'] / df['revenue']
         df['p/cf'] = df['marketcap'] / df['fcf']
         df['oppmargin'] = df['opinc'] / df['revenue']
-        df['interestcoverage'] = df['ebit'] / df['intexp']
-        df['payoutratio'] = df['dps'] / df['eps']
-        df['tax rate'] = df['taxexp'] / df['ebt']
-        df['retention ratio'] = (df['retearn']  / df['netinc']) / 100
-        df['expected netinc growth'] = df['retention ratio'] * df['roe']
-        df['expected roe growth'] = df['ebit'] *  df['tax rate'] / (df['equity'] + df['debt'])
-        df['equity reinvestment rate'] =   df['expected netinc growth'] /  df['roe']  
-        df['expected ebit growth'] = df['equity reinvestment rate'] * df['roc']
-        df['sales to capital ratio'] = '' # reinvestment rate
+        df['intcov'] = df['ebit'] / df['intexp'] # interestcoverage
+        df['paoutratio'] = df['dps'] / df['eps'] # payoutratio
+        df['taxrate'] = df['taxexp'] / df['ebt']
+        df['retentionratio'] = (df['retearn']  / df['netinc']) / 100 #retentionratio
+        df['expnetincgrow'] = df['retentionratio'] * df['roe'] # expected netinc growth
+        df['exproegrow'] = df['ebit'] *  df['taxrate'] / (df['equity'] + df['debt']) # expected roe growth
+        df['eqreinvestrate'] =   df['expnetincgrow'] /  df['roe']  # equity reinvestment rate
+        df['expebitgrow'] = df['eqreinvestrate'] * df['roc'] # expebitgrow
+        # df['sales to capital ratio'] = '' # reinvestment rate
 
         self.df = df
 
 
 
 
-class DiscountedCashFlow():
+class Measures():
 
     n_historical_periods = 5
 
-    n_future_periods = 4
 
-
-    def __init__(self, fun_obj):
-        ''' Constructs a dcf using fundamental data passed in a ~Fundamentals~ object. Raw data is stored in Fundamentals().df
+    def __init__(self, fun_obj, cols):
+        '''Fundamental data passed in a ~Fundamentals~ object. Raw data is stored in Fundamentals().df
 
         :param: fun_obj : An object of type ~Fundamentals~
         '''
-        df = fun_obj.df[fun_obj.dcf_columns].set_index('calendardate').drop('ticker', axis=1)
+        data = fun_obj.df[cols].set_index('calendardate').drop('ticker', axis=1)
 
-        self.fundamentals = df.iloc[-self.n_historical_periods:]
+        self.data = data.iloc[-self.n_historical_periods:]
+
+        self.growth_measures()
 
         with custom_formatting():
-            print(self.fundamentals)
-        
-        self.view_forecasting_table()
-
-        print(self.forecasting)
-
-        self.build_forecasting_table()
-
-        # print(self.assumptions)
+            print('Fundamental Data:')
+            print(self.data)
+            print('Measures:')
+            print(self.measures)
 
 
-
-    def view_forecasting_table(self):
-        ''' View factors to grow metrics by in future periods; return multiIndex dataframe as view.
-        
+    def growth_measures(self):
+        ''' Measure growth of fundamentals over time; return multiIndex dataframe as view.
         '''
 
         def arithmetic(col):
-            return self.fundamentals[col].pct_change().dropna().mean()
+            return self.data[col].pct_change().dropna().mean()
 
         def geometric(col):
-            a = np.log(self.fundamentals[col].pct_change().dropna())
+            a = np.log(self.data[col].pct_change().dropna())
             return np.exp(a.mean()) 
 
         def stdev(col):
-            return self.fundamentals[col].pct_change().dropna().std()
+            return self.data[col].pct_change().dropna().std()
 
 
-        self.fields = ['revenue', 'ebitda', 'ebit', 'netinc', 'opinc']
+        self.fields = self.data.columns
 
         arrays = [
             [field for field in self.fields for _ in range(3)],
@@ -150,31 +154,26 @@ class DiscountedCashFlow():
         
         multi_idx = pd.Series(values, index=index).to_frame().transpose()
 
-        self.forecasting = multi_idx
+        self.measures = multi_idx.T
 
 
 
-    def build_forecasting_table(self):
-        ''' Build table of same shape as self.fundamentals containing the factors by which a companies fundamentals will be scaled. 
-        '''
-        # bull case; bear case; base case
-        self.assumptions = pd.DataFrame(columns = self.fields, index = self.fundamentals.index)
+class Compare(Measures):
+    ''' Takes n Fundamentals objects and returns a comparison as multindex object grouped by Fundamental metric with each of the n objects data point.
+
+    *args = a list of Fundamentals objects
+    '''
+    
+    def __init__(self, *args):
+
+        dfdict = {}
+        for arg in args:
+            dfdict[arg] = arg.df
         
-        x = self.forecasting.loc[0, ("revenue", "geometric")]
-        print(x)
+        self.multi_ix_df = self.multi_index_from_df_dict(dfdict)
 
-        print(100 * ((1+x)**(np.arange(self.n_future_periods))))
-
-
-
-    def build_assumptions_table(self):
-        pass
-
-
-
-    def wacc(self):
-        pass
-
+    def multi_index_from_df_dict(self, dfdict):
+        print(self.*args)
 
 
 

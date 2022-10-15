@@ -21,13 +21,22 @@ cal = Calendar()
   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  """
 from lib.equity.fundamentals import Fundamentals
-from lib.equity.fundamentals import DiscountedCashFlow
+from lib.equity.fundamentals import Measures
+from lib.equity.fundamentals import Compare
 
-fun = Fundamentals( ticker = 'JNJ' )
+fun = Fundamentals( ticker = ['JNJ'] )
 print(fun)
-dcf = DiscountedCashFlow(fun)
 
+''' Raw fundamental data '''
+print(fun.df[fun.peer_columns])
 
+''' Growth measures '''
+# Measures(fun, fun.peer_columns)
+
+''' Peer comparisons '''
+jnj = Fundamentals( ticker = 'JNJ' )
+pg = Fundamentals( ticker = 'PG' )
+df = Compare(jnj, pg)
 
 
 
