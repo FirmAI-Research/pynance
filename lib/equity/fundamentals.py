@@ -40,9 +40,8 @@ class Fundamentals:
     ]
 
     peer_columns = id_columns + [ 
-        'bvps', 'currentratio', 'de', 'dps', 'divyield', 'eps', 'evebit', 'evebitda', 'fcfps', 'grossmargin', 'netmargin', 'pb', 'pe', 'price', 'roa', 'roe', 'roic', 'ros', 
-        'roc', 'fcfmargin', 'p/cf', 'oppmargin', 'intcov', 'payoutratio', 'taxrate', 'retentionratio', 'expnetincgrow', 'exproegrow', 
-        'eqreinvestrate','expebitgrow'
+        'de', 'divyield', 'eps', 'evebitda', 'fcfps', 'grossmargin', 'netmargin', 'pb', 'pe', 'price', 'roa', 'roe', 'roic', 'ros', 
+        'roc', 'fcfmargin', 'p/cf', 'oppmargin', 'intcov',
     ]
 
     def __init__(self, ticker = None):
@@ -52,6 +51,9 @@ class Fundamentals:
             self.ticker = ticker
 
         elif isinstance(ticker, str):
+
+            if ticker == '*':
+                print('Not slicing by an individual ticker')
 
             self.ticker = ticker
 
@@ -75,7 +77,7 @@ class Fundamentals:
     def custom_metric_calcs(self):
         ''' additional metrics calculated based on raw fundamental data
         
-        damodaran pg. 178
+        damodaran pg. 178; Jansend 79-85
         '''
 
         df = self.df
@@ -98,6 +100,21 @@ class Fundamentals:
 
 
 
+class Compare():
+    '''
+    '''
+    n_historical_periods = 5
+
+    def __init__(self, tickers):
+
+        fun = Fundamentals(ticker = tickers)
+        
+        df = fun.df[fun.peer_columns].set_index('calendardate')
+
+        self.df = df.pivot(columns = ['ticker']).iloc[-self.n_historical_periods:, :]
+
+
+
 
 class Measures():
 
@@ -109,17 +126,20 @@ class Measures():
 
         :param: fun_obj : An object of type ~Fundamentals~
         '''
+        self.fun_obj = fun_obj
+
         data = fun_obj.df[cols].set_index('calendardate').drop('ticker', axis=1)
 
         self.data = data.iloc[-self.n_historical_periods:]
 
         self.growth_measures()
 
-        with custom_formatting():
-            print('Fundamental Data:')
-            print(self.data)
-            print('Measures:')
-            print(self.measures)
+        # with custom_formatting():
+        #     print('Fundamental Data:')
+        #     print(self.data)
+        #     print('Measures:')
+        #     print(self.measures)
+        print(self.data.pct_change())
 
 
     def growth_measures(self):
@@ -156,24 +176,7 @@ class Measures():
 
         self.measures = multi_idx.T
 
-
-
-class Compare(Measures):
-    ''' Takes n Fundamentals objects and returns a comparison as multindex object grouped by Fundamental metric with each of the n objects data point.
-
-    *args = a list of Fundamentals objects
-    '''
-    
-    def __init__(self, *args):
-
-        dfdict = {}
-        for arg in args:
-            dfdict[arg] = arg.df
-        
-        self.multi_ix_df = self.multi_index_from_df_dict(dfdict)
-
-    def multi_index_from_df_dict(self, dfdict):
-        print(self.*args)
+        self.measures.columns = self.fun_obj.ticker
 
 
 

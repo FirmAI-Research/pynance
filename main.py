@@ -30,14 +30,14 @@ print(fun)
 ''' Raw fundamental data '''
 print(fun.df[fun.peer_columns])
 
-''' Growth measures '''
-# Measures(fun, fun.peer_columns)
-
 ''' Peer comparisons '''
-jnj = Fundamentals( ticker = 'JNJ' )
-pg = Fundamentals( ticker = 'PG' )
-df = Compare(jnj, pg)
+pare = Compare(tickers = ['JNJ', 'PG'])
+print(pare.df)
 
+
+''' Growth measures '''
+m = Measures(fun, fun.peer_columns)
+print(m.measures)
 
 
 

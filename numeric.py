@@ -14,7 +14,7 @@ def custom_formatting():
     orig_float_format = pd.options.display.float_format
     orig_int_format = pf.IntArrayFormatter
 
-    pd.options.display.float_format = '{:0,.2f}'.format
+    pd.options.display.float_format = '{:0,.3f}'.format
     class IntArrayFormatter(pf.GenericArrayFormatter):
         def _format_strings(self):
             formatter = self.formatter or '{:,d}'.format
