@@ -7,6 +7,7 @@ from calendar_dates import Calendar
 
 import nasdaq_data_link as nasdaq
 from nasdaq_data_link import Sharadar
+from numeric import custom_formatting
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -17,27 +18,41 @@ cal = Calendar()
 
 """ 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Call DCF                                                                 │
+  │ Fundamentals View                                                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  """
-from lib.equity.fundamentals import Fundamentals
-from lib.equity.fundamentals import Measures
-from lib.equity.fundamentals import Compare
+from lib.equity.fundamentals import Fundamentals, Columns
 
-fun = Fundamentals( ticker = ['JNJ'] )
-print(fun)
+ticker = ['JNJ','PG']
+fun = Fundamentals( ticker = ticker, columns = Columns.INCOME.value, limit = 4 )
+with custom_formatting():
+  print(fun)
+  print(fun.df)
+fun = Fundamentals( ticker = ticker, columns = Columns.CASHFLOW.value, limit = 4 )
+with custom_formatting():
+  print(fun)
+  print(fun.df)
+measures, pct = fun.growth()
+print('Percent Change: \n', pct)
+print('Growth Measures: \n', measures)
+fun = Fundamentals( ticker = ticker, columns = Columns.PEERS.value, limit = 4 )
+with custom_formatting():
+  print(fun)
+  print(fun.df)
+
+
+
 
 ''' Raw fundamental data '''
-print(fun.df[fun.peer_columns])
-
-''' Peer comparisons '''
-pare = Compare(tickers = ['JNJ', 'PG'])
-print(pare.df)
+# print(fun.df[fun.peer_columns])
 
 
-''' Growth measures '''
-m = Measures(fun, fun.peer_columns)
-print(m.measures)
+
+# ''' Growth measures '''
+# m = Measures(fun, fun.peer_columns)
+# print(m.measures)
+
+
 
 
 
