@@ -21,10 +21,10 @@ cal = Calendar()
   │ Fundamentals View                                                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  """
-from lib.equity.fundamentals import Fundamentals, Columns, RanksETL
+from lib.equity.fundamentals import Fundamentals, Columns, RanksETL, DCF
 
 # ticker = ['JNJ','PG']
-ticker = ['AMZN']
+ticker = ['JNJ']
 
 fun = Fundamentals( ticker = ticker,)
 print(fun)
@@ -34,13 +34,11 @@ print(change)
 print(change.describe())
 print(fun.delta())
 
-
 fun.get( columns = Columns.CASHFLOW.value, limit = 5 ).style_terminal(fun.df, text = 'Cash Flows:')
 change = fun.percent_change()
 print(change)
 print(change.describe())
 print(fun.delta())
-
 
 fun.get( columns = Columns.PEERS.value, limit = 5 ).style_terminal(fun.df, text = 'Peers:')
 change = fun.percent_change()
@@ -51,9 +49,12 @@ print(fun.delta())
 fun.get( columns = Columns.EXP.value, limit = 5 ).style_terminal(fun.df, text = 'Expected:')
 
 
+fun.get( columns = Columns.DCF.value, limit = 5 ).style_terminal(fun.df, text = 'Dcf:')
+dcf = DCF(fun)
+dcf.industry_cagr()
+
 
 # r = RanksETL()
-
 # r.join_fundamentals_and_profiles()
 
 
@@ -70,57 +71,3 @@ fun.get( columns = Columns.EXP.value, limit = 5 ).style_terminal(fun.df, text = 
 
 
 
-
-
-
-
-
-
-# import sys, os
-# import nasdaqdatalink
-# import pandas as pd
-
-# proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# print(proj_root)
-# sys.path.append(proj_root)
-
-# from calendar_dates import Calendar
-# cal = Calendar()
-
-# import nasdaq_data_link as nasdaq
-# from nasdaq_data_link import Sharadar
-
-# from etl.fundamentals_etl import FundamentalsETL
-
-# pd.options.display.float_format = '{:,.2f}'.format
-
-
-# """ 
-#   ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-#   │                                  Retreive data from NasdaqDataLink                                                 │
-#   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-# """
-# def get_nasdaq_data():
-
-#   query = nasdaq.Nasdaq()
-#   df = nasdaqdatalink.get_table(Sharadar.METRICS.value, ticker = ['AAPL','AMZN'], date = cal.previous_quarter_end())
-#   print(df)
-
-# # get_nasdaq_data()
-
-
-
-
-
-
-# """ 
-#   ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-#   │                                      Equity Fundamentals Ranks                                                     |
-#   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-#  """
-#  # use fundamentals.Ranks  object to calculate ranks and store in database
-# def etl_equity_fundamental_ranks():
-#   fun = FundamentalsETL()
-#   fun.custom_calculations()
-
-# etl_equity_fundamental_ranks()

@@ -25,6 +25,7 @@ class Columns(Enum):
     BALANCE = ID + []
     PEERS = ID +  ['de', 'divyield', 'eps', 'evebitda', 'fcfps', 'grossmargin', 'netmargin', 'fcfmargin', 'p/cf', 'oppmargin', 'pb', 'pe', 'roa', 'roe', 'roic', 'ros', 'roc', 'intcov']
     EXP = ID + ['retentionratio', 'roe', 'retearn','expnetincgrow', 'exproegrow', 'eqreinvestrate', 'expebitgrow','expgrowthrate']
+    DCF = ID + ['revenue','cogs','gp', 'rnd','sgna','ebit', 'taxrate', 'depamor','ebitda','capex']
 
 
 class Fundamentals:
@@ -87,8 +88,11 @@ class Fundamentals:
     def delta(self):
         ''' Change from previous quarter; Quarter over Quarter change.'''
         sub = self.df.iloc[[-5, -2, -1], :].dropna(how='any', axis=1)
+        
         sub = sub.iloc[-1].squeeze() - sub.iloc[:-1]
+        
         sub.index.name = 'Change Since'
+        
         return sub
 
 
@@ -96,14 +100,6 @@ class Fundamentals:
         '''Query ranks for selected ticker(s) from database'''
         pass
 
-
-
-    def estimates(self):
-        ''' 
-        https://www.barchart.com/stocks/quotes/SQ/earnings-estimates
-        https://www.nasdaq.com/market-activity/stocks/amzn/analyst-research
-        '''
-        pass
 
 
     def calculate(self):
@@ -129,6 +125,8 @@ class Fundamentals:
         df['paoutratio'] = df['dps'] / df['eps'] # payoutratio
         
         df['taxrate'] = df['taxexp'] / df['ebt']
+
+        df['ebit1-t'] = ''
         
         df['retentionratio'] = (df['retearn']  / df['netinc']) / 100 #retentionratio
         
@@ -145,6 +143,16 @@ class Fundamentals:
         df['expgrowthrate'] = df['netmargin'] * (df['revenue']/df['equity']) * df ['retentionratio'] #expected growth rate; p.275
         # df['sales to capital ratio'] = '' # reinvestment rate
         self.data = df
+
+
+
+
+    def estimates(self):
+        ''' 
+        https://www.barchart.com/stocks/quotes/SQ/earnings-estimates
+        https://www.nasdaq.com/market-activity/stocks/amzn/analyst-research
+        '''
+        pass
 
 
     def full_export(self, curl = False):
@@ -179,7 +187,7 @@ class Fundamentals:
     def style_jupyter(self):
         pass
 
-    # deprecate
+    # NOTE: deprecated
     def growth(self):
         ''' Measure growth of fundamentals over time; return multiIndex dataframe as view.
         '''
@@ -240,6 +248,35 @@ class Fundamentals:
         self.growth_pct = self.df.pct_change().dropna(how = 'all', axis=0) 
         return self
 
+
+
+class DCF:
+
+    def __init__(self, funobj, ):
+        self.funobj = funobj
+
+        data = funobj.df
+
+        print(self.industry_cagr())
+
+
+    def industry_cagr(self):
+        ''' Damodaran Industry average's using compdata
+        '''
+
+        from compdata import comp_data
+        print(comp_data.industry_name_list)
+        software = comp_data.Industry('Software (System & Application)')
+        betas = software.get_betas()
+        cagrL5Y = pd.DataFrame(data = betas)
+        return cagrL5Y
+
+    def industry_gross_profit_margin(self):
+        margins = software.get_margins()
+        sf1 = pd.DataFrame(data = margins)
+        sf1
+
+        #rnd
 
 
 
