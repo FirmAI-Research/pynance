@@ -91,6 +91,13 @@ class Fundamentals:
         sub.index.name = 'Change Since'
         return sub
 
+
+    def ranks(self):
+        '''Query ranks for selected ticker(s) from database'''
+        pass
+
+
+
     def estimates(self):
         ''' 
         https://www.barchart.com/stocks/quotes/SQ/earnings-estimates
@@ -246,6 +253,8 @@ class RanksETL:
         - The value in each column represent the percentile rank of a security for a given fundamental at a point in time, as compared to all other companies in the same industry
         A rank of 1 will be the highest, while 100 is the lowest.
 
+    Output called via query in Fundamentals().ranks()
+    
     # https://data.nasdaq.com/api/v3/datatables/SHARADAR/SF1?qopts.export=true&api_key=API_KEY
     '''
 
