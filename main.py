@@ -24,21 +24,37 @@ cal = Calendar()
 from lib.equity.fundamentals import Fundamentals, Columns, RanksETL
 
 # ticker = ['JNJ','PG']
-# fun = Fundamentals( ticker = ticker,)
-# print(fun)
-# fun.get( columns = Columns.INCOME.value, limit = 4 ).style_terminal(fun.df, text = 'Income:')
-# fun.growth().style_terminal([fun.growth_pct, fun.growth_measures], text = ['Growth %:', 'Growth Measures:'])
+ticker = ['AMZN']
 
-# fun.get( columns = Columns.CASHFLOW.value, limit = 4 ).style_terminal(fun.df, text = 'Cash Flows:')
-# fun.growth().style_terminal([fun.growth_pct, fun.growth_measures], text = ['Growth %:', 'Growth Measures:'])
-
-# fun.get( columns = Columns.PEERS.value, limit = 4 ).style_terminal(fun.df, text = 'Peers:')
-# fun.growth().style_terminal([fun.growth_pct, fun.growth_measures], text = ['Growth %:', 'Growth Measures:'])
-
+fun = Fundamentals( ticker = ticker,)
+print(fun)
+fun.get( columns = Columns.INCOME.value, limit = 5 ).style_terminal(fun.df, text = 'Income:')
+change = fun.percent_change()
+print(change)
+print(change.describe())
+print(fun.delta())
 
 
-r = RanksETL()
-r.join_fundamentals_and_profiles()
+fun.get( columns = Columns.CASHFLOW.value, limit = 5 ).style_terminal(fun.df, text = 'Cash Flows:')
+change = fun.percent_change()
+print(change)
+print(change.describe())
+print(fun.delta())
+
+
+fun.get( columns = Columns.PEERS.value, limit = 5 ).style_terminal(fun.df, text = 'Peers:')
+change = fun.percent_change()
+print(change)
+print(change.describe())
+print(fun.delta())
+
+fun.get( columns = Columns.EXP.value, limit = 5 ).style_terminal(fun.df, text = 'Expected:')
+
+
+
+# r = RanksETL()
+
+# r.join_fundamentals_and_profiles()
 
 
 

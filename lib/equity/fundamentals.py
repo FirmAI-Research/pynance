@@ -24,6 +24,7 @@ class Columns(Enum):
     INCOME = ID +  ['revenue', 'cogs','gp', 'opex','opinc','ebt','netinc','eps','depamor','ebitda']
     BALANCE = ID + []
     PEERS = ID +  ['de', 'divyield', 'eps', 'evebitda', 'fcfps', 'grossmargin', 'netmargin', 'fcfmargin', 'p/cf', 'oppmargin', 'pb', 'pe', 'roa', 'roe', 'roic', 'ros', 'roc', 'intcov']
+    EXP = ID + ['retentionratio', 'roe', 'retearn','expnetincgrow', 'exproegrow', 'eqreinvestrate', 'expebitgrow','expgrowthrate']
 
 
 class Fundamentals:
@@ -54,7 +55,7 @@ class Fundamentals:
         self.calculate()
 
 
-    def get(self, columns = None, limit = 5):
+    def get(self, columns = None, limit = 8):
 
         self.limit = limit
         self.columns = columns
@@ -78,68 +79,24 @@ class Fundamentals:
         return self
 
 
-    def growth(self):
-        ''' Measure growth of fundamentals over time; return multiIndex dataframe as view.
+
+    def percent_change(self):
+        return self.df.pct_change().dropna(how = 'all', axis=0) 
+
+
+    def delta(self):
+        ''' Change from previous quarter; Quarter over Quarter change.'''
+        sub = self.df.iloc[[-5, -2, -1], :].dropna(how='any', axis=1)
+        sub = sub.iloc[-1].squeeze() - sub.iloc[:-1]
+        sub.index.name = 'Change Since'
+        return sub
+
+    def estimates(self):
+        ''' 
+        https://www.barchart.com/stocks/quotes/SQ/earnings-estimates
+        https://www.nasdaq.com/market-activity/stocks/amzn/analyst-research
         '''
-        def arithmetic(df, col):
-            return df[col].pct_change().dropna().mean()
-
-        def geometric(df, col):
-            a = np.log(df[col].pct_change().dropna())
-            try:
-                b = np.exp(a.mean()) 
-            except Exception as e:
-                b = pd.Series(np.nan)
-            return b
-
-        def stdev(df, col):
-            return df[col].pct_change().dropna().std()
-
-        self.fields = [c for c in self.columns if c not in  ['ticker', 'calendardate']]
-        measure_names = ['arith', 'geo', 'stdev']
-        n_measures = len(measure_names)
-
-        # case for creating multiIndex frame with growth measures for a single ticker
-        if len(self.ticker) == 1:
-            arrays = [
-                [field for field in self.fields for _ in range(n_measures)],
-                measure_names * len(self.fields)
-            ]
-
-            tuples = list(zip(*arrays))
-
-            index = pd.MultiIndex.from_tuples(tuples, names=["field", "calc"])
-
-            values = []
-            for item in self.fields:
-                values.extend([arithmetic(self.df, col = item), geometric(self.df, col = item), stdev(self.df, col = item)])
-        
-        # # case for creating multiIndex frame with growth measures for multiple tickers
-        else:
-            arrays = [
-                [ticker for ticker in self.ticker * (len(self.fields) * len(self.ticker) * n_measures)],
-                [field for field in self.fields for _ in range(n_measures * len(self.ticker))],
-                measure_names * (len(self.fields) * len(self.ticker))
-            ]
-            tuples = list(zip(*arrays))
-
-            index = pd.MultiIndex.from_tuples(tuples, names=["ticker", "field", "calc"])
-
-            values = []
-            for item in self.fields:
-                for ticker in self.ticker:
-                    df = self.df.iloc[:, self.df.columns.get_level_values(1)==ticker]
-                    values.extend([arithmetic(df, col = item).values[0], geometric(df, col = item).values[0], stdev(df, col = item).values[0]])
-   
-        multi_idx = pd.Series(values, index=index).to_frame().transpose()
-
-        measures = multi_idx.T
-
-        self.growth_measures = measures.T
-        self.growth_measures.columns=self.growth_measures.sort_index(axis=1,level=[1,2, 0],ascending=[True,True, True]).columns
-
-        self.growth_pct = self.df.pct_change().dropna(how = 'all', axis=0) 
-        return self
+        pass
 
 
     def calculate(self):
@@ -151,6 +108,8 @@ class Fundamentals:
         df['cogs'] = df['revenue'] - df['gp']
         
         df['roc'] = df['netinc'] / (df['equity'] + df['debt'])
+
+        df['roe'] = df['netinc'] / (df['equity']) # TODO Use TTM net income
         
         df['fcfmargin'] = df['fcf'] / df['revenue']
         
@@ -173,6 +132,10 @@ class Fundamentals:
         df['eqreinvestrate'] =   df['expnetincgrow'] /  df['roe']  # equity reinvestment rate
         
         df['expebitgrow'] = df['eqreinvestrate'] * df['roc'] # expebitgrow
+
+        df['netmargin'] = (df['revenue'] - df['cogs']) / df['revenue']
+
+        df['expgrowthrate'] = df['netmargin'] * (df['revenue']/df['equity']) * df ['retentionratio'] #expected growth rate; p.275
         # df['sales to capital ratio'] = '' # reinvestment rate
         self.data = df
 
@@ -209,6 +172,66 @@ class Fundamentals:
     def style_jupyter(self):
         pass
 
+    # deprecate
+    def growth(self):
+        ''' Measure growth of fundamentals over time; return multiIndex dataframe as view.
+        '''
+        def arithmetic(df, col):
+            return df[col].pct_change().dropna().mean()
+
+        def median(df, col):
+            return df[col].pct_change().dropna().median()
+
+        def stdev(df, col):
+            return df[col].pct_change().dropna().std()
+
+        self.fields = [c for c in self.columns if c not in  ['ticker', 'calendardate']]
+        measure_names = ['arith', 'median', 'stdev']
+        n_measures = len(measure_names)
+
+        # case for creating multiIndex frame with growth measures for a single ticker
+        if len(self.ticker) == 1:
+            arrays = [
+                [field for field in self.fields for _ in range(n_measures)],
+                measure_names * len(self.fields)
+            ]
+
+            tuples = list(zip(*arrays))
+
+            index = pd.MultiIndex.from_tuples(tuples, names=["field", "calc"])
+
+            values = []
+            for item in self.fields:
+                values.extend([arithmetic(self.df, col = item), median(self.df, col = item), stdev(self.df, col = item)])
+        
+        # # case for creating multiIndex frame with growth measures for multiple tickers
+        else:
+            arrays = [
+                [ticker for ticker in self.ticker * (len(self.fields) * len(self.ticker) * n_measures)],
+                [field for field in self.fields for _ in range(n_measures * len(self.ticker))],
+                measure_names * (len(self.fields) * len(self.ticker))
+            ]
+            tuples = list(zip(*arrays))
+
+            index = pd.MultiIndex.from_tuples(tuples, names=["ticker", "field", "calc"])
+
+            values = []
+            for item in self.fields:
+                for ticker in self.ticker:
+                    df = self.df.iloc[:, self.df.columns.get_level_values(1)==ticker]
+                    values.extend([arithmetic(df, col = item).values[0], median(df, col = item).values[0], stdev(df, col = item).values[0]])
+   
+        multi_idx = pd.Series(values, index=index).to_frame().transpose()
+
+        measures = multi_idx.T
+
+        self.growth_measures = measures.T
+
+        if len(self.ticker) > 1:
+            self.growth_measures.columns=self.growth_measures.sort_index(axis=1,level=[1,2, 0],ascending=[True,True, True]).columns
+
+        self.growth_pct = self.df.pct_change().dropna(how = 'all', axis=0) 
+        return self
 
 
 
