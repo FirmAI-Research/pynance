@@ -21,40 +21,24 @@ cal = Calendar()
   │ Fundamentals View                                                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  """
-from lib.equity.fundamentals import Fundamentals, Columns
+from lib.equity.fundamentals import Fundamentals, Columns, RanksETL
 
-ticker = ['JNJ','PG']
-fun = Fundamentals( ticker = ticker, columns = Columns.INCOME.value, limit = 4 )
-with custom_formatting():
-  print(fun)
-  print(fun.df)
-fun = Fundamentals( ticker = ticker, columns = Columns.CASHFLOW.value, limit = 4 )
-with custom_formatting():
-  print(fun)
-  print(fun.df)
-measures, pct = fun.growth()
-print('Percent Change: \n', pct)
-print('Growth Measures: \n', measures)
-fun = Fundamentals( ticker = ticker, columns = Columns.PEERS.value, limit = 4 )
-with custom_formatting():
-  print(fun)
-  print(fun.df)
+# ticker = ['JNJ','PG']
+# fun = Fundamentals( ticker = ticker,)
+# print(fun)
+# fun.get( columns = Columns.INCOME.value, limit = 4 ).style_terminal(fun.df, text = 'Income:')
+# fun.growth().style_terminal([fun.growth_pct, fun.growth_measures], text = ['Growth %:', 'Growth Measures:'])
+
+# fun.get( columns = Columns.CASHFLOW.value, limit = 4 ).style_terminal(fun.df, text = 'Cash Flows:')
+# fun.growth().style_terminal([fun.growth_pct, fun.growth_measures], text = ['Growth %:', 'Growth Measures:'])
+
+# fun.get( columns = Columns.PEERS.value, limit = 4 ).style_terminal(fun.df, text = 'Peers:')
+# fun.growth().style_terminal([fun.growth_pct, fun.growth_measures], text = ['Growth %:', 'Growth Measures:'])
 
 
 
-
-''' Raw fundamental data '''
-# print(fun.df[fun.peer_columns])
-
-
-
-# ''' Growth measures '''
-# m = Measures(fun, fun.peer_columns)
-# print(m.measures)
-
-
-
-
+r = RanksETL()
+r.join_fundamentals_and_profiles()
 
 
 

@@ -61,4 +61,26 @@ class Nasdaq:
 
 
 
+class Tickers(Nasdaq):
+  '''
+  request_url = f"https://data.nasdaq.com/api/v3/datatables/SHARADAR/SF1.json?scalerevenue=5&api_key={self.api_key}&filingdate.gte=2022-01-01"
+  res = requests.get(request_url)
+  df  = pd.DataFrame.from_dict(res.json())
+  '''
 
+  def __init__(self):
+    super().__init__()
+      
+  
+  def full_export(self):
+    # df = nasdaqdatalink.get_table(Sharadar.TICKERS.value,  paginate=True) #qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
+    # df.to_csv(r'C:\data\tickers.csv')
+    self.df =  pd.read_csv(r'C:\data\tickers.csv')
+    self.df = self.df[self.df.table == 'SF1']
+    self.df = self.df[['ticker', 'name', 'exchange','sector', 'industry','scalemarketcap', 'scalerevenue','famasector','famaindustry','lastupdated']]
+    return self.df
+
+
+  def get_industry(self, ticker):
+    res = self.df[self.df.ticker==ticker]
+    return res.industry.values[0]
