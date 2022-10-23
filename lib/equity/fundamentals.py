@@ -1,6 +1,7 @@
 # Fundamentals; Sector Percentile Ranks;  DCF; Financial Statements;
 from enum import Enum
 import sys, os
+from tracemalloc import start
 import nasdaqdatalink
 import pandas as pd 
 import numpy as np
@@ -19,21 +20,26 @@ cal = Calendar()
 
 
 class Columns(Enum):
+    ''' Column views for financial statements
+    '''
     ID = ['ticker', 'calendardate' ]
     
     CASHFLOW = ID +  ['ncfo','ncfi', 'ncff', 'ncfinv', 'fcf', 'ncf', 'ncfbus', 'ncfcommon', 'ncfdebt', 'ncfdiv',  'ncfx']
     
     INCOME = ID +  ['revenue', 'cogs','gp', 'opex','opinc','ebt','netinc','eps','depamor','ebitda']
     
-    BALANCE = ID + []
+    BALANCE = ID + ['assetsc', 'assetsnc',  'assets', 'liabilitiesc','liabilitiesnc','debt','equity','retearn']
     
     PEERS = ID +  ['de', 'divyield', 'eps', 'evebitda', 'fcfps', 'grossmargin', 'netmargin', 'fcfmargin', 'p/cf', 'oppmargin', 'pb', 'pe', 'roa', 'roe', 'roic', 'ros', 'roc', 'intcov']
+
+    METRICS = ID + []
     
     EXP = ID + ['retentionratio', 'roe', 'retearn','expnetincgrow', 'exproegrow', 'eqreinvestrate', 'expebitgrow','expgrowthrate']
     
     DCF = ID + ['revenue','cogs','gp', 'rnd','sgna','ebit', 'taxrate', 'depamor','ebitda','capex']
     
     RANKS = list(set(ID + CASHFLOW + INCOME + BALANCE + PEERS + EXP + DCF + ['name', 'industry', 'sector', 'famaindustry', 'famasector', 'scalemarketcap','scalerevenue']))
+
 
 
 class Fundamentals:
@@ -302,7 +308,6 @@ class Fundamentals:
 
 
 
-
 class Ranks:
     ''' ETL Proccess to calculate and load ranks to sqlite is stored in pynance/db/
     '''
@@ -361,27 +366,50 @@ class DCF:
         
         self.cf = Fundamentals(ticker).get( columns = Columns.CASHFLOW.value, limit = 5 )
         self.inc = Fundamentals(ticker).get( columns = Columns.INCOME.value, limit = 5 )
-        self.bal = Fundamentals(ticker).get( columns = Columns.BALANCE.value, limit = 5 )
+        self.bal = Fundamentals(ticker).get( columns = Columns.BALANCE.value + ['revenue'], limit = 5 )
 
-        self.REV_GROWTH = 0.1
+        self.FORECAST_PERIODS = 5
+        self.REV_GROWTH = 0.02
 
 
-    def forecast_income_statement(self):
-        '''calculate the full income statement as a percentage of the revenue. Then forecast the future income statement by multiplying the metric of the previous year times the REV_GROWTH relative to % of revenue
+    def forecast_as_percent_of_revenue(self, type = None):
+        '''Grow revenue by a projected amount. Calculate other items as a percentage of revenue and forecast them as a percent of the grown revenue. 
         '''
-        incst = self.inc.df.copy()
-        print(incst)
+        # TODO Pass Fundamental() object of Income Statement and use isinstance instead of string?
+        if type == 'INCOME':
+            statement = self.inc.df.copy()
+        if type == 'BALANCE':
+            statement = self.bal.df.copy()
 
-        incpctrev = incst.divide(incst.revenue, axis=1) # income statement fields as a percent of revenue
-        print(incpctrev)
+        pctrev = statement.divide(statement.revenue, axis=0) # income statement fields as a percent of revenue
+        pctrevavg = pctrev.median()
 
-        # incst['revenue'] = incst['revenue'] * (1 + self.REV_GROWTH)
-        # print(incst)
-        # print(est_inc* (1 + self.REV_GROWTH))
-        
+        # Project future revenue based on REV_GROWTH
+        starting_rev = statement['revenue'].iloc[-1]
+        forecast_rev = starting_rev
+        arr = []
+        for i in range(self.FORECAST_PERIODS):
+            forecast_rev = forecast_rev * (1 + self.REV_GROWTH)
+            arr.append(forecast_rev)
 
-    def forecast_balance_sheet(self):
-        '''calculate the full balance sheet as a percentage of the revenue. 
-        '''
-        pass
+        forecast = pd.DataFrame(columns = statement.columns.tolist())
+        forecast['revenue'] = arr
+
+        # Project other metrics based on the % of 'Revenue' using the projected future revenues from above
+        for i in range(self.FORECAST_PERIODS):
+            for c in [c for c in forecast.columns if c not in ['revenue']]:
+                forecast[c].iloc[i] = forecast['revenue'].iloc[i] * pctrevavg[c]
+
+        forecast.index = [f'T+{i+1}' for i in range(0, self.FORECAST_PERIODS)]
+
+        forecast = pd.concat([statement, forecast], axis = 0)
+
+        if type == 'INCOME':
+            self.inc_forecast = forecast
+        if type == 'BALANCE':
+            self.bal_forecast = forecast
+
+        return statement, pctrevavg, forecast
+
+
 

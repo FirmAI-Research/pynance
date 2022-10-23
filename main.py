@@ -83,10 +83,12 @@ ticker = ['JNJ']
 # print(r.get_ranks())
 
 
-dcf = DCF(ticker='JNJ')
-dcf.forecast_income_statement()
-
-
+dcf = DCF(ticker=['JNJ'])
+dcf.forecast_as_percent_of_revenue(type = 'INCOME')
+dcf.forecast_as_percent_of_revenue(type = 'BALANCE')
+with custom_formatting():
+  print(dcf.inc_forecast)
+  print(dcf.bal_forecast)
 
 
 
