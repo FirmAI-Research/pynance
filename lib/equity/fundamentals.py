@@ -20,12 +20,20 @@ cal = Calendar()
 
 class Columns(Enum):
     ID = ['ticker', 'calendardate' ]
+    
     CASHFLOW = ID +  ['ncfo','ncfi', 'ncff', 'ncfinv', 'fcf', 'ncf', 'ncfbus', 'ncfcommon', 'ncfdebt', 'ncfdiv',  'ncfx']
+    
     INCOME = ID +  ['revenue', 'cogs','gp', 'opex','opinc','ebt','netinc','eps','depamor','ebitda']
+    
     BALANCE = ID + []
+    
     PEERS = ID +  ['de', 'divyield', 'eps', 'evebitda', 'fcfps', 'grossmargin', 'netmargin', 'fcfmargin', 'p/cf', 'oppmargin', 'pb', 'pe', 'roa', 'roe', 'roic', 'ros', 'roc', 'intcov']
+    
     EXP = ID + ['retentionratio', 'roe', 'retearn','expnetincgrow', 'exproegrow', 'eqreinvestrate', 'expebitgrow','expgrowthrate']
+    
     DCF = ID + ['revenue','cogs','gp', 'rnd','sgna','ebit', 'taxrate', 'depamor','ebitda','capex']
+    
+    RANKS = list(set(ID + CASHFLOW + INCOME + BALANCE + PEERS + EXP + DCF + ['name', 'industry', 'sector', 'famaindustry', 'famasector', 'scalemarketcap','scalerevenue']))
 
 
 class Fundamentals:
@@ -80,28 +88,6 @@ class Fundamentals:
         return self
 
 
-
-    def percent_change(self):
-        return self.df.pct_change().dropna(how = 'all', axis=0) 
-
-
-    def delta(self):
-        ''' Change from previous quarter; Quarter over Quarter change.'''
-        sub = self.df.iloc[[-5, -2, -1], :].dropna(how='any', axis=1)
-        
-        sub = sub.iloc[-1].squeeze() - sub.iloc[:-1]
-        
-        sub.index.name = 'Change Since'
-        
-        return sub
-
-
-    def ranks(self):
-        '''Query ranks for selected ticker(s) from database'''
-        pass
-
-
-
     def calculate(self):
         ''' additional metrics calculated based on raw fundamental data
         damodaran pg. 178; Jansen 79-85
@@ -145,6 +131,19 @@ class Fundamentals:
         self.data = df
 
 
+    def percent_change(self):
+        return self.df.pct_change().dropna(how = 'all', axis=0) 
+
+
+    def delta(self):
+        ''' Change from previous quarter; Quarter over Quarter change.'''
+        sub = self.df.iloc[[-5, -2, -1], :].dropna(how='any', axis=1)
+        
+        sub = sub.iloc[-1].squeeze() - sub.iloc[:-1]
+        
+        sub.index.name = 'Change Since'
+        
+        return sub
 
 
     def estimates(self):
@@ -156,20 +155,40 @@ class Fundamentals:
 
 
     def full_export(self, curl = False):
-        import requests
-        import urllib.request
+        ''' Helper function for RanksETL
+        '''
+        import requests, zipfile, io
+
+        dirp = "C:\data\FundamentalsZip"
+        
         if curl:
-            request_url = f'https://data.nasdaq.com/api/v3/datatables/SHARADAR/SF1?qopts.export=true&api_key={nasdaq.api_key}'
+            nas = nasdaq.Nasdaq()
+            
+            request_url = f'https://data.nasdaq.com/api/v3/datatables/SHARADAR/SF1?qopts.export=true&api_key={nas.api_key}'
             res = requests.get(request_url)
+            
             df  = pd.DataFrame.from_dict(res.json())
             link = df.datatable_bulk_download.iloc[1].get('link')
             print(link)
+            
+            r = requests.get(link)
+            z = zipfile.ZipFile(io.BytesIO(r.content))
+            z.extractall(dirp)
         
-        self.data = pd.read_csv(r'C:\data\fundamentals.csv')
+        fp = os.listdir(dirp)[0] # Only one file is returned in the unziped folder
+        
+        self.data = pd.read_csv(os.path.join(dirp, fp))
 
         self.calculate()
 
         return self.data
+
+
+    def plot_clustered_bar_peer_fundamentals():
+        ''' Clustered bar chart for multiple peers to the ticker and various metrics
+        '''
+        pass
+
 
 
     def style_terminal(self, df, text:list = None):
@@ -250,6 +269,55 @@ class Fundamentals:
 
 
 
+
+class Ranks:
+    ''' ETL Proccess to calculate and load ranks to sqlite is stored in pynance/db/
+    '''
+
+    def __init__(self, ticker=None, industry=None):
+
+        if ticker is None and industry is None:
+            raise ValueError ('Must provide a ticker or an Industry')
+
+        if ticker is not None and industry is None:
+            tick = nasdaq.Tickers()
+            tick.full_export(curl=False)
+            self.industry = tick.get_industry(ticker)
+        
+        else:    
+            self.industry = industry
+
+        self.ticker = ticker
+
+        from sqlalchemy import create_engine
+        engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+        self.cnxn = engine.connect()
+
+
+    def get_ranks(self):
+        ''' Returns ranks for all periods and one ticker '''
+        df =  pd.read_sql(f"select * from CompFunRanks where ticker == '{self.ticker}'", self.cnxn)
+        return df.pivot(index = ['calendardate'], columns = ['variable'], values= ['value'])
+
+
+    def get_box_plot_values(self):
+        ''' Raw fundamental values for all companies in an industry peer group'''
+        return pd.read_sql(f"select * from CompFunBase where industry == '{self.industry}'", self.cnxn)
+
+
+    def plot_dual_axis_value_and_rank(self):
+        ''' Plots a time series of fundamental values for an individual metric and company on one axis; With the % rank vs peer group on the second axis
+        '''
+        pass
+
+    
+    def plot_plot(self):
+        ''' Box plot of fundamental values for a metric across all companies in a peer group. Star the individual companies value on the plot. 
+        '''
+        pass
+
+
+
 class DCF:
 
     def __init__(self, funobj, ):
@@ -277,84 +345,5 @@ class DCF:
         sf1
 
         #rnd
-
-
-
-
-class RanksETL:
-    '''
-    Creates a database table for each market industry.
-        - Columns of the table represent fundamental's
-            One column will store the "As of Date"
-        - Each row will represent a ticker
-        - The value in each column represent the percentile rank of a security for a given fundamental at a point in time, as compared to all other companies in the same industry
-        A rank of 1 will be the highest, while 100 is the lowest.
-
-    Output called via query in Fundamentals().ranks()
-    
-    # https://data.nasdaq.com/api/v3/datatables/SHARADAR/SF1?qopts.export=true&api_key=API_KEY
-    '''
-
-    def __init__(self):
-        pass
-    
-
-    def join_fundamentals_and_profiles(self):
-
-        # Fundamentals
-        fun = Fundamentals()
-        df_fun = fun.full_export(curl = False) # Set curl = True if data should be refreshed
-        print(df_fun)
-
-        # Static Profile info
-        nasdaq.Nasdaq()
-        tick = nasdaq.Tickers()
-        df_prof = tick.full_export()
-
-        all_industies = df_prof.industry.unique().tolist()
-        print(all_industies)
-
-        # Join
-        df = df_fun.set_index('ticker').merge(df_prof.set_index('ticker'), how='inner', left_index=True, right_index=True)
-        print(df)
-        print(df.columns)
-
-
-
-
-
-
-
-################# Wip - Complete ETL to sqlite first
-# class Ranks:
-
-
-#     def __init__(self, ticker=None, industry=None):
-
-#         if ticker is None and industry is None:
-#             raise ValueError ('Must provide a ticker or an Industry')
-
-#         self.ticker = ticker
-        
-#         self.industry = industry
-
-#         if self.industry is None:
-#             nasdaq.Nasdaq()
-#             tick = nasdaq.Tickers()
-#             data = tick.full_export()
-#             self.industry = tick.get_industry(ticker)
-#             print(self.industry)
-
-#         self.data = data[data.industry == self.industry]
-       
-#         self.data = self.data
-       
-#         print(self.data.head())
-       
-#         print(self.data.columns)
-
-#         self.peers = self.data.ticker.tolist()
-
-#         print(len(self.peers))
 
 

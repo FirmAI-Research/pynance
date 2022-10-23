@@ -72,9 +72,11 @@ class Tickers(Nasdaq):
     super().__init__()
       
   
-  def full_export(self):
-    # df = nasdaqdatalink.get_table(Sharadar.TICKERS.value,  paginate=True) #qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
-    # df.to_csv(r'C:\data\tickers.csv')
+  def full_export(self, curl = False):
+    if curl:
+      df = nasdaqdatalink.get_table(Sharadar.TICKERS.value,  paginate=True) #qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
+      df.to_csv(r'C:\data\tickers.csv')
+    
     self.df =  pd.read_csv(r'C:\data\tickers.csv')
     self.df = self.df[self.df.table == 'SF1']
     self.df = self.df[['ticker', 'name', 'exchange','sector', 'industry','scalemarketcap', 'scalerevenue','famasector','famaindustry','lastupdated']]
