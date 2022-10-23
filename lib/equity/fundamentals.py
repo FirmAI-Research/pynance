@@ -131,6 +131,10 @@ class Fundamentals:
         self.data = df
 
 
+
+    def describe(self, df):
+        return df.describe().loc[['mean', 'std','25%','50%','75%'], :]
+
     def percent_change(self):
         return self.df.pct_change().dropna(how = 'all', axis=0) 
 
@@ -144,6 +148,36 @@ class Fundamentals:
         sub.index.name = 'Change Since'
         
         return sub
+
+
+    
+    def get_peers(self):
+        tick = nasdaq.Tickers()
+        tick.full_export(curl=False)
+        
+        industry = tick.get_industry(self.ticker[0])
+        print(industry)
+
+        from sqlalchemy import create_engine
+        engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+        self.cnxn = engine.connect()
+        base = pd.read_sql(f"select * from CompFunBase where industry == '{industry}'", self.cnxn)
+
+        base = base[base.industry == industry].sort_values(by = 'revenue', ascending = False)
+        peers = base.ticker.unique().tolist()
+        index = peers.index(self.ticker[0])
+        
+        if index == 0:
+            search = 0, [1, 2, 3]
+        elif index == 1:
+            search = [1, 0, 2, 3]
+        elif index == 2:
+            search = [2, 0, 1, 3]
+        else:
+            search = [index, index-3, index-2, index-1]
+
+        return [peers[i] for i in search]
+
 
 
     def estimates(self):
@@ -184,11 +218,10 @@ class Fundamentals:
         return self.data
 
 
-    def plot_clustered_bar_peer_fundamentals():
+    def plot_clustered_bar_peer_fundamentals(self):
         ''' Clustered bar chart for multiple peers to the ticker and various metrics
         '''
         pass
-
 
 
     def style_terminal(self, df, text:list = None):
@@ -299,16 +332,19 @@ class Ranks:
         df =  pd.read_sql(f"select * from CompFunRanks where ticker == '{self.ticker}'", self.cnxn)
         return df.pivot(index = ['calendardate'], columns = ['variable'], values= ['value'])
 
-
-    def get_box_plot_values(self):
-        ''' Raw fundamental values for all companies in an industry peer group'''
-        return pd.read_sql(f"select * from CompFunBase where industry == '{self.industry}'", self.cnxn)
-
+    def get_industry_stat(self):
+        pass
 
     def plot_dual_axis_value_and_rank(self):
         ''' Plots a time series of fundamental values for an individual metric and company on one axis; With the % rank vs peer group on the second axis
         '''
         pass
+
+
+    def get_box_plot_values(self):
+        ''' Raw fundamental values for all companies in an industry peer group'''
+        return pd.read_sql(f"select * from CompFunBase where industry == '{self.industry}'", self.cnxn)
+
 
     
     def plot_plot(self):
@@ -320,30 +356,32 @@ class Ranks:
 
 class DCF:
 
-    def __init__(self, funobj, ):
-        self.funobj = funobj
+    def __init__(self, ticker):
+        self.ticker = ticker
+        
+        self.cf = Fundamentals(ticker).get( columns = Columns.CASHFLOW.value, limit = 5 )
+        self.inc = Fundamentals(ticker).get( columns = Columns.INCOME.value, limit = 5 )
+        self.bal = Fundamentals(ticker).get( columns = Columns.BALANCE.value, limit = 5 )
 
-        data = funobj.df
-
-        print(self.industry_cagr())
+        self.REV_GROWTH = 0.1
 
 
-    def industry_cagr(self):
-        ''' Damodaran Industry average's using compdata
+    def forecast_income_statement(self):
+        '''calculate the full income statement as a percentage of the revenue. Then forecast the future income statement by multiplying the metric of the previous year times the REV_GROWTH relative to % of revenue
         '''
+        incst = self.inc.df.copy()
+        print(incst)
 
-        from compdata import comp_data
-        print(comp_data.industry_name_list)
-        software = comp_data.Industry('Software (System & Application)')
-        betas = software.get_betas()
-        cagrL5Y = pd.DataFrame(data = betas)
-        return cagrL5Y
+        incpctrev = incst.divide(incst.revenue, axis=1) # income statement fields as a percent of revenue
+        print(incpctrev)
 
-    def industry_gross_profit_margin(self):
-        margins = software.get_margins()
-        sf1 = pd.DataFrame(data = margins)
-        sf1
+        # incst['revenue'] = incst['revenue'] * (1 + self.REV_GROWTH)
+        # print(incst)
+        # print(est_inc* (1 + self.REV_GROWTH))
+        
 
-        #rnd
-
+    def forecast_balance_sheet(self):
+        '''calculate the full balance sheet as a percentage of the revenue. 
+        '''
+        pass
 
