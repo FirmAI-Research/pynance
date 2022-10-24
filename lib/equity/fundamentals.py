@@ -28,7 +28,7 @@ class Columns(Enum):
     
     CASHFLOW = ID +  ['ncfo','ncfi', 'ncff', 'ncfinv', 'fcf', 'ncf', 'ncfbus', 'ncfcommon', 'ncfdebt', 'ncfdiv',  'ncfx']
     
-    INCOME = ID +  ['revenue', 'cogs','gp', 'opex','opinc','ebt','netinc','eps','depamor','ebitda']
+    INCOME = ID +  ['revenue', 'cogs','gp', 'opex','opinc','ebt','netinc','ebitda', 'depamor'] # 'eps'
     
     BALANCE = ID + ['assetsc', 'assetsnc', 'receivables', 'inventory', 'assets', 'liabilitiesc','liabilitiesnc', 'payables', 'debt','equity','retearn']
     
@@ -69,6 +69,9 @@ class Fundamentals:
     
             self.data = nasdaqdatalink.get_table(Sharadar.FUNDAMENTALS.value, dimension="MRQ",   paginate=True) # All MRQ periods; All Tickers
 
+
+        self.data.calendardate = [d.strftime('%Y-%m-%d') for d in self.data.calendardate]
+
         self.calculate()
 
 
@@ -88,10 +91,10 @@ class Fundamentals:
 
         else:  
             if limit is not None:
-                self.df = self.df[self.columns].set_index('calendardate').pivot(columns = ['ticker'])[::-1].iloc[-limit:, :]
+                self.df = self.df[self.columns][::-1].set_index('calendardate').pivot(columns = ['ticker']).iloc[-limit:, :]
             
             else:
-                self.df = self.df[self.columns].set_index('calendardate').pivot(columns = ['ticker'])[::-1]
+                self.df = self.df[self.columns][::-1].set_index('calendardate').pivot(columns = ['ticker'])
         
         return self
 
@@ -139,23 +142,36 @@ class Fundamentals:
         self.data = df
 
 
-
-    def describe(self, df):
-        return df.describe().loc[['mean', 'std','25%','50%','75%'], :]
-
     def percent_change(self):
-        return self.df.pct_change().dropna(how = 'all', axis=0) 
+        ''' A percent change function for representing negative numbers intuitively was opposed to absolute change.
+        https://github.com/pandas-dev/pandas/issues/22596
+        '''
+        self.pct_chg = self.df.copy()
+        for c in self.pct_chg.columns:
+            self.pct_chg[c] =  self.pct_chg[c].pct_change()*np.sign(self.pct_chg[c].shift(periods=1))
+        # self.pct_chg.dropna(how = 'all', axis=0, inplace = True) 
+        return self
+
+
+    def describe(self):
+        print('Describe % Change:')
+        self.desc = self.pct_chg.describe().loc[['mean', 'std','25%','50%','75%'], :]
+        return self
 
 
     def delta(self):
         ''' Change from previous quarter; Quarter over Quarter change, Same Quarter last year.'''
+        print('Change Since: ')
+
         sub = self.df.iloc[[-5, -2, -1], :].dropna(how='any', axis=1)
         
         sub = sub.iloc[-1].squeeze() - sub.iloc[:-1]
         
         sub.index.name = 'Change Since'
+
+        self.delta = sub
         
-        return sub
+        return self
 
 
     
@@ -244,8 +260,58 @@ class Fundamentals:
                 print(df)           
 
 
-    def style_jupyter(self):
-        pass
+    def style_jupyter(self, df, units='M'):
+
+
+        if isinstance(df.columns, pd.MultiIndex):
+
+            if units == 'M':
+                df = df.divide(1000000).T
+
+                return df.style      \
+                    .format("${:,}") \
+                    .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
+                    .set_properties(**{'border': '1px solid lightgrey'})      \
+                    .set_table_styles(
+                    [
+                    {"selector": "td, th", "props": [("border", "1px solid lightgrey !important")]},
+                    ]
+                )
+
+            if units == '%':
+                df = df.multiply(100).T
+
+                return df.style      \
+                    .format("{:,.2f}%") \
+                    .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
+                    .set_properties(**{'border': '1px solid lightgrey'})      \
+                    .set_table_styles(
+                    [
+                    {"selector": "td, th", "props": [("border", "1px solid lightgrey !important")]},
+                    ]
+                )
+
+
+
+
+        else:
+
+            if units == 'M':
+                df = df.divide(1000000)
+
+                return df.style      \
+                    .format("${:,}") \
+                    .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
+
+
+            elif units == '%':
+                df = df.multiply(100)
+
+                return df.style      \
+                    .format("{:,.2f}%") \
+                    .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
+
+
 
     # NOTE: deprecated
     def growth(self):
