@@ -5,7 +5,9 @@ from tracemalloc import start
 import nasdaqdatalink
 import pandas as pd 
 import numpy as np
+import numpy_financial as npf
 from scipy.stats.mstats import gmean
+import yfinance as yf
 
 proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print(proj_root)
@@ -28,7 +30,7 @@ class Columns(Enum):
     
     INCOME = ID +  ['revenue', 'cogs','gp', 'opex','opinc','ebt','netinc','eps','depamor','ebitda']
     
-    BALANCE = ID + ['assetsc', 'assetsnc',  'assets', 'liabilitiesc','liabilitiesnc','debt','equity','retearn']
+    BALANCE = ID + ['assetsc', 'assetsnc', 'receivables', 'inventory', 'assets', 'liabilitiesc','liabilitiesnc', 'payables', 'debt','equity','retearn']
     
     PEERS = ID +  ['de', 'divyield', 'eps', 'evebitda', 'fcfps', 'grossmargin', 'netmargin', 'fcfmargin', 'p/cf', 'oppmargin', 'pb', 'pe', 'roa', 'roe', 'roic', 'ros', 'roc', 'intcov']
 
@@ -36,7 +38,7 @@ class Columns(Enum):
     
     EXP = ID + ['retentionratio', 'roe', 'retearn','expnetincgrow', 'exproegrow', 'eqreinvestrate', 'expebitgrow','expgrowthrate']
     
-    DCF = ID + ['revenue','cogs','gp', 'rnd','sgna','ebit', 'taxrate', 'depamor','ebitda','capex']
+    DCF = ID + ['netinc', 'revenue','cogs','gp', 'rnd','sgna','ebit', 'payables','receivables', 'inventory', 'depamor','ebitda','capex', 'fcf', 'ncfo']
     
     RANKS = list(set(ID + CASHFLOW + INCOME + BALANCE + PEERS + EXP + DCF + ['name', 'industry', 'sector', 'famaindustry', 'famasector', 'scalemarketcap','scalerevenue']))
 
@@ -146,7 +148,7 @@ class Fundamentals:
 
 
     def delta(self):
-        ''' Change from previous quarter; Quarter over Quarter change.'''
+        ''' Change from previous quarter; Quarter over Quarter change, Same Quarter last year.'''
         sub = self.df.iloc[[-5, -2, -1], :].dropna(how='any', axis=1)
         
         sub = sub.iloc[-1].squeeze() - sub.iloc[:-1]
@@ -364,12 +366,13 @@ class DCF:
     def __init__(self, ticker):
         self.ticker = ticker
         
-        self.cf = Fundamentals(ticker).get( columns = Columns.CASHFLOW.value, limit = 5 )
+        self.cf = Fundamentals(ticker).get( columns = Columns.DCF.value + ['sharesbas'], limit = 5 )
         self.inc = Fundamentals(ticker).get( columns = Columns.INCOME.value, limit = 5 )
-        self.bal = Fundamentals(ticker).get( columns = Columns.BALANCE.value + ['revenue'], limit = 5 )
+        self.bal = Fundamentals(ticker).get( columns = Columns.BALANCE.value + ['revenue', 'depamor', 'intexp', 'taxrate'], limit = 5 )
 
         self.FORECAST_PERIODS = 5
-        self.REV_GROWTH = 0.02
+        self.REV_GROWTH = 0.05 # Use Base, Bear, Bull Case. 
+        self.TERMINAL_GROWTH = 0.03
 
 
     def forecast_as_percent_of_revenue(self, type = None):
@@ -380,9 +383,11 @@ class DCF:
             statement = self.inc.df.copy()
         if type == 'BALANCE':
             statement = self.bal.df.copy()
+        if type == 'CF':
+            statement = self.cf.df.copy()
 
-        pctrev = statement.divide(statement.revenue, axis=0) # income statement fields as a percent of revenue
-        pctrevavg = pctrev.median()
+        pctrev = statement.divide(statement.revenue, axis=0) # statement fields as a percent of revenue
+        pctrevavg = pctrev.median() # average percent of revenue for each metric over n periods provided
 
         # Project future revenue based on REV_GROWTH
         starting_rev = statement['revenue'].iloc[-1]
@@ -404,12 +409,82 @@ class DCF:
 
         forecast = pd.concat([statement, forecast], axis = 0)
 
+        for c in forecast.columns:
+            forecast[c] = pd.to_numeric(forecast[c])
+
         if type == 'INCOME':
             self.inc_forecast = forecast
         if type == 'BALANCE':
             self.bal_forecast = forecast
+        if type == 'CF':
+            self.cf_forecast = forecast
 
-        return statement, pctrevavg, forecast
+        return pctrevavg
 
 
+    def forecast_cf_from_opperations(self):
+        bal = self.bal_forecast[['receivables','payables','inventory','depamor', 'equity', 'debt', 'intexp', 'taxrate']]
+        inc = self.cf_forecast[['netinc', 'ncfo', 'capex', 'fcf']]
+        
+        df = pd.concat([bal, inc], axis=1)
+        
+        self.cf_from_opp = df
 
+        return self.cf_from_opp
+
+
+    def beta(self):
+        df = yf.download(f"SPY {self.ticker[0].upper()}", start="2017-01-01", end="2017-04-30")['Adj Close']
+        
+        covariance = df.cov().iloc[0,1]
+        
+        benchmark_variance = df.SPY.var()
+        
+        return covariance / benchmark_variance # beta
+
+
+    def discount(self):
+        ''' CAPM defines cost of equity as beta; Discount future cash flows back to present value using WACC.
+        '''
+        rf = 0  # risk free rate
+        Erm = 0.08  # exoected return on market
+
+        df = self.cf_from_opp
+
+        df['bv_equity'] = df['equity']
+        
+        df['cost_of_equity']  = rf  + (self.beta() * (Erm - rf))
+        
+        df['cost_of_debt'] = df['intexp'] / df['debt'].iloc[0:5].mean() # average debt over past 5 periods
+        
+        df['bv_debt']  = df['debt']
+        
+        tc = df['taxrate']
+
+        eq = (df['bv_equity'] / (df['bv_equity'] + df['bv_debt'])) * df['cost_of_equity']
+        
+        dbt = (df['bv_debt'] / (df['bv_equity'] + df['bv_debt'])) * df['cost_of_debt']
+        
+        df['wacc'] =  (eq + dbt)  * ( 1 - df['taxrate'] / 100)
+
+        print(df)
+        wacc = pd.to_numeric(df['wacc'].iloc[-1])
+        fcf = pd.to_numeric(df['fcf'].iloc[-self.FORECAST_PERIODS:]).values.tolist()
+        self.npv = npf.npv(wacc,fcf)
+        return self.npv
+        
+
+    def terminal_value(self):
+        terminal_value = (self.cf_from_opp['fcf'].iloc[-1] * (1+ self.TERMINAL_GROWTH)) /(self.cf_from_opp['wacc'].iloc[-1]  - self.TERMINAL_GROWTH)
+        
+        self.terminal_value_discounted = terminal_value/(1+self.cf_from_opp['wacc'].iloc[-1] )**4
+        
+        return self.terminal_value_discounted
+    
+
+    def estimate_price_per_share(self):
+        print(self.npv)
+        print(self.terminal_value_discounted)
+        value = self.npv + self.terminal_value_discounted
+        return value / self.cf.df['sharesbas'].iloc[-1]
+        

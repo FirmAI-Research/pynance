@@ -86,11 +86,18 @@ ticker = ['JNJ']
 dcf = DCF(ticker=['JNJ'])
 dcf.forecast_as_percent_of_revenue(type = 'INCOME')
 dcf.forecast_as_percent_of_revenue(type = 'BALANCE')
+dcf.forecast_as_percent_of_revenue(type = 'CF')
+
 with custom_formatting():
   print(dcf.inc_forecast)
   print(dcf.bal_forecast)
+  print(dcf.cf_forecast)
 
-
+dcf.forecast_cf_from_opperations()
+print(dcf.cf_from_opp)
+dcf.discount()
+dcf.terminal_value()
+print(dcf.estimate_price_per_share())
 
 
 
