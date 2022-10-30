@@ -171,11 +171,15 @@ class Fundamentals:
 
         from sqlalchemy import create_engine
         engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+        
         self.cnxn = engine.connect()
+        
         base = pd.read_sql(f"select * from CompFunBase where industry == '{industry}'", self.cnxn)
 
         base = base[base.industry == industry].sort_values(by = 'revenue', ascending = False)
+        
         peers = base.ticker.unique().tolist()
+        
         index = peers.index(self.ticker[0])
         
         if index == 0:
@@ -202,14 +206,19 @@ class Fundamentals:
             nas = nasdaq.Nasdaq()
             
             request_url = f'https://data.nasdaq.com/api/v3/datatables/SHARADAR/SF1?qopts.export=true&api_key={nas.api_key}'
+            
             res = requests.get(request_url)
             
             df  = pd.DataFrame.from_dict(res.json())
+            
             link = df.datatable_bulk_download.iloc[1].get('link')
+            
             print(link)
             
             r = requests.get(link)
+            
             z = zipfile.ZipFile(io.BytesIO(r.content))
+            
             z.extractall(dirp)
         
         fp = os.listdir(dirp)[0] # Only one file is returned in the unziped folder
@@ -229,13 +238,19 @@ class Fundamentals:
 
     def plot_box_plot(self, cols):
         engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+        
         cnxn = engine.connect()
+        
         cal = Calendar()
+        
         self.get_peers()
 
         date = cal.prior_quarter_end().strftime("%Y-%m-%d")
+        
         df = pd.read_sql(f"select * from CompFunBase where industry = '{self.industry}' and calendardate = '{date}' ", cnxn)
+        
         df = df[['ticker'] + cols]
+        
         melt = df.melt(id_vars = 'ticker').dropna()
 
         def annotate(data, **kws):
@@ -245,7 +260,9 @@ class Fundamentals:
             ax.scatter(.1, n, color = 'orange')
                 
         g = sns.FacetGrid(melt, col="variable", sharey=False,  col_wrap=5, height=5)
+        
         g.map_dataframe(sns.boxplot, y="value", showfliers=False)
+        
         g.map_dataframe(annotate)
         return g
 
@@ -269,6 +286,7 @@ class Fundamentals:
 
             if units == 'M':
                 df = df.divide(1000000).T
+
 
                 return df.style      \
                     .format("${:,.0f}") \
@@ -309,7 +327,6 @@ class Fundamentals:
                 return df.style      \
                     .format("{:,.2f}%") \
                     .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
-
 
 
     # NOTE: deprecated
@@ -418,23 +435,14 @@ class Ranks:
             ]
         )
 
-
-
-
-    def get_industry_stat(self):
+    # TODO 
+    def get_industry_stats(self):
         pass
 
     def plot_dual_axis_value_and_rank(self):
         ''' Plots a time series of fundamental values for an individual metric and company on one axis; With the % rank vs peer group on the second axis
         '''
         pass
-
-
-    def get_box_plot_values(self):
-        ''' Raw fundamental values for all companies in an industry peer group'''
-        return pd.read_sql(f"select * from CompFunBase where industry == '{self.industry}'", self.cnxn)
-
-
     
     def plot_plot(self):
         ''' Box plot of fundamental values for a metric across all companies in a peer group. Star the individual companies value on the plot. 
@@ -459,7 +467,6 @@ class DCF:
     def forecast_as_percent_of_revenue(self, type = None):
         '''Grow revenue by a projected amount. Calculate other items as a percentage of revenue and forecast them as a percent of the grown revenue. 
         '''
-
         # TODO Pass Fundamental() object of Income Statement and use isinstance instead of string?
         if type == 'INCOME':
             statement = self.inc.df.copy()
