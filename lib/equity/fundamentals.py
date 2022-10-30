@@ -21,29 +21,6 @@ from calendar_dates import Calendar
 cal = Calendar()
 
 
-class Columns(Enum):
-    ''' Column views for financial statements
-    '''
-    ID = ['ticker', 'calendardate' ]
-    
-    CASHFLOW = ID +  ['ncfo','ncfi', 'ncff', 'ncfinv', 'fcf', 'ncf', 'ncfbus', 'ncfcommon', 'ncfdebt', 'ncfdiv',  'ncfx']
-    
-    INCOME = ID +  ['revenue', 'cogs','gp', 'opex','opinc','ebt','netinc','ebitda', 'depamor'] # 'eps'
-    
-    BALANCE = ID + ['assetsc', 'assetsnc', 'receivables', 'inventory', 'assets', 'liabilitiesc','liabilitiesnc', 'payables', 'debt','equity','retearn']
-    
-    PEERS = ID +  ['de', 'divyield', 'eps', 'evebitda', 'fcfps', 'grossmargin', 'netmargin', 'fcfmargin', 'p/cf', 'oppmargin', 'pb', 'pe', 'roa', 'roe', 'roic', 'ros', 'roc', 'intcov']
-
-    METRICS = ID + []
-    
-    EXP = ID + ['retentionratio', 'roe', 'retearn','expnetincgrow', 'exproegrow', 'eqreinvestrate', 'expebitgrow','expgrowthrate']
-    
-    DCF = ID + ['netinc', 'revenue','cogs','gp', 'rnd','sgna','ebit', 'payables','receivables', 'inventory', 'depamor','ebitda','capex', 'fcf', 'ncfo']
-    
-    RANKS = list(set(ID + CASHFLOW + INCOME + BALANCE + PEERS + EXP + DCF + ['name', 'industry', 'sector', 'famaindustry', 'famasector', 'scalemarketcap','scalerevenue']))
-
-
-
 class Fundamentals:
     ''' Retreive equity fundamental's.
 
@@ -147,15 +124,20 @@ class Fundamentals:
         https://github.com/pandas-dev/pandas/issues/22596
         '''
         self.pct_chg = self.df.copy()
+        
         for c in self.pct_chg.columns:
             self.pct_chg[c] =  self.pct_chg[c].pct_change()*np.sign(self.pct_chg[c].shift(periods=1))
+        
         # self.pct_chg.dropna(how = 'all', axis=0, inplace = True) 
+        
         return self
 
 
     def describe(self):
         print('Describe % Change:')
+        
         self.desc = self.pct_chg.describe().loc[['mean', 'std','25%','50%','75%'], :]
+        
         return self
 
 
@@ -172,7 +154,6 @@ class Fundamentals:
         self.delta = sub
         
         return self
-
 
     
     def get_peers(self):
@@ -201,15 +182,6 @@ class Fundamentals:
             search = [index, index-3, index-2, index-1]
 
         return [peers[i] for i in search]
-
-
-
-    def estimates(self):
-        ''' 
-        https://www.barchart.com/stocks/quotes/SQ/earnings-estimates
-        https://www.nasdaq.com/market-activity/stocks/amzn/analyst-research
-        '''
-        pass
 
 
     def full_export(self, curl = False):
@@ -262,7 +234,6 @@ class Fundamentals:
 
     def style_jupyter(self, df, units='M'):
 
-
         if isinstance(df.columns, pd.MultiIndex):
 
             if units == 'M':
@@ -291,13 +262,10 @@ class Fundamentals:
                     ]
                 )
 
-
-
-
         else:
 
             if units == 'M':
-                df = df.divide(1000000)
+                df = df.divide(1000000).T
 
                 return df.style      \
                     .format("${:,}") \
@@ -305,7 +273,7 @@ class Fundamentals:
 
 
             elif units == '%':
-                df = df.multiply(100)
+                df = df.multiply(100).T
 
                 return df.style      \
                     .format("{:,.2f}%") \
@@ -327,7 +295,9 @@ class Fundamentals:
             return df[col].pct_change().dropna().std()
 
         self.fields = [c for c in self.columns if c not in  ['ticker', 'calendardate']]
+        
         measure_names = ['arith', 'median', 'stdev']
+        
         n_measures = len(measure_names)
 
         # case for creating multiIndex frame with growth measures for a single ticker
@@ -405,6 +375,22 @@ class Ranks:
         df =  pd.read_sql(f"select * from CompFunRanks where ticker == '{self.ticker}'", self.cnxn)
         return df.pivot(index = ['calendardate'], columns = ['variable'], values= ['value'])
 
+
+    def print_ranks(self, df):
+        
+        return df.T.style      \
+            .format("{:,.2f}%") \
+            .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
+            .set_properties(**{'border': '1px solid lightgrey'})      \
+            .set_table_styles(
+            [
+            {"selector": "td, th", "props": [("border", "1px solid lightgrey !important")]},
+            ]
+        )
+
+
+
+
     def get_industry_stat(self):
         pass
 
@@ -429,7 +415,7 @@ class Ranks:
 
 class DCF:
 
-    def __init__(self, ticker):
+    def __init__(self, ticker,  REV_GROWTH=0.05):
         self.ticker = ticker
         
         self.cf = Fundamentals(ticker).get( columns = Columns.DCF.value + ['sharesbas'], limit = 5 )
@@ -437,13 +423,13 @@ class DCF:
         self.bal = Fundamentals(ticker).get( columns = Columns.BALANCE.value + ['revenue', 'depamor', 'intexp', 'taxrate'], limit = 5 )
 
         self.FORECAST_PERIODS = 5
-        self.REV_GROWTH = 0.05 # Use Base, Bear, Bull Case. 
-        self.TERMINAL_GROWTH = 0.03
+        self.REV_GROWTH = REV_GROWTH # Use Base, Bear, Bull Case. 
 
 
     def forecast_as_percent_of_revenue(self, type = None):
         '''Grow revenue by a projected amount. Calculate other items as a percentage of revenue and forecast them as a percent of the grown revenue. 
         '''
+
         # TODO Pass Fundamental() object of Income Statement and use isinstance instead of string?
         if type == 'INCOME':
             statement = self.inc.df.copy()
@@ -505,15 +491,19 @@ class DCF:
         covariance = df.cov().iloc[0,1]
         
         benchmark_variance = df.SPY.var()
+
+        beta = covariance / benchmark_variance 
         
-        return covariance / benchmark_variance # beta
+        print('beta: ', beta)
+
+        return beta
 
 
-    def discount(self):
+    def discount(self, ERM = 0.8, RFR=0):
         ''' CAPM defines cost of equity as beta; Discount future cash flows back to present value using WACC.
         '''
-        rf = 0  # risk free rate
-        Erm = 0.08  # exoected return on market
+        rf = RFR  # risk free rate
+        Erm = ERM  # exoected return on market
 
         df = self.cf_from_opp
 
@@ -533,15 +523,24 @@ class DCF:
         
         df['wacc'] =  (eq + dbt)  * ( 1 - df['taxrate'] / 100)
 
-        print(df)
         wacc = pd.to_numeric(df['wacc'].iloc[-1])
+
+        print('wacc: ', wacc)
+
         fcf = pd.to_numeric(df['fcf'].iloc[-self.FORECAST_PERIODS:]).values.tolist()
+
         self.npv = npf.npv(wacc,fcf)
+
         return self.npv
         
 
-    def terminal_value(self):
-        terminal_value = (self.cf_from_opp['fcf'].iloc[-1] * (1+ self.TERMINAL_GROWTH)) /(self.cf_from_opp['wacc'].iloc[-1]  - self.TERMINAL_GROWTH)
+    def terminal_value(self, TERMINAL_GROWTH=0.03):
+        self.TERMINAL_GROWTH = TERMINAL_GROWTH
+
+        if self.cf_from_opp['wacc'].iloc[-1] > self.TERMINAL_GROWTH:
+            terminal_value = (self.cf_from_opp['fcf'].iloc[-1] * (1+ self.TERMINAL_GROWTH)) / (self.cf_from_opp['wacc'].iloc[-1] )
+        else:
+            terminal_value = (self.cf_from_opp['fcf'].iloc[-1] * (1+ self.TERMINAL_GROWTH)) / (self.cf_from_opp['wacc'].iloc[-1])
         
         self.terminal_value_discounted = terminal_value/(1+self.cf_from_opp['wacc'].iloc[-1] )**4
         
@@ -549,8 +548,50 @@ class DCF:
     
 
     def estimate_price_per_share(self):
-        print(self.npv)
-        print(self.terminal_value_discounted)
-        value = self.npv + self.terminal_value_discounted
-        return value / self.cf.df['sharesbas'].iloc[-1]
+        print('npv: ', self.npv)
+        print('terminal value: ', self.terminal_value_discounted)
         
+        value = self.npv + self.terminal_value_discounted
+
+        price = value / self.cf.df['sharesbas'].iloc[-1]
+        
+        print('pv future cash flows: ', price)
+
+        return  None
+        
+
+    def style_jupyter(self, df):
+        df = df.divide(1000000).round(2).T
+
+        return df.style      \
+            .format("${:,}") \
+            .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
+            .set_properties(**{'border': '1px solid lightgrey'})      \
+            .set_table_styles(
+            [
+            {"selector": "td, th", "props": [("border", "1px solid lightgrey !important")]},
+            ]
+        )
+
+
+
+class Columns(Enum):
+    ''' Column views for financial statements
+    '''
+    ID = ['ticker', 'calendardate' ]
+    
+    CASHFLOW = ID +  ['cashneq', 'netinc', 'depamor', 'opex', 'receivables', 'payables', 'inventory', 'ncfo', 'ncfbus', 'ncfi', 'ncfinv',  'ncfdiv',  'ncfx', 'ncff', 'fcf', 'ncf']
+    
+    INCOME = ID +  ['revenue', 'cogs','gp', 'opex','opinc','ebt','netinc','ebitda', 'depamor'] 
+    
+    BALANCE = ID + ['assetsc', 'assetsnc', 'receivables', 'inventory', 'assets', 'liabilitiesc','liabilitiesnc', 'payables', 'debt','equity','retearn']
+    
+    PEERS = ID +  ['divyield', 'grossmargin', 'netmargin', 'fcfmargin', 'oppmargin','roe', 'roic', 'ros', 'roc']
+    
+    EXP = ID + ['retentionratio', 'roe', 'retearn','expnetincgrow', 'exproegrow', 'eqreinvestrate', 'expebitgrow','expgrowthrate']
+    
+    DCF = ID + ['netinc', 'revenue','cogs','gp', 'rnd','sgna','ebit', 'payables','receivables', 'inventory', 'depamor','ebitda','capex', 'fcf', 'ncfo']
+    
+    RANKS = list(set(ID + CASHFLOW + INCOME + BALANCE + PEERS + EXP + DCF + ['name', 'industry', 'sector', 'famaindustry', 'famasector', 'scalemarketcap','scalerevenue']))
+
+    CASHFLOW_ = ID +  ['cashneq', 'depamor','retearn', 'opex', 'capex', 'ncfo', 'ncfdiv', 'fcf', 'ncf']

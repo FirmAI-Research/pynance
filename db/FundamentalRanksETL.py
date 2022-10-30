@@ -47,7 +47,7 @@ warnings.filterwarnings('ignore')
 
 # Fundamentals
 fun = Fundamentals()
-df_fun = fun.full_export(curl = False) # Set curl = True if data should be refreshed
+df_fun = fun.full_export(curl = False) # Set curl = True if data should be refreshed; # NOTE
 df_fun = df_fun[df_fun.dimension == 'MRQ']
 
 # Static Profile info
@@ -127,7 +127,7 @@ frames =[]
 for date in dates[-6:]:
     for industry in industries:
         data = df[(df.calendardate == date) & (df.industry == industry)].set_index(['ticker','calendardate','industry'])
-        ranks = data.rank(axis=1, pct=True, numeric_only = True).reset_index()
+        ranks = data.rank(axis=1, pct=True, numeric_only = True, ascending = False).reset_index()
         melt = ranks.melt(id_vars = ['ticker', 'calendardate','industry'])
         frames.append(melt)
 res = pd.concat(frames, axis=0)
