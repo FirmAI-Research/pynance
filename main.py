@@ -22,10 +22,9 @@ cal = Calendar()
   └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  """
 from lib.equity.fundamentals import Fundamentals, Columns, DCF, Ranks
+from lib.equity.attribution import Attribution
 
-# ticker = ['JNJ','PG','CVS']
-ticker = ['JNJ']
-
+Attribution().get_holdings(ticker = 'SPY')
 
 
 

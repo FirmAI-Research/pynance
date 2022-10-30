@@ -9,10 +9,14 @@ import numpy_financial as npf
 from scipy.stats.mstats import gmean
 import yfinance as yf
 
+import seaborn as sns
+import matplotlib.pyplot as plt 
+
 proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print(proj_root)
 sys.path.append(proj_root)
 
+from sqlalchemy import create_engine
 
 import nasdaq_data_link as nasdaq
 from nasdaq_data_link import Sharadar
@@ -161,6 +165,8 @@ class Fundamentals:
         tick.full_export(curl=False)
         
         industry = tick.get_industry(self.ticker[0])
+
+        self.industry = industry
         print(industry)
 
         from sqlalchemy import create_engine
@@ -182,6 +188,7 @@ class Fundamentals:
             search = [index, index-3, index-2, index-1]
 
         return [peers[i] for i in search]
+
 
 
     def full_export(self, curl = False):
@@ -220,6 +227,30 @@ class Fundamentals:
         pass
 
 
+    def plot_box_plot(self, cols):
+        engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+        cnxn = engine.connect()
+        cal = Calendar()
+        self.get_peers()
+
+        date = cal.prior_quarter_end().strftime("%Y-%m-%d")
+        df = pd.read_sql(f"select * from CompFunBase where industry = '{self.industry}' and calendardate = '{date}' ", cnxn)
+        df = df[['ticker'] + cols]
+        melt = df.melt(id_vars = 'ticker').dropna()
+
+        def annotate(data, **kws):
+            n = np.round(data.value.loc[data.ticker==self.ticker[0]].values[0],3)
+            ax = plt.gca()
+            ax.text(.15, n, f"{n}")
+            ax.scatter(.1, n, color = 'orange')
+                
+        g = sns.FacetGrid(melt, col="variable", sharey=False,  col_wrap=5, height=5)
+        g.map_dataframe(sns.boxplot, y="value", showfliers=False)
+        g.map_dataframe(annotate)
+        return g
+
+
+
     def style_terminal(self, df, text:list = None):
         if isinstance(text, list):
             for i in range(len(text)):
@@ -240,7 +271,7 @@ class Fundamentals:
                 df = df.divide(1000000).T
 
                 return df.style      \
-                    .format("${:,}") \
+                    .format("${:,.0f}") \
                     .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
                     .set_properties(**{'border': '1px solid lightgrey'})      \
                     .set_table_styles(
@@ -365,7 +396,6 @@ class Ranks:
 
         self.ticker = ticker
 
-        from sqlalchemy import create_engine
         engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
         self.cnxn = engine.connect()
 
@@ -592,6 +622,6 @@ class Columns(Enum):
     
     DCF = ID + ['netinc', 'revenue','cogs','gp', 'rnd','sgna','ebit', 'payables','receivables', 'inventory', 'depamor','ebitda','capex', 'fcf', 'ncfo']
     
-    RANKS = list(set(ID + CASHFLOW + INCOME + BALANCE + PEERS + EXP + DCF + ['name', 'industry', 'sector', 'famaindustry', 'famasector', 'scalemarketcap','scalerevenue']))
+    RANKS = list(set(ID + CASHFLOW + INCOME + BALANCE + PEERS + EXP + DCF + ['name', 'industry', 'sector', 'famaindustry', 'famasector', 'scalemarketcap','scalerevenue'] + ['pe','eps']))
 
     CASHFLOW_ = ID +  ['cashneq', 'depamor','retearn', 'opex', 'capex', 'ncfo', 'ncfdiv', 'fcf', 'ncf']
