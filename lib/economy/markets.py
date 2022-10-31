@@ -1,2 +1,0 @@
-''' Equity/Bond Market Correlation
-'''

@@ -3,18 +3,23 @@ import pandas as pd
 import pandas_datareader
 import numpy as np
 import scipy.stats
-
+from functools import reduce
+import pandas_datareader as web
 import requests
 import re
 import json
 from bs4 import BeautifulSoup
 import yfinance as yf
+import statsmodels.formula.api as smf
 
+
+from calendar_dates import Calendar
+cal = Calendar()
 
 class Attribution:
 
     def __init__(self):
-        pass
+        self.START_DATE = '2021-01-01'
 
 
     def get_holdings(self, ticker):
@@ -51,7 +56,10 @@ class Attribution:
             return frames
                     
         portfolio = main(url = "https://www.zacks.com/funds/etf/{}/holding", tickers = [ ticker ])
-        print(portfolio)
+        # print(portfolio)
+
+        self.symbols = portfolio[0].Symbol.tolist()
+        self.weights = portfolio[0].Weight.tolist()
         
         return portfolio
     
@@ -89,10 +97,10 @@ class Attribution:
 
 
 
-class FammaFrench:
+class FammaFrench(Attribution):
 
     def __init__(self):
-        pass
+        super().__init__()
 
     def get_ff_three_factor(self):
 

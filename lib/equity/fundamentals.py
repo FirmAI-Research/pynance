@@ -420,34 +420,97 @@ class Ranks:
     def get_ranks(self):
         ''' Returns ranks for all periods and one ticker '''
         df =  pd.read_sql(f"select * from CompFunRanks where ticker == '{self.ticker}'", self.cnxn)
-        return df.pivot(index = ['calendardate'], columns = ['variable'], values= ['value'])
+        self.rank_pivot =  df.pivot(index = ['calendardate'], columns = ['variable'], values= ['value'])
+        return self
 
 
-    def print_ranks(self, df):
+    def style_jupyter(self, cols, units = '%'):
+
+        r = self.rank_pivot.iloc[:, self.rank_pivot.columns.get_level_values(1).isin(cols)].round(2)
         
-        return df.T.style      \
-            .format("{:,.2f}%") \
+        new_cols = r.columns.reindex(cols, level=1)
+        
+        r =r.reindex(columns=new_cols[0])
+        
+        r = r.T.droplevel(0).iloc[:, -5:].T
+        
+        r.columns.name = None        
+
+        
+        return r.T.multiply(100).style      \
+            .format("{:,.0f}%") \
             .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
-            .set_properties(**{'border': '1px solid lightgrey'})      \
-            .set_table_styles(
-            [
-            {"selector": "td, th", "props": [("border", "1px solid lightgrey !important")]},
-            ]
-        )
+
+  
+        # return r.style      \
+        #     .format("{:,.2f}%") \
+        #     .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
+        #     .set_properties(**{'border': '1px solid lightgrey'})      \
+        #     .set_table_styles(
+        #     [
+        #     {"selector": "td, th", "props": [("border", "1px solid lightgrey !important")]},
+        #     ]
+        # )
+
+
 
     # TODO 
     def get_industry_stats(self):
         pass
 
-    def plot_dual_axis_value_and_rank(self):
+
+    def plot_dual_axis_ranks(self, fun_obj):
         ''' Plots a time series of fundamental values for an individual metric and company on one axis; With the % rank vs peer group on the second axis
         '''
-        pass
-    
-    def plot_plot(self):
-        ''' Box plot of fundamental values for a metric across all companies in a peer group. Star the individual companies value on the plot. 
-        '''
-        pass
+        engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+
+        cnxn = engine.connect()
+
+        fun_obj.get_peers()
+
+        cols = ['ticker', 'calendardate', 'pe','eps','roe','roc','grossmargin', 'oppmargin','fcfmargin', 'divyield','netinc', 'ebitda']
+
+        # Base value
+        df = pd.read_sql(f"select * from CompFunBase where ticker = '{fun_obj.ticker[0]}' ", cnxn)
+        df = df[cols]
+        base = df.melt(id_vars = ['ticker','calendardate']).dropna()
+
+        # Peer ranks
+        df = pd.read_sql(f"select * from CompFunRanks where ticker = '{fun_obj.ticker[0]}' ", cnxn)
+        rank = df[df.variable.isin(cols)][['ticker', 'calendardate', 'variable','value']]
+
+        # Chart data
+        data = base.merge(rank, how = 'outer', on = ['calendardate','variable'])
+        data.rename(columns = { 'value_x':'base_val'}, inplace = True)
+        data.rename(columns = { 'value_y':'rank_val'}, inplace = True)
+
+
+        def facetgrid_two_axes(*args, **kwargs):
+            data = kwargs.pop('data')
+            dual_axis = kwargs.pop('dual_axis')
+            alpha = kwargs.pop('alpha', 0.8)
+            kwargs.pop('color')
+            ax = plt.gca()
+            if dual_axis:
+                ax2 = ax.twinx()
+                ax2.set_ylabel('Percentile Rank')
+
+            ax.plot(data['calendardate'],data['base_val'], **kwargs, color='red',alpha=alpha, label = 'Reported Value')
+        #     ax.legend(loc=1)
+
+            if dual_axis:
+                ax2.plot(data['calendardate'],data['rank_val'], **kwargs, color='blue',alpha=alpha, label = 'Percentile Rank')
+        #         ax2.legend(loc=4)
+
+        sns.set_style('whitegrid') 
+        g = sns.FacetGrid(data, col='variable', size=6, col_wrap = 5, sharex = False, sharey=False)
+        g.map_dataframe(facetgrid_two_axes, dual_axis=True).set_axis_labels("Period", "Reported Value")
+
+        plt.subplots_adjust(hspace=0.4, wspace=0.4)
+        g.set_xticklabels(rotation=60)
+        # g.add_legend()
+        plt.show()
+        return g
 
 
 
