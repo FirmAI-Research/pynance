@@ -23,8 +23,10 @@ cal = Calendar()
  """
 from lib.equity.fundamentals import Fundamentals, Columns, DCF, Ranks
 from lib.equity.attribution import Attribution
+from lib.fixed_income.rates import Treasuries
 
-Attribution().get_holdings(ticker = 'SPY')
+ust = Treasuries(years = ['2021', '2022'])
+print(ust.df)
 
 
 
