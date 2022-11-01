@@ -11,7 +11,7 @@ import json
 from bs4 import BeautifulSoup
 import yfinance as yf
 import statsmodels.formula.api as smf
-
+import matplotlib.pyplot as plt
 
 from calendar_dates import Calendar
 cal = Calendar()
@@ -91,6 +91,8 @@ class Attribution:
         df = df[[x for x in df.columns if x not in self.symbols]] # drop individual asset returns and keep only weighted portfolio returns
 
         df.index = pd.to_datetime(df.index)
+
+        self.portf_rets = df
         
         return df
 
@@ -99,8 +101,19 @@ class Attribution:
 
 class FammaFrench(Attribution):
 
-    def __init__(self):
+    def __init__(self, model='ThreeFactor', portf_rets = None):
         super().__init__()
+    
+        if model == 'ThreeFactors':
+            factors = self.get_ff_three_factor()
+            df = portf_rets.merge(factors,  left_index=True, right_index=True, how='inner')
+            self.summary, self.results = self.three_factor_model(df)
+
+        elif model == 'IndustryFactors':
+            factors = self.get_ff_industry_factors()
+            df = portf_rets.merge(factors,  left_index=True, right_index=True, how='inner')
+            self.summary, self.results = self.industry_factor_model(df)
+
 
     def get_ff_three_factor(self):
 
@@ -222,6 +235,11 @@ class FammaFrench(Attribution):
         benchmark_variance = ff_data.mkt.var()
         return covariance / benchmark_variance # beta
 
+
+    def plot(self):
+        plt.rcParams["figure.figsize"] = (20,7)
+        self.results.plot(title=f'Rolling Fama-French Industry Factor model')
+        plt.legend(bbox_to_anchor=(1.1, 1.05))
 
     def explain(self):
         '''Construct a sentence in english explaining how much of the SPY return over the past 30 days is attributable to each factor '''

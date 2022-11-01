@@ -138,8 +138,6 @@ class Fundamentals:
 
 
     def describe(self):
-        print('Describe % Change:')
-        
         self.desc = self.pct_chg.describe().loc[['mean', 'std','25%','50%','75%'], :]
         
         return self
@@ -524,7 +522,22 @@ class DCF:
         self.bal = Fundamentals(ticker).get( columns = Columns.BALANCE.value + ['revenue', 'depamor', 'intexp', 'taxrate'], limit = 5 )
 
         self.FORECAST_PERIODS = 5
-        self.REV_GROWTH = REV_GROWTH # Use Base, Bear, Bull Case. 
+        self.REV_GROWTH = REV_GROWTH  
+
+        self.forecast_as_percent_of_revenue(type = 'INCOME')
+        self.forecast_as_percent_of_revenue(type = 'BALANCE')
+        self.forecast_as_percent_of_revenue(type = 'CF')
+
+        # x = dcf.style_jupyter(dcf.bal_forecast)
+        # y = dcf.style_jupyter(dcf.inc_forecast)
+
+        # fun.get( columns = Columns.INCOME.value, limit = 8 ).percent_change().style_jupyter(fun.pct_chg, units='%')
+        # x = fun.get( columns = Columns.INCOME.value, limit = 8).describe().style_jupyter(fun.desc, units = '%')
+
+        # fun.get( columns = Columns.CASHFLOW.value, limit = 8 ).percent_change().style_jupyter(fun.pct_chg, units='%')
+        # y = fun.get( columns = Columns.INCOME.value, limit = 8).describe().style_jupyter(fun.desc, units = '%')
+
+        # display_side_by_side(y,x)
 
 
     def forecast_as_percent_of_revenue(self, type = None):
