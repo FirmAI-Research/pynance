@@ -64,7 +64,7 @@ class Treasuries:
                 df[c] = pd.to_numeric(df[c])       
         
         df.date = [d.strftime('%Y-%m-%d') for d in df.date]
-        
+
         df.set_index('date', inplace = True)
 
         self.df = df
@@ -74,36 +74,24 @@ class Treasuries:
 
 
 
+    def build_zero_curve(self):
+        ''' The variables NS_ZC and NS_Fwd will give the zero coupon rates and implied forward rates using Nelson Siegel model, similarly the next two lines of code with variables NSS_ZC and NSS_Fwd will give the output using Nelson Siegel Svensson model.
+        '''
+        #tenors
+        # t = np.array([0.0,0.5,0.75,1.0,1.5,2.0,3.0,4.0,5.0,6.0,7.0,8.0,10.0])
+        t = np.array([0.5,0.75,1.0,1.5,2.0,3.0,4.0,5.0,6.0,7.0,8.0,10.0])
+        
+        #market rates
+        # y=np.array([0.01,0.02,0.025,0.029,0.03,0.033,0.036,0.039,0.04,0.043,0.045,0.047,0.049])
+        y = self.df.iloc[-1].to_numpy()
 
+        curve_fit1, status1 = calibrate_ns_ols(t,y) #NS model calibrate
+        curve_fit, status = calibrate_nss_ols(t,y) #NSS model calibrate
+        NS_ZC = NelsonSiegelCurve.zero(curve_fit1,t)
+        NS_Fwd = NelsonSiegelCurve.forward(curve_fit1,t)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def build_zero_curve():
-    ''' The variables NS_ZC and NS_Fwd will give the zero coupon rates and implied forward rates using Nelson Siegel model, similarly the next two lines of code with variables NSS_ZC and NSS_Fwd will give the output using Nelson Siegel Svensson model.
-    '''
-    #tenors
-    t = np.array([0.0,0.5,0.75,1.0,1.5,2.0,3.0,4.0,5.0,6.0,7.0,8.0,10.0])
-
-    #market rates
-    y=np.array([0.01,0.02,0.025,0.029,0.03,0.033,0.036,0.039,0.04,0.043,0.045,0.047,0.049])
-    curve_fit1, status1 = calibrate_ns_ols(t,y) #NS model calibrate
-    curve_fit, status = calibrate_nss_ols(t,y) #NSS model calibrate
-    NS_ZC = NelsonSiegelCurve.zero(curve_fit1,t)
-    NS_Fwd = NelsonSiegelCurve.forward(curve_fit1,t)
-
-    NSS_ZC = NelsonSiegelSvenssonCurve.zero(curve_fit,t)
-    NSS_Fwd = NelsonSiegelSvenssonCurve.forward(curve_fit,t)
-    print(NS_ZC)
+        NSS_ZC = NelsonSiegelSvenssonCurve.zero(curve_fit,t)
+        NSS_Fwd = NelsonSiegelSvenssonCurve.forward(curve_fit,t)
+        print(NS_ZC)
+        return NSS_ZC, NSS_Fwd
 
