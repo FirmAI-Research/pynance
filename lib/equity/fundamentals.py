@@ -257,7 +257,7 @@ class Fundamentals:
             ax.text(.15, n, f"{n}")
             ax.scatter(.1, n, color = 'orange')
                 
-        g = sns.FacetGrid(melt, col="variable", sharey=False,  col_wrap=5, height=5)
+        g = sns.FacetGrid(melt, col="variable", sharey=False,  col_wrap=7, height=5)
         
         g.map_dataframe(sns.boxplot, y="value", showfliers=False)
         
@@ -454,10 +454,11 @@ class Ranks:
 
     # TODO 
     def get_industry_stats(self):
+        # median pe etc by sector
         pass
 
 
-    def plot_dual_axis_ranks(self, fun_obj):
+    def plot_dual_axis_ranks(self, fun_obj, cols):
         ''' Plots a time series of fundamental values for an individual metric and company on one axis; With the % rank vs peer group on the second axis
         '''
         engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
@@ -465,8 +466,6 @@ class Ranks:
         cnxn = engine.connect()
 
         fun_obj.get_peers()
-
-        cols = ['ticker', 'calendardate', 'pe','eps','roe','roc','grossmargin', 'oppmargin','fcfmargin', 'divyield','netinc', 'ebitda']
 
         # Base value
         df = pd.read_sql(f"select * from CompFunBase where ticker = '{fun_obj.ticker[0]}' ", cnxn)
@@ -501,7 +500,7 @@ class Ranks:
         #         ax2.legend(loc=4)
 
         sns.set_style('whitegrid') 
-        g = sns.FacetGrid(data, col='variable', size=6, col_wrap = 5, sharex = False, sharey=False)
+        g = sns.FacetGrid(data, col='variable', size=5, col_wrap = 7, sharex = False, sharey=False)
         g.map_dataframe(facetgrid_two_axes, dual_axis=True).set_axis_labels("Period", "Reported Value")
 
         plt.subplots_adjust(hspace=0.4, wspace=0.4)
