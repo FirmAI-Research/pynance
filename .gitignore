@@ -1,22 +1,10 @@
 secrets.json
 nasdaq_data_link.json
 
-pynance/vendors/exports/
-pynance/vendors/exports/*
-pynance\time_series\static\img\*
 
-docs/_todo.txt
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
-
-*/img/*.png
-
-_tmp/*
-
-
-todo.md
-
 
 *.csv

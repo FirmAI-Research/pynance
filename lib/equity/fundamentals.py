@@ -265,27 +265,12 @@ class Fundamentals:
         return g
 
 
-
-    def style_terminal(self, df, text:list = None):
-        if isinstance(text, list):
-            for i in range(len(text)):
-                print(text[i])
-                with custom_formatting():
-                    print(df[i])
-        else:
-            print(text)
-            with custom_formatting():
-                print(df)           
-
-
     def style_jupyter(self, df, units='M'):
 
         if isinstance(df.columns, pd.MultiIndex):
 
             if units == 'M':
                 df = df.divide(1000000).T
-
-
                 return df.style      \
                     .format("${:,.0f}") \
                     .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
@@ -298,7 +283,6 @@ class Fundamentals:
 
             if units == '%':
                 df = df.multiply(100).T
-
                 return df.style      \
                     .format("{:,.2f}%") \
                     .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
@@ -313,15 +297,12 @@ class Fundamentals:
 
             if units == 'M':
                 df = df.divide(1000000).T
-
                 return df.style      \
                     .format("${:,}") \
                     .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
 
-
             elif units == '%':
                 df = df.multiply(100).T
-
                 return df.style      \
                     .format("{:,.2f}%") \
                     .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
@@ -439,23 +420,6 @@ class Ranks:
             .format("{:,.0f}%") \
             .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
 
-  
-        # return r.style      \
-        #     .format("{:,.2f}%") \
-        #     .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
-        #     .set_properties(**{'border': '1px solid lightgrey'})      \
-        #     .set_table_styles(
-        #     [
-        #     {"selector": "td, th", "props": [("border", "1px solid lightgrey !important")]},
-        #     ]
-        # )
-
-
-
-    # TODO 
-    def get_industry_stats(self):
-        # median pe etc by sector
-        pass
 
 
     def plot_dual_axis_ranks(self, fun_obj, cols):

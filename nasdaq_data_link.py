@@ -27,6 +27,7 @@ class Sharadar(Enum):
   TICKERS = 'SHARADAR/TICKERS'
   INSTITUIONS = 'SHARADAR/SF3'
   INSIDERS =  'SHARADAR/SF2'
+  PRICES = 'SHARADAR/SEP'
 
 
 class Nasdaq:

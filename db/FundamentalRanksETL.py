@@ -83,9 +83,6 @@ engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
 cnxn = engine.connect()
 df.to_sql(con=cnxn, if_exists='replace', name = 'CompFunBase', index = False) #Company Fundamentals base
 
-# Check Load
-# base = pd.read_sql("select * from CompFunBase where industry = 'Utilities - Regulated Electric' and ticker = 'DUK'", cnxn)
-# base
 
 
 """ 
