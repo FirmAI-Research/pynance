@@ -28,6 +28,9 @@ class Calendar:
         else:
             return last_month_end + relativedelta(months=offset)
 
+    def previous_market_day(self, dtobj):
+        return nyse.valid_days(start_date='2022-01-01', end_date=dtobj)[-1]
+
 
     def closest_market_day(self, dtobj):
         market_days = nyse.valid_days(start_date = '1900-01-01', end_date = '2100-01-01')
