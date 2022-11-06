@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block content %}
+<h1>fundamentals</h1>
+
+
+{% endblock content %}
+
+
+
+{% block js %}
+<script>
+
+$(function() {
+  // Sidebar toggle behavior
+  $('#sidebarCollapse').on('click', function() {
+    $('#sidebar, #content').toggleClass('active');
+  });
+});
+</script>
+
+{% endblock js %}

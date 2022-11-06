@@ -1,0 +1,162 @@
+{% load static %}
+<html>
+
+<head>
+
+    <title>{% block title %}{% endblock title %}</title>
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{% static 'img/favicons/favicon-32x32.png' %}" />
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'base.css' %}" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+        integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+
+    <!-- 3rd party CSS -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="//cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
+
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.min.css"
+        rel="stylesheet" />
+
+</head>
+
+
+<body>
+
+    <header class="fixed-top page-header">
+
+        <!-- Horizontal NavBar -->
+        <div class="container-fluid-max">
+            <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-custom-gradient" >
+                <a class="navbar-brand" href="#home"><img src="{% static 'logo2_transparent.png' %}" alt="..." width="200" height = "50"></a>
+
+                <div class="collapse navbar-collapse justify-content-lg-between" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Equity
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" type="button"
+                                        href="{% url 'fundamentals' %}">Fundamentals</a></li>
+                            </ul>
+                        </li>
+
+                </div>
+
+                <div class="collapse navbar-collapse justify-content-end" id="navbarCollapse">
+                    <ul class="navbar-nav">
+                        <li class="nav-item ">
+                            <button id="sidebarCollapse" type="button"
+                                class="btn btn-light bg-white rounded-pill shadow-sm"><small
+                                    class="text-uppercase font-weight-bold">Toggle NavBar</small></button>
+                        </li>
+                    </ul>
+
+                    </ul>
+                </div>
+
+            </nav>
+
+
+            <!-- Vertical navbar -->
+            <div class="vertical-nav bg-white active" id="sidebar">
+                <div class="py-4 px-3 mb-4 bg-light">
+                    <div class="media d-flex align-items-center"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" alt="..." width="65"
+                            class="mr-3 rounded-circle img-thumbnail shadow-sm">
+                        <div class="media-body">
+                            <h4 class="m-0"> </h4>
+                            <p class="font-weight-light text-muted mb-0"> </p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-gray font-weight-bold text-uppercase px-3 small pb-4 mb-0">Main</p>
+
+                <ul class="nav flex-column bg-white mb-0">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link text-dark font-italic bg-light">
+                            <i class="fa fa-th-large mr-3 text-primary fa-fw"></i>
+                            Home
+                        </a>
+                    </li>
+                </ul>
+                <p class="text-gray font-weight-bold text-uppercase px-3 small py-4 mb-0">Charts</p>
+                <ul class="nav flex-column bg-white mb-0">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link text-dark font-italic">
+                            <i class="fa fa-area-chart mr-3 text-primary fa-fw"></i>
+                            Area charts
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- End vertical navbar -->
+
+
+
+
+    </header>
+
+
+
+
+    <main class="col main pt-5 mt-3 h-100 overflow-auto">
+
+        {% block content %}
+
+        {% endblock content %}
+
+    </main>
+
+
+    <!-- Jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Bootstrap & Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
+        crossorigin="anonymous"></script>
+
+    <script src="//cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <script src="//cdn.datatables.net/plug-ins/1.10.16/sorting/datetime-moment.js"></script>
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/series-label.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+
+
+
+    {% block js %}
+
+    <script>
+
+
+    </script>
+
+    {% endblock js %}
+
+
+</body>
+
+</html>
