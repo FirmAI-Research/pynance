@@ -80,7 +80,8 @@ class Tickers(Nasdaq):
     
     self.df =  pd.read_csv(r'C:\data\tickers.csv')
     self.df = self.df[self.df.table == 'SF1']
-    self.df = self.df[['ticker', 'name', 'exchange','sector', 'industry','scalemarketcap', 'scalerevenue','famasector','famaindustry','lastupdated']]
+    self.df = self.df[['ticker', 'name', 'exchange','sector', 'industry','scalemarketcap', 'scalerevenue','famasector','famaindustry','lastupdated', 'currency']]
+    self.df = self.df[self.df.currency == 'USD']
     return self.df
 
 

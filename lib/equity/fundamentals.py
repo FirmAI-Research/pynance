@@ -182,10 +182,13 @@ class Fundamentals:
         
         if index == 0:
             search = 0, [1, 2, 3]
+        
         elif index == 1:
             search = [1, 0, 2, 3]
+        
         elif index == 2:
             search = [2, 0, 1, 3]
+        
         else:
             search = [index, index-3, index-2, index-1]
 

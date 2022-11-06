@@ -22,6 +22,9 @@ print(proj_root)
 sys.path.append(proj_root)
 from calendar_dates import Calendar
 import fredapi
+import sys, os, json
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 proj_root = os.path.abspath('')
@@ -142,12 +145,9 @@ class Treasuries:
 
         cmap = sns.diverging_palette(230, 20, as_cmap=True)
 
-
         # 20 day corr
         corr = join.iloc[-20:].corr()[key].to_frame().drop(key, axis=0)
         g = sns.heatmap(corr, ax = axes[0],  cmap=cmap, square=True, linewidths=.5, annot = True, cbar = True,  cbar_kws={"shrink": .5})
-
-
 
         g.set_title('20 day Correlation')
 
@@ -158,7 +158,6 @@ class Treasuries:
 
         corr = join.iloc[-60:].corr()[key].to_frame().drop(key, axis=0)
         g = sns.heatmap(corr,  ax = axes[1], cmap=cmap, square=True, linewidths=.5, annot = True, cbar = True, cbar_kws={"shrink": .5} )
-
 
         g.set_title('60 day Correlation')
 
@@ -171,13 +170,10 @@ class Treasuries:
         corr = join.iloc[-252:].corr()[key].to_frame().drop(key, axis=0)
         g = sns.heatmap(corr,  ax = axes[2], cmap=cmap, square=True, linewidths=.5, annot = True, cbar = True, cbar_kws={"shrink": .5} )
 
-
-
             
         g.set_title('252 day Correlation')
 
         g.set_yticklabels(g.get_yticklabels(), rotation=45)
-        
         
         # 5 Year (1260 d) corr
         corr = join.iloc[-1260:].corr()[key].to_frame().drop(key, axis=0)
@@ -186,7 +182,6 @@ class Treasuries:
         g.set_title('5 Year (1260 day) Correlation')
 
         g.set_yticklabels(g.get_yticklabels(), rotation=45)
-        
         
         fig.suptitle(title, fontsize=16)
 
@@ -269,10 +264,6 @@ class Treasuries:
     
 
     def expected_inflation(self):
-        import sys, os, json
-        import matplotlib.pyplot as plt
-        import seaborn as sns
-      
 
         # Moodys seasoned bond yields
         fred = fredapi.Fred(api_key=fred_api_key)
