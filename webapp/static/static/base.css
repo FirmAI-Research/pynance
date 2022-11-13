@@ -1,90 +1,115 @@
-h1 {
-    color : black;
-}
-
-.bg-custom-gradient{
-    background: linear-gradient(to right,  #e4e4ae, #28628ef8);
-}
-
-.nav-link{
-    font-size: 20px;
-}
-.dropdown-item{
-    font-size: 18px;
-}
-
+/* 
+  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Project Defaults                                                                                                │
+  └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ */
 
 body {
-    padding-top: 2rem;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  
+  padding-top: 2rem;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-/*
-*
-* ==========================================
-* Vertical nav bar
-* ==========================================
-*
+
+h1 {
+  background: linear-gradient(to right, #243949, #2b5876);
+  color : white;
+  border-radius: 10px;
+  text-align:center;
+  margin: auto;
+  padding: 10px;
+  width: 25%;
+}
+
+
+
+p {
+  color: #28628ef8;
+}
+
+.bg-custom-gradient {
+  background: linear-gradient(to right, #243949, #2b5876);
+}
+
+.nav-link {
+  font-size: 18px;
+}
+
+.dropdown-item {
+  font-size: 18px;
+}
+
+#navbarDropdown{
+  color:white;
+}
+
+
+
+
+
+/* 
+  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Vertical Nav Bar                                                                                                │
+  └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 */
-
 .vertical-nav {
-    min-width: 14rem;
-    width: 14rem;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
-    transition: all 0.4s;
-  }
-  
-  .page-content {
-    width: calc(100% - 14rem);
-    margin-left: 14rem;
-    transition: all 0.4s;
-  }
-  
-  /* for toggle behavior */
-  
-  #sidebar.active {
+  min-width: 14rem;
+  width: 14rem;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s;
+}
+
+.page-content {
+  width: calc(100% - 14rem);
+  margin-left: 14rem;
+  transition: all 0.4s;
+}
+
+/* for toggle behavior */
+
+#sidebar.active {
+  margin-left: -14rem;
+}
+
+#content.active {
+  width: 100%;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  #sidebar {
     margin-left: -14rem;
   }
-  
-  #content.active {
+
+  #sidebar.active {
+    margin-left: 0;
+  }
+
+  #content {
     width: 100%;
     margin: 0;
   }
-  
-  @media (max-width: 768px) {
-    #sidebar {
-      margin-left: -14rem;
-    }
-    #sidebar.active {
-      margin-left: 0;
-    }
-    #content {
-      width: 100%;
-      margin: 0;
-    }
-    #content.active {
-      margin-left: 14rem;
-      width: calc(100% - 14rem);
-    }
-  }
-  
 
-  .separator {
-    margin: 3rem 0;
-    border-bottom: 1px dashed #fff;
+  #content.active {
+    margin-left: 14rem;
+    width: calc(100% - 14rem);
   }
-  
-  .text-uppercase {
-    letter-spacing: 0.1em;
-  }
-  
-  .text-gray {
-    color: #aaa;
-  }
-  
+}
+
+
+.separator {
+  margin: 3rem 0;
+  border-bottom: 1px dashed #fff;
+}
+
+.text-uppercase {
+  letter-spacing: 0.1em;
+}
+
+.text-gray {
+  color: #aaa;
+}

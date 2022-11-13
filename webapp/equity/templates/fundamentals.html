@@ -4,8 +4,15 @@
 
 
 {% block content %}
-<h1>fundamentals</h1>
 
+<h1>Fundamentals</h1>
+
+<p>blah</p>
+
+
+<div class="card-body">
+  {{ table_data | safe }}
+</div>
 
 {% endblock content %}
 
@@ -14,12 +21,18 @@
 {% block js %}
 <script>
 
-$(function() {
-  // Sidebar toggle behavior
-  $('#sidebarCollapse').on('click', function() {
-    $('#sidebar, #content').toggleClass('active');
+$(document).ready(function() {
+            $('#example').DataTable();
+        } );
+
+
+
+$(function () {
+    // Sidebar toggle behavior
+    $('#sidebarCollapse').on('click', function () {
+      $('#sidebar, #content').toggleClass('active');
+    });
   });
-});
 </script>
 
 {% endblock js %}
