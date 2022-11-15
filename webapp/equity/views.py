@@ -25,23 +25,22 @@ def fundamentals(request):
     
     fun.get( columns = Columns.INCOME.value, limit = 5 )
 
-    inc = fun.df.divide(1000000).T.droplevel(1)
+    inc = fun.df.divide(1000000).T.reset_index(level=[0,1]).reset_index(drop=False).drop(columns = ['ticker', 'index'])
+    inc.columns.name = None
 
     print(inc)
     # Convert pandas dataframe to data and column objects read by jquery datatables
     inc_json = inc.to_json(orient='split', index=False)
-    print(type(inc_json))
-    j = json.loads(inc_json)
-    inc_data = j['data']
-    columns = j['columns']
-    columns = [{'title': c} for c in columns]
+    j = json.loads(json.dumps(inc_json ))
+    print(j)
+    inc_data = json.dumps(json.loads(j)["data"])
+    # inc_data = json.dumps(inc_data )
     print(inc_data)
-    print(columns)
-    table_data = inc.to_html(table_id="example")
+    # columns = j['columns']
 
     context = {
 
-        'table_data': table_data,
+        'table_data': inc_data,
 
     }
 

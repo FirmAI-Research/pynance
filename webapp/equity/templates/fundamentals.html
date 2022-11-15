@@ -10,10 +10,31 @@
 <p>blah</p>
 
 
-<div class="card-body">
-  {{ table_data | safe }}
-</div>
+<table id="example" class="display" style="width:100%">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Position</th>
+      <th>Office</th>
+      <th>Extn.</th>
+      <th>Start date</th>
+      <th>Start date</th>
 
+    </tr>
+  </thead>
+  <tfoot>
+    <tr>
+      <th>Name</th>
+      <th>Position</th>
+      <th>Office</th>
+      <th>Extn.</th>
+      <th>Start date</th>
+      <th>Start date</th>
+
+    </tr>
+    
+  </tfoot>
+</table>
 {% endblock content %}
 
 
@@ -21,18 +42,26 @@
 {% block js %}
 <script>
 
-$(document).ready(function() {
-            $('#example').DataTable();
-        } );
+
+  let table_data = "{{ table_data|safe }}";
+  console.log(table_data);
+  // console.log('hello')
+  $(document).ready(function () {
+    $('#example').DataTable({
+      data: table_data,
+    });
+  });
 
 
 
-$(function () {
+  $(function () {
     // Sidebar toggle behavior
     $('#sidebarCollapse').on('click', function () {
       $('#sidebar, #content').toggleClass('active');
     });
   });
+
+
 </script>
 
 {% endblock js %}
