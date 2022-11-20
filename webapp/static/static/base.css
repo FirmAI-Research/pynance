@@ -3,16 +3,41 @@
   │ Project Defaults                                                                                                │
   └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  */
+ /* https://colorcodes.io/gray/ */
+
+ :root {
+  --primary: #3C4754;
+  --white: #faf0e6;
+}
 
 body {
   padding-top: 2rem;
   min-height: 100vh;
   overflow-x: hidden;
+  background: linear-gradient(to bottom, #6D7987, #4E5761);
+
+}
+
+.nav-item > .active {
+  color: #3C4754 !important;
+}
+
+.table-div{
+  background:lightgrey;
+  padding-left: 25px;
+  padding-right: 25px;
+  padding-top: 25px;
+  padding-bottom: 25px;
+  border-radius: 25px;
+  margin-bottom: 15px;
+  margin-right: 15px;
+  margin-top:15px;
+  width:49%;
+  display:inline-block;
 }
 
 
 h1 {
-  background: linear-gradient(to right, #243949, #2b5876);
   color : white;
   border-radius: 10px;
   text-align:center;
@@ -22,13 +47,12 @@ h1 {
 }
 
 
-
 p {
-  color: #28628ef8;
+  color: white;
 }
 
 .bg-custom-gradient {
-  background: linear-gradient(to right, #243949, #2b5876);
+  background: linear-gradient(to right, #6D7987, #4E5761);
 }
 
 .nav-link {
@@ -112,4 +136,11 @@ p {
 
 .text-gray {
   color: #aaa;
+}
+
+
+/* move body content when toggle button selected */
+#body-content.active {
+  width: calc(100% - 14rem) !important;
+  float:right;
 }

@@ -7,34 +7,71 @@
 
 <h1>Fundamentals</h1>
 
-<p>blah</p>
+<div id="body-content">
 
 
-<table id="example" class="display" style="width:100%">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Position</th>
-      <th>Office</th>
-      <th>Extn.</th>
-      <th>Start date</th>
-      <th>Start date</th>
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="bs-tab" data-bs-toggle="tab" data-bs-target="#bs" type="button" role="tab"
+        aria-controls="bs" aria-selected="true" style='color:white;'>Balance Sheet</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="incs-tab" data-bs-toggle="tab" data-bs-target="#incs" type="button" role="tab"
+        aria-controls="incs" aria-selected="false" style='color:white;'>Income Statement</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="cf-tab" data-bs-toggle="tab" data-bs-target="#cf" type="button" role="tab"
+        aria-controls="cf" aria-selected="false" style='color:white;'>Cash Flow Statement</button>
+    </li>
+  </ul>
+  <div class="tab-content" id="myTabContent">
 
-    </tr>
-  </thead>
-  <tfoot>
-    <tr>
-      <th>Name</th>
-      <th>Position</th>
-      <th>Office</th>
-      <th>Extn.</th>
-      <th>Start date</th>
-      <th>Start date</th>
+    <div class="tab-pane fade show active" id="bs" role="tabpanel" aria-labelledby="bs-tab">
 
-    </tr>
-    
-  </tfoot>
-</table>
+
+    </div>
+
+    <div class="tab-pane fade" id="incs" role="tabpanel" aria-labelledby="incs-tab">
+      <!-- Income Statement -->
+      <div class='table-div'>
+        <h2>Income Statement</h2>
+        <table id="income_statement" class="display" width="100%"></table>
+      </div>
+      <div class='table-div'>
+        <h2>Percent Change</h2>
+        <table id="income_statement_percent_change" class="display" width="100%"></table>
+      </div>
+
+    </div>
+    <div class="tab-pane fade" id="cf" role="tabpanel" aria-labelledby="cf-tab">
+
+      <!-- Cash Flow Statement -->
+      <div class='table-div'>
+        <h2>Cash Flow</h2>
+        <table id="cash_flow" class="display" width="100%"></table>
+      </div>
+
+
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
 {% endblock content %}
 
 
@@ -42,15 +79,56 @@
 {% block js %}
 <script>
 
-
-  let table_data = "{{ table_data|safe }}";
-  console.log(table_data);
-  // console.log('hello')
   $(document).ready(function () {
-    $('#example').DataTable({
-      data: table_data,
+
+    let income_statement = JSON.parse("{{inc_json|escapejs}}");
+    $('#income_statement').DataTable({
+      data: income_statement.data,
+      columns: income_statement.columns,
+      "columnDefs": [
+        {
+          "orderable": false,
+          "render": $.fn.dataTable.render.number(',', '.', 2, '$', ''),
+          "targets": [1, 2, 3, 4, 5],
+        }
+      ],
     });
+
+
+    let income_statement_percent_change = JSON.parse("{{inc_pct_json|escapejs}}");
+    $('#income_statement_percent_change').DataTable({
+      data: income_statement_percent_change.data,
+      columns: income_statement_percent_change.columns,
+      "columnDefs": [
+        {
+          "orderable": false,
+          "render": $.fn.dataTable.render.number(',', '.', 2, '', '%'),
+          "targets": [1, 2, 3, 4, 5],
+        }
+      ],
+    });
+
+
+
+    let cash_flow_statement = JSON.parse("{{cf_json|escapejs}}");
+    $('#cash_flow').DataTable({
+      data: cash_flow_statement.data,
+      columns: cash_flow_statement.columns,
+      "columnDefs": [
+        {
+          "orderable": false,
+          "render": $.fn.dataTable.render.number(',', '.', 2, '$', ''),
+          "targets": [1, 2, 3, 4, 5],
+        }
+      ],
+    });
+
+
+
+
   });
+
+
 
 
 
@@ -58,6 +136,8 @@
     // Sidebar toggle behavior
     $('#sidebarCollapse').on('click', function () {
       $('#sidebar, #content').toggleClass('active');
+      $('#body-content').toggleClass('active');
+
     });
   });
 

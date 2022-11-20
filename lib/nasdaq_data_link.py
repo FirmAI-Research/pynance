@@ -14,8 +14,7 @@ import requests
 
 from enum import Enum
 
-proj_root = os.path.dirname(os.path.abspath(__file__))
-
+proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from calendar_dates import Calendar
 cal = Calendar()
 

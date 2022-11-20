@@ -21,8 +21,9 @@ from sqlalchemy import create_engine
 import nasdaq_data_link as nasdaq
 from nasdaq_data_link import Sharadar
 from numeric import custom_formatting
-from calendar_dates import Calendar
-cal = Calendar()
+import calendar_dates 
+
+cal = calendar_dates.Calendar()
 
 
 class Fundamentals:
@@ -79,6 +80,16 @@ class Fundamentals:
         
         return self
 
+
+    def for_js(self):
+        
+        df = self.df.divide(1000000).T.reset_index(level=[0,1]).reset_index(drop=False).drop(columns = ['ticker', 'index'])
+        
+        df.columns.name = None
+        
+        return df
+
+        
 
     def calculate(self):
         ''' additional metrics calculated based on raw fundamental data
@@ -231,18 +242,10 @@ class Fundamentals:
         return self.data
 
 
-    def plot_clustered_bar_peer_fundamentals(self):
-        ''' Clustered bar chart for multiple peers to the ticker and various metrics
-        '''
-        pass
-
-
     def plot_box_plot(self, cols):
         engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
         
         cnxn = engine.connect()
-        
-        cal = Calendar()
         
         self.get_peers()
 
@@ -266,49 +269,6 @@ class Fundamentals:
         
         g.map_dataframe(annotate)
         return g
-
-
-    def style_jupyter(self, df, units='M'):
-
-        if isinstance(df.columns, pd.MultiIndex):
-
-            if units == 'M':
-                df = df.divide(1000000).T
-                return df.style      \
-                    .format("${:,.0f}") \
-                    .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
-                    .set_properties(**{'border': '1px solid lightgrey'})      \
-                    .set_table_styles(
-                    [
-                    {"selector": "td, th", "props": [("border", "1px solid lightgrey !important")]},
-                    ]
-                )
-
-            if units == '%':
-                df = df.multiply(100).T
-                return df.style      \
-                    .format("{:,.2f}%") \
-                    .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
-                    .set_properties(**{'border': '1px solid lightgrey'})      \
-                    .set_table_styles(
-                    [
-                    {"selector": "td, th", "props": [("border", "1px solid lightgrey !important")]},
-                    ]
-                )
-
-        else:
-
-            if units == 'M':
-                df = df.divide(1000000).T
-                return df.style      \
-                    .format("${:,}") \
-                    .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
-
-            elif units == '%':
-                df = df.multiply(100).T
-                return df.style      \
-                    .format("{:,.2f}%") \
-                    .applymap(lambda x: f"color: {'red' if x < 0 else 'black'}") \
 
 
     # NOTE: deprecated

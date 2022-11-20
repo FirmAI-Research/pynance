@@ -1,6 +1,5 @@
 import sys, os
 import numpy as np
-import matplotlib.pyplot as plt
 from nelson_siegel_svensson import NelsonSiegelSvenssonCurve, NelsonSiegelCurve
 from nelson_siegel_svensson.calibrate import calibrate_ns_ols, calibrate_nss_ols
 from datetime import datetime
@@ -9,13 +8,10 @@ import numpy as np
 from re import L, X
 import requests
 from bs4 import BeautifulSoup
-import pandas as pd 
 import seaborn as sns
 import matplotlib.pyplot as plt
 import json
-import matplotlib.pyplot as plt
 import seaborn as sns
-from calendar_dates import Calendar
 import yfinance as yf
 proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print(proj_root)
@@ -23,7 +19,6 @@ sys.path.append(proj_root)
 from calendar_dates import Calendar
 import fredapi
 import sys, os, json
-import matplotlib.pyplot as plt
 import seaborn as sns
 
 

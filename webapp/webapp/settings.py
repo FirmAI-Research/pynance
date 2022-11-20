@@ -131,7 +131,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
   os.path.join(BASE_DIR, 'static/static/'),
-) # Django looks for local static files
+) # Django looks for local static files; use for base.css
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static/root/") # Used by Nginx; Must differ from Staticfiles Dirs
 
