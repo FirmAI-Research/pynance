@@ -18,5 +18,5 @@ def df_to_dt(df, fp):
 
 
 
-def for_highcharts():
+def to_highcharts():
     pass

@@ -23,7 +23,7 @@ body {
 }
 
 .table-div{
-  background:lightgrey;
+  background:white;
   padding-left: 25px;
   padding-right: 25px;
   padding-top: 25px;
@@ -144,3 +144,7 @@ p {
   width: calc(100% - 14rem) !important;
   float:right;
 }
+
+
+
+

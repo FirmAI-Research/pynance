@@ -81,11 +81,15 @@ class Fundamentals:
         return self
 
 
-    def for_js(self):
+    def for_js(self, multiIndex = False):
         
-        df = self.df.divide(1000000).T.reset_index(level=[0,1]).reset_index(drop=False).drop(columns = ['ticker', 'index'])
+        if multiIndex:
+            df = self.df.divide(1000000).T.reset_index(drop=False)
+
+        else:
+            df = self.df.divide(1000000).T.reset_index(level=[0,1]).reset_index(drop=False).drop(columns = ['ticker', 'index'])
         
-        df.columns.name = None
+            df.columns.name = None
         
         return df
 
@@ -172,8 +176,9 @@ class Fundamentals:
     def get_peers(self):
         tick = nasdaq.Tickers()
         tick.full_export(curl=False)
+
         
-        industry = tick.get_industry(self.ticker[0])
+        industry = tick.get_industry(self.ticker)
 
         self.industry = industry
         print(industry)
@@ -189,10 +194,10 @@ class Fundamentals:
         
         peers = base.ticker.unique().tolist()
         
-        index = peers.index(self.ticker[0])
+        index = peers.index(self.ticker)
         
         if index == 0:
-            search = 0, [1, 2, 3]
+            search = [0, 1, 2, 3]
         
         elif index == 1:
             search = [1, 0, 2, 3]
@@ -202,7 +207,7 @@ class Fundamentals:
         
         else:
             search = [index, index-3, index-2, index-1]
-
+        print(search)
         return [peers[i] for i in search]
 
 
@@ -362,8 +367,18 @@ class Ranks:
     def get_ranks(self):
         ''' Returns ranks for all periods and one ticker '''
         df =  pd.read_sql(f"select * from CompFunRanks where ticker == '{self.ticker}'", self.cnxn)
+        print(df)
         self.rank_pivot =  df.pivot(index = ['calendardate'], columns = ['variable'], values= ['value'])
         return self
+
+
+    def for_js(self, cols):
+        r = self.rank_pivot
+        r.columns.name = None
+        r.index.name = None
+        r = r.droplevel(0, axis=1)
+        r = r[cols[2:]].iloc[-5:].transpose().reset_index()
+        return r
 
 
     def style_jupyter(self, cols, units = '%'):
@@ -619,11 +634,11 @@ class Columns(Enum):
     '''
     ID = ['ticker', 'calendardate' ]
     
-    CASHFLOW = ID +  ['cashneq', 'netinc', 'depamor', 'opex', 'receivables', 'payables', 'inventory', 'ncfo', 'ncfbus', 'ncfi', 'ncfinv',  'ncfdiv',  'ncfx', 'ncff', 'fcf', 'ncf']
+    CASHFLOW = ID +  ['ncfo', 'ncfbus', 'ncfi', 'ncfinv',  'ncfdiv',  'ncfx', 'ncff', 'fcf', 'ncf']
     
-    INCOME = ID +  ['revenue', 'cogs','gp', 'opex','opinc','ebt','netinc','ebitda', 'depamor'] 
+    INCOME = ID +  ['revenue', 'depamor', 'cogs', 'gp', 'sgna','rnd', 'opex',  'opinc','ebitda',  'ebit', 'intexp','ebt','taxexp','netinc'] 
     
-    BALANCE = ID + ['assetsc', 'assetsnc', 'receivables', 'inventory', 'assets', 'liabilitiesc','liabilitiesnc', 'payables', 'debt','equity','retearn']
+    BALANCE = ID + ['cashneq', 'receivables', 'inventory', 'assetsc', 'assetsnc',  'assets', 'payables', 'liabilitiesc', 'liabilitiesnc', 'liabilities', 'debt','equity']
     
     PEERS = ID +  ['divyield', 'grossmargin', 'netmargin', 'fcfmargin', 'oppmargin','roe', 'roic', 'ros', 'roc']
     

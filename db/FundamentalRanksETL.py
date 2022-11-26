@@ -99,8 +99,8 @@ industries =  df['industry'].unique().tolist()
 frames =[]
 for date in dates[-10:]:
     for industry in industries:
-        data = df[(df.calendardate == date) & (df.industry == industry)].set_index(['ticker','calendardate','industry'])
-        ranks = data.rank(axis=0, pct=True, numeric_only = True, ascending = False, na_option='top').reset_index()          # NOTE RANKS calculated here...
+        data = df[(df.calendardate == date) & (df.industry == industry)].set_index(['ticker','calendardate','industry']).replace(0, np.nan)
+        ranks = data.rank(axis=0, pct=False, numeric_only = True, ascending = False, na_option='bottom', method='min').reset_index()                       # NOTE RANKS calculated here...
         melt = ranks.melt(id_vars = ['ticker', 'calendardate','industry'])
         frames.append(melt)
 res = pd.concat(frames, axis=0)
@@ -113,6 +113,8 @@ res.to_sql(con=cnxn, if_exists='replace', name = 'CompFunRanks', index = False) 
 
 rank = pd.read_sql("select * from CompFunRanks where ticker == 'AMZN'", cnxn)
 rank
+
+
 
 
 """ 
