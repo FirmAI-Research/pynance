@@ -13,7 +13,8 @@ import matplotlib.pyplot as plt
 import json
 import seaborn as sns
 import yfinance as yf
-proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from pathlib import Path
+proj_root = Path(__file__).resolve().parent.parent.parent
 print(proj_root)
 sys.path.append(proj_root)
 from calendar_dates import Calendar
@@ -22,8 +23,8 @@ import sys, os, json
 import seaborn as sns
 
 
-proj_root = os.path.abspath('')
 fp = os.path.join(proj_root, 'secrets.json')
+print(fp)
 with open(fp) as f:
     data = json.load(f)
 fred_api_key = data['fred_api_key'] 

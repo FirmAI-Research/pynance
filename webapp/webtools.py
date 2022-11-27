@@ -18,5 +18,5 @@ def df_to_dt(df, fp):
 
 
 
-def to_highcharts():
+def df_to_highcharts_heatmap():
     pass

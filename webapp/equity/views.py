@@ -4,6 +4,7 @@ from django.templatetags.static import static
 from pathlib import Path
 import sys, os
 import json
+import numpy as np 
 proj_root = Path(__file__).resolve().parent.parent.parent
 sys.path.append(os.path.join(proj_root, 'lib'))
 sys.path.append(os.path.join(proj_root, 'lib', 'equity'))
@@ -14,11 +15,9 @@ import webtools
 fp_ajax = os.path.join( Path(__file__).resolve().parent, 'ajax')
 
 
-
 def fundamentals(request):
 
-
-    ticker = 'AMZN'
+    ticker = 'BKNG'
 
     fun = Fundamentals( ticker = ticker)
 
@@ -37,14 +36,21 @@ def fundamentals(request):
     fp = os.path.join(fp_ajax, 'income_statement_pct.json')
     inc_pct_json = webtools.df_to_dt(inc_pct_json.fillna('-'), fp)
 
+    fun.quarter_over_quarter_change()
+    inc_qq_change = fun.qq_change
+    inc_qq_change.columns.name = None
+    fp = os.path.join(fp_ajax, 'income_qq_change.json')
+    inc_qq_json = webtools.df_to_dt(inc_qq_change.fillna('-'), fp)
+
     rank = Ranks(ticker = ticker)
-    inc_ranks = rank.get_ranks().for_js(cols=Columns.INCOME.value)
+    inc_ranks = rank.get_ranks().for_js(cols=Columns.INCOME_RANKS.value)
     fp = os.path.join(fp_ajax, 'income_statement_ranks.json')
     inc_ranks_json = webtools.df_to_dt(inc_ranks, fp)
 
     peers = fun.get_peers()
     peer_fun = Fundamentals(ticker = peers)
     inc_peer_values =  peer_fun.get( columns = Columns.INCOME.value, limit = 5 ).for_js(multiIndex = True)
+    inc_peer_values.replace([np.inf, -np.inf], np.nan, inplace=True)
     fp = os.path.join(fp_ajax, 'income_statement_peer_values.json')    
     inc_peer_json =  webtools.df_to_dt(inc_peer_values.fillna('-'), fp)
 
@@ -65,7 +71,7 @@ def fundamentals(request):
     bs_pct_json = webtools.df_to_dt(bs_pct_json.fillna('-'), fp)
 
     rank = Ranks(ticker = ticker)
-    bs_ranks = rank.get_ranks().for_js(cols=Columns.BALANCE.value)
+    bs_ranks = rank.get_ranks().for_js(cols=Columns.BALANCE_RANKS.value)
     fp = os.path.join(fp_ajax, 'balance_sheet_ranks.json')
     bs_ranks_json = webtools.df_to_dt(bs_ranks, fp)
 
@@ -92,13 +98,13 @@ def fundamentals(request):
     cf_pct_json = webtools.df_to_dt(cf_pct_json.fillna('-'), fp)
 
     rank = Ranks(ticker = ticker)
-    cf_ranks = rank.get_ranks().for_js(cols=Columns.CASHFLOW.value)
+    cf_ranks = rank.get_ranks().for_js(cols=Columns.CASHFLOW_RANKS.value)
     fp = os.path.join(fp_ajax, 'cash_flow_ranks.json')
     cf_ranks_json = webtools.df_to_dt(cf_ranks, fp)
 
     peers = fun.get_peers()
     peer_fun = Fundamentals(ticker = peers)
-    cf_peer_values =  peer_fun.get( columns = Columns.CASHFLOW.value, limit = 5 ).for_js(multiIndex = True)
+    cf_peer_values =  peer_fun.get( columns = Columns.CASHFLOW_RANKS.value, limit = 5 ).for_js(multiIndex = True)
     fp = os.path.join(fp_ajax, 'cash_flow_peer_values.json')    
     cf_peer_json =  webtools.df_to_dt(cf_peer_values.fillna('-'), fp)
 
@@ -107,6 +113,7 @@ def fundamentals(request):
 
         'inc_json': inc_json,
         'inc_pct_json':inc_pct_json,
+        'inc_qq_json':inc_qq_json,
         'inc_ranks_json':inc_ranks_json,
         'inc_peer_json':inc_peer_json,
 

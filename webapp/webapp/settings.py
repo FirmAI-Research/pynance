@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
 
-    'equity'
+    'equity',
+    'rates'
 
 
     

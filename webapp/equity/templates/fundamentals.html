@@ -6,7 +6,22 @@
 
 <h1>Fundamentals</h1>
 
-<div id="body-content">
+<div style="clear:both;"></div>
+
+<div class="card" style="width:25%">
+  <div class="card-header">
+    <strong>Ticker</strong>
+  </div>
+  <ul class="list-group list-group-flush">
+    <li class="list-group-item">Industry</li>
+    <li class="list-group-item">Last Price | 1 day Change</li>
+  </ul>
+</div>
+
+<div style="clear:both;"></div>
+
+
+<div id="body-content" style="padding-top:1%;">
 
   <ul class="nav nav-tabs" id="FinancialsTabs" role="tablist">
     <li class="nav-item" role="presentation">
@@ -60,12 +75,16 @@
         </div>
         <div class="tab-pane fade" id="peers-bs" role="tabpanel" aria-labelledby="peers-bs-tab">
           <div class='table-div'>
-            <h2>Ranks</h2>
-            <table id="balance_sheet_ranks" class="display" width="100%"></table>
+            <h2>Balance Sheet</h2>
+            <table id="balance_sheet_peer_compare" class="display" width="100%"></table>
           </div>
           <div class='table-div'>
             <h2>Peer Values</h2>
             <table id="balance_sheet_peer_values" class="display" width="100%"></table>
+          </div>
+          <div class='table-div'>
+            <h2>Ranks</h2>
+            <table id="balance_sheet_ranks" class="display" width="100%"></table>
           </div>
         </div>
         <div class="tab-pane fade" id="metrics-bs" role="tabpanel" aria-labelledby="metrics-bs-tab">
@@ -104,19 +123,30 @@
             <h2>Income Statement</h2>
             <table id="income_statement" class="display" width="100%"></table>
           </div>
+
           <div class='table-div'>
             <h2>Percent Change</h2>
             <table id="income_statement_percent_change" class="display" width="100%"></table>
           </div>
+
+          <div class='table-div'>
+            <h2>Q/Q Percent Change</h2>
+            <table id="income_statement_qq_percent_change" class="display" width="100%"></table>
+          </div>
+
         </div>
         <div class="tab-pane fade" id="peers" role="tabpanel" aria-labelledby="peers-tab">
           <div class='table-div'>
-            <h2>Ranks</h2>
-            <table id="income_statement_ranks" class="display" width="100%"></table>
+            <h2>Income Statement</h2>
+            <table id="income_statement_peer_compare" class="display" width="100%"></table>
           </div>
           <div class='table-div'>
             <h2>Peer Values</h2>
             <table id="income_statement_peer_values" class="display" width="100%"></table>
+          </div>
+          <div class='table-div'>
+            <h2>Ranks</h2>
+            <table id="income_statement_ranks" class="display" width="100%"></table>
           </div>
         </div>
 
@@ -134,8 +164,9 @@
       <div id="cf-body-content" style='padding-top:10px;'>
         <ul class="nav nav-tabs" id="CashFlowTabs" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="reported-cf-tab" data-bs-toggle="tab" data-bs-target="#reported-cf" type="button"
-              role="tab" aria-controls="reported-cf" aria-selected="true" style='color:white;'>Reported</button>
+            <button class="nav-link" id="reported-cf-tab" data-bs-toggle="tab" data-bs-target="#reported-cf"
+              type="button" role="tab" aria-controls="reported-cf" aria-selected="true"
+              style='color:white;'>Reported</button>
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="peers-cf-tab" data-bs-toggle="tab" data-bs-target="#peers-cf" type="button"
@@ -149,7 +180,7 @@
       </div>
 
 
- 
+
       <div class="tab-content" id="IncomeTabContent">
 
         <div class="tab-pane fade " id="reported-cf" role="tabpanel" aria-labelledby="reported-cf-tab">
@@ -179,364 +210,401 @@
 
 
 
+      </div>
+
     </div>
 
   </div>
 
-</div>
 
 
 
+  <style type="text/css">
+    td.major {
+      background-color: #D0D5D9 !important;
+      /* color: white; */
+      /* opacity: 0.9; */
+      /* font-weight: bold; */
+    }
 
-<style type="text/css">
-  td.major {
-    background-color: #D0D5D9 !important;
-    /* color: white; */
-    /* opacity: 0.9; */
-    /* font-weight: bold; */
-  }
+    td.mid {
+      text-align: center;
+    }
 
-  td.mid {
-    text-align: center;
-  }
+    td.minor {
+      text-align: right;
+    }
 
-  td.minor {
-    text-align: right;
-  }
+    /* bootstrap hack: fix content width inside hidden tabs */
+    .tab-content>.active,
+    .pill-content>.active {
+      display: block;
+      visibility: visible;
+      position: absolute;
+      width: 100%;
+    }
+  </style>
 
-  /* bootstrap hack: fix content width inside hidden tabs */
-  .tab-content>.active,
-  .pill-content>.active {
-    display: block;
-    visibility: visible;
-    position: absolute;
-    width: 100%;
-  }
-</style>
-
-{% endblock content %}
-
+  {% endblock content %}
 
 
-{% block js %}
 
-<script>
+  {% block js %}
 
-  $(document).ready(function () {
+  <script>
 
-    let income_statement = JSON.parse("{{inc_json|escapejs}}");
-    $('#income_statement').DataTable({
-      data: income_statement.data,
-      columns: income_statement.columns,
-      order: [],
-      pageLength: 20,
-      columnDefs: [
-        {
-          "orderable": false,
-          "render": $.fn.dataTable.render.number(',', '.', 0, '$', ''),
-          "targets": [1, 2, 3, 4, 5],
-        }
-      ],
-      createdRow: function (row, data, index) {
-        if (['revenue', 'gp', 'opinc', 'netinc', 'ebitda'].includes(data[0])) {
-          $('td', row).addClass('major');
-        } else if (['cogs', 'opex', 'intexp', 'taxexp'].includes(data[0])) {
-          $('td', row).eq(0).addClass('mid');
-        } else if (['depamor', 'sgna', 'rnd'].includes(data[0])) {
-          $('td', row).eq(0).addClass('minor');
-        }
-      },
+    $(document).ready(function () {
 
-    });
+      let income_statement = JSON.parse("{{inc_json|escapejs}}");
+      $('#income_statement').DataTable({
+        data: income_statement.data,
+        columns: income_statement.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 0, '$', ''),
+            "targets": [1, 2, 3, 4, 5],
+          }
+        ],
+        createdRow: function (row, data, index) {
+          if (['revenue', 'gp', 'opinc', 'netinc', 'ebitda'].includes(data[0])) {
+            $('td', row).addClass('major');
+            //   } else if (['cogs', 'opex', 'intexp', 'taxexp'].includes(data[0])) {
+            //     $('td', row).eq(0).addClass('mid');
+            //   } else if (['depamor', 'sgna', 'rnd'].includes(data[0])) {
+            //     $('td', row).eq(0).addClass('minor');
+          }
+        },
+
+      });
 
 
-    let income_statement_percent_change = JSON.parse("{{inc_pct_json|escapejs}}");
-    $('#income_statement_percent_change').DataTable({
-      data: income_statement_percent_change.data,
-      columns: income_statement_percent_change.columns,
-      order: [],
-      pageLength: 20,
-      columnDefs: [
-        {
-          "orderable": false,
-          "render": $.fn.dataTable.render.number(',', '.', 2, '', '%'),
-          "targets": [1, 2, 3, 4, 5],
-        }
-      ],
-      rowCallback: function (row, data, index) {
-        for (let i = 0; i < data.length; i++) {
-          if (data[i] < 0) {
-            $(row).find(`td:eq(${i})`).css('color', 'red');
+      let income_statement_percent_change = JSON.parse("{{inc_pct_json|escapejs}}");
+      $('#income_statement_percent_change').DataTable({
+        data: income_statement_percent_change.data,
+        columns: income_statement_percent_change.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 2, '', '%'),
+            "targets": [1, 2, 3, 4, 5],
+          }
+        ],
+        rowCallback: function (row, data, index) {
+          for (let i = 0; i < data.length; i++) {
+            if (data[i] < 0) {
+              $(row).find(`td:eq(${i})`).css('color', 'red');
+            }
           }
         }
-      }
-    });
+      });
 
 
-    let income_statement_ranks = JSON.parse("{{inc_ranks_json|escapejs}}");
-    $('#income_statement_ranks').DataTable({
-      data: income_statement_ranks.data,
-      columns: income_statement_ranks.columns,
-      order: [],
-      pageLength: 20,
-      columnDefs: [
-        {
-          "orderable": false,
-          "render": $.fn.dataTable.render.number(',', '.', 0, '', ''),
-          "targets": [1, 2, 3, 4, 5],
-        }
-      ],
-    });
-
-
-    let income_statement_peer_values = JSON.parse("{{inc_peer_json|escapejs}}");
-    $('#income_statement_peer_values').DataTable({
-      data: income_statement_peer_values.data,
-      columns: income_statement_peer_values.columns,
-      order: [],
-      pageLength: 20,
-      columnDefs: [
-        {
-          "orderable": false,
-          "render": $.fn.dataTable.render.number(',', '.', 2, '$', ''),
-          "targets": [1, 2, 3, 4, 5, 6],
-        }
-      ],
-    });
-
-
-
-
-
-    let balance_sheet = JSON.parse("{{bs_json|escapejs}}");
-    $('#balance_sheet').DataTable({
-      data: balance_sheet.data,
-      columns: balance_sheet.columns,
-      order: [],
-      pageLength: 20,
-      columnDefs: [
-        {
-          "orderable": false,
-          "render": $.fn.dataTable.render.number(',', '.', 0, '$', ''),
-          "targets": [1, 2, 3, 4, 5],
-        }
-      ],
-    });
-
-
-    let balance_sheet_percent_change = JSON.parse("{{bs_pct_json|escapejs}}");
-    $('#balance_sheet_percent_change').DataTable({
-      data: balance_sheet_percent_change.data,
-      columns: balance_sheet_percent_change.columns,
-      order: [],
-      pageLength: 20,
-      columnDefs: [
-        {
-          "orderable": false,
-          "render": $.fn.dataTable.render.number(',', '.', 2, '', '%'),
-          "targets": [1, 2, 3, 4, 5],
-        }
-      ],
-      rowCallback: function (row, data, index) {
-        for (let i = 0; i < data.length; i++) {
-          if (data[i] < 0) {
-            $(row).find(`td:eq(${i})`).css('color', 'red');
+      let income_statement_qq_percent_change = JSON.parse("{{inc_qq_json|escapejs}}");
+      $('#income_statement_qq_percent_change').DataTable({
+        data: income_statement_qq_percent_change.data,
+        columns: income_statement_qq_percent_change.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 2, '', '%'),
+            "targets": [1],
+          }
+        ],
+        rowCallback: function (row, data, index) {
+          for (let i = 0; i < data.length; i++) {
+            if (data[i] < 0) {
+              $(row).find(`td:eq(${i})`).css('color', 'red');
+            }
           }
         }
-      }
-    });
+      });
 
 
-    let balance_sheet_ranks = JSON.parse("{{bs_ranks_json|escapejs}}");
-    $('#balance_sheet_ranks').DataTable({
-      data: balance_sheet_ranks.data,
-      columns: balance_sheet_ranks.columns,
-      order: [],
-      pageLength: 20,
-      columnDefs: [
-        {
-          "orderable": false,
-          "render": $.fn.dataTable.render.number(',', '.', 0, '', ''),
-          "targets": [1, 2, 3, 4, 5],
-        }
-      ],
-    });
-
-    let balance_sheet_peer_values = JSON.parse("{{bs_peer_json|escapejs}}");
-    $('#balance_sheet_peer_values').DataTable({
-      data: balance_sheet_peer_values.data,
-      columns: balance_sheet_peer_values.columns,
-      order: [],
-      pageLength: 20,
-      columnDefs: [
-        {
-          "orderable": false,
-          "render": $.fn.dataTable.render.number(',', '.', 2, '$', ''),
-          "targets": [1, 2, 3, 4, 5, 6],
-        }
-      ],
-    });
+      let income_statement_ranks = JSON.parse("{{inc_ranks_json|escapejs}}");
+      $('#income_statement_ranks').DataTable({
+        data: income_statement_ranks.data,
+        columns: income_statement_ranks.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 0, '', ''),
+            "targets": [1, 2, 3, 4, 5],
+          }
+        ],
+      });
 
 
+      let income_statement_peer_compare = JSON.parse("{{inc_json|escapejs}}");
+      $('#income_statement_peer_compare').DataTable({
+        data: income_statement_peer_compare.data,
+        columns: income_statement_peer_compare.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 0, '$', ''),
+            "targets": [1, 2, 3, 4, 5],
+          }
+        ],
+        createdRow: function (row, data, index) {
+          if (['revenue', 'gp', 'opinc', 'netinc', 'ebitda'].includes(data[0])) {
+            $('td', row).addClass('major');
+            //   } else if (['cogs', 'opex', 'intexp', 'taxexp'].includes(data[0])) {
+            //     $('td', row).eq(0).addClass('mid');
+            //   } else if (['depamor', 'sgna', 'rnd'].includes(data[0])) {
+            //     $('td', row).eq(0).addClass('minor');
+          }
+        },
+
+      });
+
+
+      let income_statement_peer_values = JSON.parse("{{inc_peer_json|escapejs}}");
+      $('#income_statement_peer_values').DataTable({
+        data: income_statement_peer_values.data,
+        columns: income_statement_peer_values.columns,
+        order: [],
+        pageLength: 14,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 0, '$', ''),
+            "targets": [1, 2, 3, 4, 5, 6],
+          }
+        ],
+      });
 
 
 
 
 
-
-
-
-
-
-    let cash_flow = JSON.parse("{{cf_json|escapejs}}");
-    $('#cash_flow_statement').DataTable({
-      data: cash_flow.data,
-      columns: cash_flow.columns,
-      order: [],
-      pageLength: 20,
-      columnDefs: [
-        {
-          "orderable": false,
-          "render": $.fn.dataTable.render.number(',', '.', 0, '$', ''),
-          "targets": [1, 2, 3, 4, 5],
-        }
-      ],
-    });
-
-
-    let cash_flow_percent_change = JSON.parse("{{cf_pct_json|escapejs}}");
-    $('#cash_flow_statement_percent_change').DataTable({
-      data: cash_flow_percent_change.data,
-      columns: cash_flow_percent_change.columns,
-      order: [],
-      pageLength: 20,
-      columnDefs: [
-        {
-          "orderable": false,
-          "render": $.fn.dataTable.render.number(',', '.', 2, '', '%'),
-          "targets": [1, 2, 3, 4, 5],
-        }
-      ],
-      rowCallback: function (row, data, index) {
-        for (let i = 0; i < data.length; i++) {
-          if (data[i] < 0) {
-            $(row).find(`td:eq(${i})`).css('color', 'red');
+      let balance_sheet = JSON.parse("{{bs_json|escapejs}}");
+      $('#balance_sheet').DataTable({
+        data: balance_sheet.data,
+        columns: balance_sheet.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 0, '$', ''),
+            "targets": [1, 2, 3, 4, 5],
+          }
+        ],
+        createdRow: function (row, data, index) {
+          if (['assets', 'liabilities', 'equity'].includes(data[0])) {
+            $('td', row).addClass('major');
           }
         }
-      }
-    });
+
+      });
 
 
-    let cash_flow_ranks = JSON.parse("{{cf_ranks_json|escapejs}}");
-    $('#cash_flow_statement_ranks').DataTable({
-      data: cash_flow_ranks.data,
-      columns: cash_flow_ranks.columns,
-      order: [],
-      pageLength: 20,
-      columnDefs: [
-        {
-          "orderable": false,
-          "render": $.fn.dataTable.render.number(',', '.', 0, '', ''),
-          "targets": [1, 2, 3, 4, 5],
+      let balance_sheet_percent_change = JSON.parse("{{bs_pct_json|escapejs}}");
+      $('#balance_sheet_percent_change').DataTable({
+        data: balance_sheet_percent_change.data,
+        columns: balance_sheet_percent_change.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 2, '', '%'),
+            "targets": [1, 2, 3, 4, 5],
+          }
+        ],
+        rowCallback: function (row, data, index) {
+          for (let i = 0; i < data.length; i++) {
+            if (data[i] < 0) {
+              $(row).find(`td:eq(${i})`).css('color', 'red');
+            }
+          }
         }
-      ],
-    });
+      });
 
-    let cash_flow_peer_values = JSON.parse("{{cf_peer_json|escapejs}}");
-    $('#cash_flow_statement_peer_values').DataTable({
-      data: cash_flow_peer_values.data,
-      columns: cash_flow_peer_values.columns,
-      order: [],
-      pageLength: 20,
-      columnDefs: [
-        {
-          "orderable": false,
-          "render": $.fn.dataTable.render.number(',', '.', 2, '$', ''),
-          "targets": [1, 2, 3, 4, 5, 6],
+
+      let balance_sheet_ranks = JSON.parse("{{bs_ranks_json|escapejs}}");
+      $('#balance_sheet_ranks').DataTable({
+        data: balance_sheet_ranks.data,
+        columns: balance_sheet_ranks.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 0, '', ''),
+            "targets": [1, 2, 3, 4, 5],
+          }
+        ],
+      });
+
+
+      let balance_sheet_peer_compare = JSON.parse("{{bs_json|escapejs}}");
+      $('#balance_sheet_peer_compare').DataTable({
+        data: balance_sheet_peer_compare.data,
+        columns: balance_sheet_peer_compare.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 0, '$', ''),
+            "targets": [1, 2, 3, 4, 5],
+          }
+        ],
+        createdRow: function (row, data, index) {
+          if (['assets', 'liabilities', 'equity'].includes(data[0])) {
+            $('td', row).addClass('major');
+          }
         }
-      ],
-    });
+
+      });
+      let balance_sheet_peer_values = JSON.parse("{{bs_peer_json|escapejs}}");
+      $('#balance_sheet_peer_values').DataTable({
+        data: balance_sheet_peer_values.data,
+        columns: balance_sheet_peer_values.columns,
+        order: [],
+        pageLength: 12,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 0, '$', ''),
+            "targets": [1, 2, 3, 4, 5, 6],
+          }
+        ],
+      });
 
 
 
 
+      let cash_flow = JSON.parse("{{cf_json|escapejs}}");
+      $('#cash_flow_statement').DataTable({
+        data: cash_flow.data,
+        columns: cash_flow.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 0, '$', ''),
+            "targets": [1, 2, 3, 4, 5],
+          }
+        ],
+      });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    let cash_flow_statement = JSON.parse("{{cf_json|escapejs}}");
-    $('#cash_flow').DataTable({
-      data: cash_flow_statement.data,
-      columns: cash_flow_statement.columns,
-      order: [],
-      pageLength: 20,
-      columnDefs: [
-        {
-          "orderable": false,
-          "render": $.fn.dataTable.render.number(',', '.', 2, '$', ''),
-          "targets": [1, 2, 3, 4, 5],
+      let cash_flow_percent_change = JSON.parse("{{cf_pct_json|escapejs}}");
+      $('#cash_flow_statement_percent_change').DataTable({
+        data: cash_flow_percent_change.data,
+        columns: cash_flow_percent_change.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 2, '', '%'),
+            "targets": [1, 2, 3, 4, 5],
+          }
+        ],
+        rowCallback: function (row, data, index) {
+          for (let i = 0; i < data.length; i++) {
+            if (data[i] < 0) {
+              $(row).find(`td:eq(${i})`).css('color', 'red');
+            }
+          }
         }
-      ],
+      });
+
+
+      let cash_flow_ranks = JSON.parse("{{cf_ranks_json|escapejs}}");
+      $('#cash_flow_statement_ranks').DataTable({
+        data: cash_flow_ranks.data,
+        columns: cash_flow_ranks.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 0, '', ''),
+            "targets": [1, 2, 3, 4, 5],
+          }
+        ],
+      });
+
+      let cash_flow_peer_values = JSON.parse("{{cf_peer_json|escapejs}}");
+      $('#cash_flow_statement_peer_values').DataTable({
+        data: cash_flow_peer_values.data,
+        columns: cash_flow_peer_values.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 2, '$', ''),
+            "targets": [1, 2, 3, 4, 5, 6],
+          }
+        ],
+      });
+
+
+
+
+      let cash_flow_statement = JSON.parse("{{cf_json|escapejs}}");
+      $('#cash_flow').DataTable({
+        data: cash_flow_statement.data,
+        columns: cash_flow_statement.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 2, '$', ''),
+            "targets": [1, 2, 3, 4, 5],
+          }
+        ],
+      });
+
+
+    });
+
+    $(function () {
+      // Sidebar toggle behavior
+      $('#sidebarCollapse').on('click', function () {
+        $('#sidebar, #content').toggleClass('active');
+        $('#body-content').toggleClass('active');
+
+      });
     });
 
 
-  });
+    // Get 'active' tab selection ID
+    $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+      var currId = $(e.target).attr("id");
+      console.log(currId)
+    })
 
-  $(function () {
-    // Sidebar toggle behavior
-    $('#sidebarCollapse').on('click', function () {
-      $('#sidebar, #content').toggleClass('active');
-      $('#body-content').toggleClass('active');
 
+    $(document).ready(function () {
+      $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        // var target = $(e.target).attr("href"); // activated tab
+        // alert (target);
+        $($.fn.dataTable.tables(true)).css('width', '100%');
+        $($.fn.dataTable.tables(true)).DataTable().columns.adjust().draw();
+      });
     });
-  });
-
-
-  // Get 'active' tab selection ID
-  $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-    var currId = $(e.target).attr("id");
-    console.log(currId)
-  })
-
-
-  $(document).ready(function () {
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-      // var target = $(e.target).attr("href"); // activated tab
-      // alert (target);
-      $($.fn.dataTable.tables(true)).css('width', '100%');
-      $($.fn.dataTable.tables(true)).DataTable().columns.adjust().draw();
-    });
-  });
 
 
 
-</script>
+  </script>
 
-{% endblock js %}
+  {% endblock js %}

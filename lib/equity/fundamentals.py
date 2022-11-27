@@ -78,6 +78,9 @@ class Fundamentals:
             else:
                 self.df = self.df[self.columns][::-1].set_index('calendardate').pivot(columns = ['ticker'])
         
+
+        self.df.fillna(0, inplace=True)
+
         return self
 
 
@@ -103,20 +106,41 @@ class Fundamentals:
         
         df['cogs'] = df['revenue'] - df['gp']
         
+        # Balance Sheet Ratio
+        df['currentratio'] = df['assetsc'] / df['liabilitiesc']
+        
+        df['quickratio'] = (df['assetsc'] - df['inventory']) / df['liabilities']
+
+        df['workingcapital'] = df['assetsc'] - df['liabilitiesc']
+
+        df['debttoequityratio'] = df['liabilities'] / df['equity']
+
+        df['solvencyratio'] = (df['netinc'] + df['depamor']) / df['liabilities']
+
+
+        # Income Statement Ratios
+        df['profitmargin'] = df['netinc'] / df['revenue']
+
+        df['oppmargin'] = df['opinc'] / df['revenue']
+
+        df['timesinterestearned'] = df['ebit'] / df['intexp']
+
+        df['netmargin'] = (df['revenue'] - df['cogs']) / df['revenue']
+
         df['roc'] = df['netinc'] / (df['equity'] + df['debt'])
 
         df['roe'] = df['netinc'] / (df['equity']) # TODO Use TTM net income
-        
+
+        df['paoutratio'] = df['dps'] / df['eps'] # payoutratio
+
+        df['intcov'] = df['ebit'] / df['intexp'] # interestcoverage
+
+        # Cash Flow Ratios
         df['fcfmargin'] = df['fcf'] / df['revenue']
         
         df['p/cf'] = df['marketcap'] / df['fcf']
         
-        df['oppmargin'] = df['opinc'] / df['revenue']
-        
-        df['intcov'] = df['ebit'] / df['intexp'] # interestcoverage
-        
-        df['paoutratio'] = df['dps'] / df['eps'] # payoutratio
-        
+        # Etc.
         df['taxrate'] = df['taxexp'] / df['ebt']
 
         df['ebit1-t'] = ''
@@ -131,10 +155,10 @@ class Fundamentals:
         
         df['expebitgrow'] = df['eqreinvestrate'] * df['roc'] # expebitgrow
 
-        df['netmargin'] = (df['revenue'] - df['cogs']) / df['revenue']
-
         df['expgrowthrate'] = df['netmargin'] * (df['revenue']/df['equity']) * df ['retentionratio'] #expected growth rate; p.275
         # df['sales to capital ratio'] = '' # reinvestment rate
+
+
         self.data = df
 
 
@@ -150,6 +174,13 @@ class Fundamentals:
         # self.pct_chg.dropna(how = 'all', axis=0, inplace = True) 
         
         return self
+
+
+    def quarter_over_quarter_change(self):
+        # use self.data to get extended history and calculate qtr over qtr change for all qtrs shown in the display
+        df = self.df.fillna(0)
+        self.qq_change =  ((df.iloc[-1] / df.iloc[0]) -1).reset_index(level=[0,1]).reset_index(drop=False).drop(columns = ['ticker', 'index'])
+        self.qq_change.columns = ['level_0','MRQ']
 
 
     def describe(self):
@@ -177,7 +208,6 @@ class Fundamentals:
         tick = nasdaq.Tickers()
         tick.full_export(curl=False)
 
-        
         industry = tick.get_industry(self.ticker)
 
         self.industry = industry
@@ -196,19 +226,7 @@ class Fundamentals:
         
         index = peers.index(self.ticker)
         
-        if index == 0:
-            search = [0, 1, 2, 3]
-        
-        elif index == 1:
-            search = [1, 0, 2, 3]
-        
-        elif index == 2:
-            search = [2, 0, 1, 3]
-        
-        else:
-            search = [index, index-3, index-2, index-1]
-        print(search)
-        return [peers[i] for i in search]
+        return list(set([self.ticker] + peers)) 
 
 
 
@@ -367,7 +385,7 @@ class Ranks:
     def get_ranks(self):
         ''' Returns ranks for all periods and one ticker '''
         df =  pd.read_sql(f"select * from CompFunRanks where ticker == '{self.ticker}'", self.cnxn)
-        print(df)
+        # print(df)
         self.rank_pivot =  df.pivot(index = ['calendardate'], columns = ['variable'], values= ['value'])
         return self
 
@@ -633,19 +651,24 @@ class Columns(Enum):
     ''' Column views for financial statements
     '''
     ID = ['ticker', 'calendardate' ]
-    
-    CASHFLOW = ID +  ['ncfo', 'ncfbus', 'ncfi', 'ncfinv',  'ncfdiv',  'ncfx', 'ncff', 'fcf', 'ncf']
-    
-    INCOME = ID +  ['revenue', 'depamor', 'cogs', 'gp', 'sgna','rnd', 'opex',  'opinc','ebitda',  'ebit', 'intexp','ebt','taxexp','netinc'] 
-    
+
     BALANCE = ID + ['cashneq', 'receivables', 'inventory', 'assetsc', 'assetsnc',  'assets', 'payables', 'liabilitiesc', 'liabilitiesnc', 'liabilities', 'debt','equity']
-    
+    BALANCE_RANKS = ID + ['equity','debt','assets','liabilities','currentratio','quickratio','workingcapital','debttoequityratio','solvencyratio']
+
+    INCOME = ID +  ['revenue', 'depamor', 'cogs', 'gp', 'sgna','rnd', 'opex',  'opinc','ebitda',  'ebit', 'intexp','ebt','taxexp','netinc'] 
+    INCOME_RANKS = ID + ['revenue','opinc','ebit','ebitda','rnd','profitmargin','oppmargin','timesinterestearned','netmargin' ,'roc','roe','paoutratio','intcov']
+
+    CASHFLOW = ID +  ['ncfo', 'ncfbus', 'ncfi', 'ncfinv',  'ncfdiv',  'ncfx', 'ncff', 'fcf', 'ncf']
+    CASHFLOW_RANKS = ID + ['fcf','ncfo','ncf', 'fcfmargin', 'p/cf' ]
+    CASHFLOW_ = ID +  ['cashneq', 'depamor','retearn', 'opex', 'capex', 'ncfo', 'ncfdiv', 'fcf', 'ncf']
+
+    GROWTH_RANKS = ID + ['retentionratio', 'roe', 'retearn', 'expnetincgrow', 'exproegrow','eqreinvestrate','expebitgrow','expgrowthrate' ]
+
     PEERS = ID +  ['divyield', 'grossmargin', 'netmargin', 'fcfmargin', 'oppmargin','roe', 'roic', 'ros', 'roc']
-    
-    EXP = ID + ['retentionratio', 'roe', 'retearn','expnetincgrow', 'exproegrow', 'eqreinvestrate', 'expebitgrow','expgrowthrate']
     
     DCF = ID + ['netinc', 'revenue','cogs','gp', 'rnd','sgna','ebit', 'payables','receivables', 'inventory', 'depamor','ebitda','capex', 'fcf', 'ncfo']
     
-    RANKS = list(set(ID + CASHFLOW + INCOME + BALANCE + PEERS + EXP + DCF + ['name', 'industry', 'sector', 'famaindustry', 'famasector', 'scalemarketcap','scalerevenue'] + ['pe','eps']))
+    RANKS = list(set(ID + CASHFLOW_RANKS + INCOME_RANKS + BALANCE_RANKS + PEERS + GROWTH_RANKS + ['name', 'industry', 'sector', 'famaindustry', 'famasector', 'scalemarketcap','scalerevenue'] + ['pe','eps']))
 
-    CASHFLOW_ = ID +  ['cashneq', 'depamor','retearn', 'opex', 'capex', 'ncfo', 'ncfdiv', 'fcf', 'ncf']
+
+
