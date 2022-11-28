@@ -17,7 +17,14 @@ fp_ajax = os.path.join( Path(__file__).resolve().parent, 'ajax')
 
 def fundamentals(request):
 
-    ticker = 'BKNG'
+    print(request.POST)
+
+    ticker = str(request.POST.get("inputTicker"))
+
+    if ticker in ['', 'None', None]:
+        ticker = 'BKNG'
+    
+    print(ticker)
 
     fun = Fundamentals( ticker = ticker)
 
@@ -37,8 +44,8 @@ def fundamentals(request):
     inc_pct_json = webtools.df_to_dt(inc_pct_json.fillna('-'), fp)
 
     fun.quarter_over_quarter_change()
-    inc_qq_change = fun.qq_change
-    inc_qq_change.columns.name = None
+    inc_qq_change = fun.qq_change[fun.qq_change['index'].isin(Columns.INCOME.value)]
+    inc_qq_change.replace([np.inf, -np.inf], np.nan, inplace=True)
     fp = os.path.join(fp_ajax, 'income_qq_change.json')
     inc_qq_json = webtools.df_to_dt(inc_qq_change.fillna('-'), fp)
 
@@ -109,7 +116,11 @@ def fundamentals(request):
     cf_peer_json =  webtools.df_to_dt(cf_peer_values.fillna('-'), fp)
 
 
+    industry = fun.industry
+
     context = {
+        'ticker':ticker,
+        'industry':industry,
 
         'inc_json': inc_json,
         'inc_pct_json':inc_pct_json,

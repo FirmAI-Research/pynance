@@ -1,3 +1,167 @@
-h1 {
-    color : teal;
+/* 
+  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Project Defaults                                                                                                │
+  └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ */
+ /* https://colorcodes.io/gray/ */
+
+ :root {
+  --custom_primary: #3C4754;
+  --white: #faf0e6;
 }
+
+body {
+  padding-top: 2rem;
+  min-height: 100vh;
+  overflow-x: hidden;
+  /* background: linear-gradient(to bottom, #6D7987, #4E5761); */
+
+}
+
+.button{
+  background-color: #3C4754;
+  color:white;
+
+}
+
+.nav-item > .active {
+  color: #3C4754 !important;
+}
+
+.table-div{
+  background:#fffafa; /* snow white  */
+  padding-left: 25px;
+  padding-right: 25px;
+  padding-top: 25px;
+  padding-bottom: 25px;
+  border-radius: 25px;
+  margin-bottom: 15px;
+  margin-right: 15px;
+  margin-top:15px;
+  width:49%;
+  display:inline-block;
+
+}
+
+
+h1 {
+  /* color : white; */
+  color:#3C4754;
+
+  border-radius: 10px;
+  text-align:center;
+  margin: auto;
+  padding: 10px;
+  width: 25%;
+}
+
+h2{
+  color:var(--custom_primary);
+
+}
+
+
+p {
+  /* color: white; */
+  color:black;
+
+}
+
+.bg-custom-gradient {
+  background: linear-gradient(to right, #6D7987, #4E5761);
+}
+
+.nav-link {
+  font-size: 18px;
+}
+
+.dropdown-item {
+  font-size: 18px;
+}
+
+#navbarDropdown{
+  color:white;
+
+}
+
+
+
+
+
+/* 
+  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Vertical Nav Bar                                                                                                │
+  └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+*/
+.vertical-nav {
+  min-width: 14rem;
+  width: 14rem;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s;
+}
+
+.page-content {
+  width: calc(100% - 14rem);
+  margin-left: 14rem;
+  transition: all 0.4s;
+}
+
+/* for toggle behavior */
+
+#sidebar.active {
+  margin-left: -14rem;
+}
+
+#content.active {
+  width: 100%;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  #sidebar {
+    margin-left: -14rem;
+  }
+
+  #sidebar.active {
+    margin-left: 0;
+  }
+
+  #content {
+    width: 100%;
+    margin: 0;
+  }
+
+  #content.active {
+    margin-left: 14rem;
+    width: calc(100% - 14rem);
+  }
+}
+
+
+.separator {
+  margin: 3rem 0;
+  border-bottom: 1px dashed #fff;
+}
+
+.text-uppercase {
+  letter-spacing: 0.1em;
+}
+
+.text-gray {
+  color: #aaa;
+}
+
+
+/* move body content when toggle button selected */
+#body-content.active {
+  width: calc(100% - 14rem) !important;
+  float:right;
+}
+
+
+
+

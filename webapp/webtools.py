@@ -18,5 +18,21 @@ def df_to_dt(df, fp):
 
 
 
-def df_to_highcharts_heatmap():
-    pass
+def df_to_highcharts_heatmap(df):
+    ''' Return a pandas dataframe as JSON object for highcharts heatmap '''
+    
+    columns = df.columns.tolist()
+    rows = df.index.tolist()
+    data = []
+    
+    for ixrow, row in enumerate(rows):
+    
+        for ixcol, col in enumerate(columns):
+    
+            data.append([ixcol, ixrow, df[col].iloc[ixrow]])
+    
+    json_data = {'rows':rows, 'columns':columns, 'data':data}
+
+    response = json.dumps(json_data)
+
+    return response

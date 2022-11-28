@@ -8,33 +8,57 @@
 
 <div style="clear:both;"></div>
 
-<div class="card" style="width:25%">
-  <div class="card-header">
-    <strong>Ticker</strong>
-  </div>
-  <ul class="list-group list-group-flush">
-    <li class="list-group-item">Industry</li>
-    <li class="list-group-item">Last Price | 1 day Change</li>
-  </ul>
-</div>
 
-<div style="clear:both;"></div>
 
 
 <div id="body-content" style="padding-top:1%;">
 
+
+  <div class='float-left' style="display:inline">
+
+    <div class="container ">
+      <div class="row">
+        <form class="form-inline" action="" method="POST">
+          {% csrf_token %}
+
+          <div class="form-group mx-sm-3 mb-2">
+            <label for="inputTicker" class="sr-only">Ticker</label>
+            <input type="text" class="form-control" name = "inputTicker" id = "inputTicker" placeholder="Ticker" >
+          </div>
+          <button type="submit" class="btn mb-2" style = 'background-color: #3C4754;color:white;'>Submit</button>
+        </form>
+
+        <div class="card ml-auto card w-200" style='border-radius: 20px;'>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>{{ticker}}</strong></li>
+            <li class="list-group-item">{{industry}}</li>
+            <li class="list-group-item">Last Price | 1 day Change</li>
+          </ul>
+        </div>
+      </div>
+      <br><br>
+
+    </div>
+
+
+
+
+  </div>
+
+  <div style="clear:both;"></div>
+
   <ul class="nav nav-tabs" id="FinancialsTabs" role="tablist">
     <li class="nav-item" role="presentation">
       <button class="nav-link active" id="bs-tab" data-bs-toggle="tab" data-bs-target="#bs" type="button" role="tab"
-        aria-controls="bs" aria-selected="true" style='color:white;'>Balance Sheet</button>
+        aria-controls="bs" aria-selected="true" style='color:black;'>Balance Sheet</button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="incs-tab" data-bs-toggle="tab" data-bs-target="#incs" type="button" role="tab"
-        aria-controls="incs" aria-selected="false" style='color:white;'>Income Statement</button>
+        aria-controls="incs" aria-selected="false" style='color:black;'>Income Statement</button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="cf-tab" data-bs-toggle="tab" data-bs-target="#cf" type="button" role="tab"
-        aria-controls="cf" aria-selected="false" style='color:white;'>Cash Flow Statement</button>
+        aria-controls="cf" aria-selected="false" style='color:black;'>Cash Flow Statement</button>
     </li>
   </ul>
 
@@ -48,16 +72,13 @@
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="reported-bs-tab" data-bs-toggle="tab" data-bs-target="#reported-bs"
               type="button" role="tab" aria-controls="reported-bs" aria-selected="true"
-              style='color:white;'>Reported</button>
+              style='color:black;'>Reported</button>
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="peers-bs-tab" data-bs-toggle="tab" data-bs-target="#peers-bs" type="button"
-              role="tab" aria-controls="peers-bs" aria-selected="false" style='color:white;'>Peers</button>
+              role="tab" aria-controls="peers-bs" aria-selected="false" style='color:black;'>Peers</button>
           </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="metrics-bs-tab" data-bs-toggle="tab" data-bs-target="#metrics-bs" type="button"
-              role="tab" aria-controls="metrics-bs" aria-selected="false" style='color:white;'>Metrics</button>
-          </li>
+
         </ul>
       </div>
 
@@ -87,8 +108,7 @@
             <table id="balance_sheet_ranks" class="display" width="100%"></table>
           </div>
         </div>
-        <div class="tab-pane fade" id="metrics-bs" role="tabpanel" aria-labelledby="metrics-bs-tab">
-        </div>
+
 
       </div>
 
@@ -103,16 +123,13 @@
         <ul class="nav nav-tabs" id="IncomeTabs" role="tablist">
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="reported-tab" data-bs-toggle="tab" data-bs-target="#reported" type="button"
-              role="tab" aria-controls="reported" aria-selected="true" style='color:white;'>Reported</button>
+              role="tab" aria-controls="reported" aria-selected="true" style='color:black;'>Reported</button>
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="peers-tab" data-bs-toggle="tab" data-bs-target="#peers" type="button"
-              role="tab" aria-controls="peers" aria-selected="false" style='color:white;'>Peers</button>
+              role="tab" aria-controls="peers" aria-selected="false" style='color:black;'>Peers</button>
           </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="metrics-tab" data-bs-toggle="tab" data-bs-target="#metrics" type="button"
-              role="tab" aria-controls="metrics" aria-selected="false" style='color:white;'>Metrics</button>
-          </li>
+
         </ul>
       </div>
 
@@ -151,8 +168,6 @@
         </div>
 
 
-        <div class="tab-pane fade" id="metrics" role="tabpanel" aria-labelledby="metrics-tab">
-        </div>
 
       </div>
 
@@ -166,16 +181,13 @@
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="reported-cf-tab" data-bs-toggle="tab" data-bs-target="#reported-cf"
               type="button" role="tab" aria-controls="reported-cf" aria-selected="true"
-              style='color:white;'>Reported</button>
+              style='color:black;'>Reported</button>
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="peers-cf-tab" data-bs-toggle="tab" data-bs-target="#peers-cf" type="button"
-              role="tab" aria-controls="peers-cf" aria-selected="false" style='color:white;'>Peers</button>
+              role="tab" aria-controls="peers-cf" aria-selected="false" style='color:black;'>Peers</button>
           </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="metrics-cf-tab" data-bs-toggle="tab" data-bs-target="#metrics-cf" type="button"
-              role="tab" aria-controls="metrics-cf" aria-selected="false" style='color:white;'>Metrics</button>
-          </li>
+
         </ul>
       </div>
 
@@ -204,9 +216,6 @@
           </div>
         </div>
 
-
-        <div class="tab-pane fade" id="metrics" role="tabpanel" aria-labelledby="metrics-cf-tab">
-        </div>
 
 
 
@@ -314,7 +323,7 @@
           {
             "orderable": false,
             "render": $.fn.dataTable.render.number(',', '.', 2, '', '%'),
-            "targets": [1],
+            "targets": [1, 2, 3, 4, 5],
           }
         ],
         rowCallback: function (row, data, index) {

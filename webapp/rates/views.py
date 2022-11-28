@@ -19,6 +19,20 @@ def treasuries(request):
     ust = Treasuries(years = ['2022'])
     print(ust.df)
 
-    context = {}
+    recent_rates = ust.df.iloc[-10:]
+    recent_rates_response = webtools.df_to_highcharts_heatmap(recent_rates)
+    
+
+    recent_rates_change = ust.df.iloc[-10:].diff(axis=0).dropna(axis=0).round(2)
+    recent_rates_change_response = webtools.df_to_highcharts_heatmap(recent_rates_change)
+
+
+
+    context = {
+
+        'recent_rates_response':recent_rates_response,
+        'recent_rates_change_response':recent_rates_change_response
+
+    }
 
     return render(request, 'treasuries.html', context)
