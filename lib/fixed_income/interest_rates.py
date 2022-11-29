@@ -1,7 +1,6 @@
 import sys, os
 import numpy as np
-from nelson_siegel_svensson import NelsonSiegelSvenssonCurve, NelsonSiegelCurve
-from nelson_siegel_svensson.calibrate import calibrate_ns_ols, calibrate_nss_ols
+
 from datetime import datetime
 import pandas as pd
 import numpy as np 
@@ -20,7 +19,9 @@ sys.path.append(proj_root)
 from calendar_dates import Calendar
 import fredapi
 import sys, os, json
-import seaborn as sns
+
+from nelson_siegel_svensson import NelsonSiegelSvenssonCurve, NelsonSiegelCurve
+from nelson_siegel_svensson.calibrate import calibrate_ns_ols, calibrate_nss_ols
 
 
 fp = os.path.join(proj_root, 'secrets.json')
@@ -140,7 +141,7 @@ class Treasuries:
         return delta
 
 
-    def market_correlations(self, join, title, key="SPY"):
+    def market_correlations(self, df, title, key="SPY"):
         import numpy as np
         fig, axes = plt.subplots(1, 4)
         sns.set_style('whitegrid')
@@ -148,47 +149,54 @@ class Treasuries:
         cmap = sns.diverging_palette(230, 20, as_cmap=True)
 
         # 20 day corr
-        corr = join.iloc[-20:].corr()[key].to_frame().drop(key, axis=0)
-        g = sns.heatmap(corr, ax = axes[0],  cmap=cmap, square=True, linewidths=.5, annot = True, cbar = True,  cbar_kws={"shrink": .5})
+        corr20 = df.iloc[-20:].corr()[key].to_frame().drop(key, axis=0)
+        # g = sns.heatmap(corr20, ax = axes[0],  cmap=cmap, square=True, linewidths=.5, annot = True, cbar = True,  cbar_kws={"shrink": .5})
 
-        g.set_title('20 day Correlation')
+        # g.set_title('20 day Correlation')
 
-        g.set_yticklabels(g.get_yticklabels(), rotation=45)
+        # g.set_yticklabels(g.get_yticklabels(), rotation=45)
 
 
         # 60 day corr
 
-        corr = join.iloc[-60:].corr()[key].to_frame().drop(key, axis=0)
-        g = sns.heatmap(corr,  ax = axes[1], cmap=cmap, square=True, linewidths=.5, annot = True, cbar = True, cbar_kws={"shrink": .5} )
+        corr60 = df.iloc[-60:].corr()[key].to_frame().drop(key, axis=0)
+        # g = sns.heatmap(corr60,  ax = axes[1], cmap=cmap, square=True, linewidths=.5, annot = True, cbar = True, cbar_kws={"shrink": .5} )
 
-        g.set_title('60 day Correlation')
+        # g.set_title('60 day Correlation')
 
-        g.set_yticklabels(g.get_yticklabels(), rotation=45)
+        # g.set_yticklabels(g.get_yticklabels(), rotation=45)
 
-        fig.suptitle('Correlation of US Treasuries and S&P 500')
+        # fig.suptitle('Correlation of US Treasuries and S&P 500')
 
 
         # 252 day corr
-        corr = join.iloc[-252:].corr()[key].to_frame().drop(key, axis=0)
-        g = sns.heatmap(corr,  ax = axes[2], cmap=cmap, square=True, linewidths=.5, annot = True, cbar = True, cbar_kws={"shrink": .5} )
+        corr252 = df.iloc[-252:].corr()[key].to_frame().drop(key, axis=0)
+        # g = sns.heatmap(corr252,  ax = axes[2], cmap=cmap, square=True, linewidths=.5, annot = True, cbar = True, cbar_kws={"shrink": .5} )
 
             
-        g.set_title('252 day Correlation')
+        # g.set_title('252 day Correlation')
 
-        g.set_yticklabels(g.get_yticklabels(), rotation=45)
+        # g.set_yticklabels(g.get_yticklabels(), rotation=45)
         
         # 5 Year (1260 d) corr
-        corr = join.iloc[-1260:].corr()[key].to_frame().drop(key, axis=0)
-        g = sns.heatmap(corr,  ax = axes[3], cmap=cmap, square=True, linewidths=.5, annot = True, cbar = True, cbar_kws={"shrink": .5} )
+        corr5Y = df.iloc[-1260:].corr()[key].to_frame().drop(key, axis=0)
+        # g = sns.heatmap(corr5Y,  ax = axes[3], cmap=cmap, square=True, linewidths=.5, annot = True, cbar = True, cbar_kws={"shrink": .5} )
 
-        g.set_title('5 Year (1260 day) Correlation')
+        # g.set_title('5 Year (1260 day) Correlation')
 
-        g.set_yticklabels(g.get_yticklabels(), rotation=45)
+        # g.set_yticklabels(g.get_yticklabels(), rotation=45)
         
-        fig.suptitle(title, fontsize=16)
+        # fig.suptitle(title, fontsize=16)
 
-        fig.tight_layout()
-        sns.despine()
+        # fig.tight_layout()
+        # sns.despine()
+
+        frames = [corr20, corr60, corr252, corr5Y]
+        res = pd.concat(frames, axis=1)
+        res.columns  = ['20d','60d','252d','5Y']
+        res = res.round(2)
+        return res
+
         
 
     def stock_bond_correlation(self):
@@ -215,53 +223,38 @@ class Treasuries:
 
 
     def stock_treasury_correlation(self):
-        import matplotlib.pyplot as plt
-        import seaborn as sns
-        from calendar_dates import Calendar
-        import yfinance as yf
-        plt.rcParams["figure.figsize"] = (20,6)
-
         cal = Calendar()
         spy = yf.download(f"SPY", start="2017-01-01", end=cal.today())['Adj Close'].to_frame().rename(columns = {'Adj Close':'SPY'}).reset_index().rename(columns = {'Date':'date'})
         spy.date = [d.strftime('%Y-%m-%d') for d in spy.date]
         spy.set_index('date', inplace = True)
         join = self.df.merge(spy, how = 'inner', left_index = True, right_index = True)
 
-        self.market_correlations(join, title = 'Stock/Treasury Correlation')
+        res = self.market_correlations(join, title = 'Stock/Treasury Correlation')
+        return res
 
 
     def tens_twos_spread(self):
-        import pandas as pd
         # overlay recession periods
-
         raw = self.df.reset_index()
-        raw.date = pd.to_datetime(raw.date)
+        # raw.date = pd.to_datetime(raw.date)
         spread = raw[['date','10 Year', '2 Year']]
         spread['Spread'] = spread['10 Year'] - spread['2 Year']
-        g = sns.lineplot(data=spread, x = 'date', y = 'Spread')
-        plt.xticks(rotation=45)
-        plt.axhline(0, c='black')
-        plt.title('10s/2s Spread')
+        spread.set_index('date', inplace = True)
+        # g = sns.lineplot(data=spread, x = 'date', y = 'Spread')
+        # plt.xticks(rotation=45)
+        # plt.axhline(0, c='black')
+        # plt.title('10s/2s Spread')
 
-        for label in g.xaxis.get_ticklabels()[::2]:
-            label.set_visible(False)
+        # for label in g.xaxis.get_ticklabels()[::2]:
+        #     label.set_visible(False)
+        return spread
 
     
     def breakeven_inflation(self):
-        import sys, os, json
-        import fredapi
-        import matplotlib.pyplot as plt
-        import seaborn as sns
-        proj_root = os.path.abspath('')
-        fp = os.path.join(proj_root, 'secrets.json')
-        with open(fp) as f:
-            data = json.load(f)
-        fred_api_key = data['fred_api_key'] 
-
-        # Moodys seasoned bond yields
         fred = fredapi.Fred(api_key=fred_api_key)
         data = fred.get_series('T10YIE').to_frame().rename(columns={0:'10Y Breakeven'})
-        data.plot(title='10 Year Breakeven Inflation Rate')
+        # data.plot(title='10 Year Breakeven Inflation Rate')
+        return data
 
     
 

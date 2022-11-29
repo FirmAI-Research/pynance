@@ -19,11 +19,27 @@
         <div id="recent_rates_change"></div>
     </figure>
 
+    <figure class="highcharts-figure">
+        <div id="change_since"></div>
+    </figure>
+
 
     <figure class="highcharts-figure">
-        <div id="container"></div>
+        <div id="stockBondCorr"></div>
     </figure>
-    
+
+
+    <figure class="highcharts-figure">
+        <div id="stockUstCorr"></div>
+    </figure>
+
+
+    <figure class="highcharts-figure">
+        <div id="tensTwos"></div>
+    </figure>
+
+
+
 
 </div>
 
@@ -36,11 +52,22 @@
 <script>
 
     $(document).ready(function () {
+
         document.body.style.zoom = "80%";
 
-        recentRatesChart.reflow(); // Auto resize chart absent a div or window resizing event; needed due to the body zoom settings
+         // Auto resize chart absent a div or window resizing event; needed due to the body zoom settings
+         
+        recentRatesChart.reflow();
+
         recentRatesChange.reflow();
+
         changeSinceChart.reflow();
+
+        stockBondCorrChart.reflow();
+
+        stockUstCorrChart.reflow();
+
+        tensTwosChart.reflow();
 
     });
 
@@ -159,8 +186,11 @@
             dataLabels: {
                 enabled: true,
                 color: '#000000',
-                shadow: false
-            }
+                style: {
+                    textOutline: false,
+                },
+            },
+
         }],
 
         responsive: {
@@ -269,8 +299,10 @@
             dataLabels: {
                 enabled: true,
                 color: '#000000',
-                shadow: false
-            }
+                style: {
+                    textOutline: false,
+                },
+            },
         }],
 
         responsive: {
@@ -298,7 +330,7 @@
     let min_change_since_value = getMinimumValue(change_since_response.data)
     let max_change_since_value = getMaximumValue(change_since_response.data)
 
-    const changeSinceChart = Highcharts.chart('container', {
+    const changeSinceChart = Highcharts.chart('change_since', {
 
         chart: {
             type: 'column'
@@ -315,7 +347,7 @@
         yAxis: {
             allowDecimals: false,
             min: min_change_since_value,
-            max:max_change_since_value,
+            max: max_change_since_value,
             title: {
                 text: 'Change'
             }
@@ -324,7 +356,7 @@
         tooltip: {
             formatter: function () {
                 return '<b>' + this.x + '</b><br/>' +
-                    this.series.name + ': ' + this.y + '<br/>' 
+                    this.series.name + ': ' + this.y + '<br/>'
             }
         },
 
@@ -337,6 +369,292 @@
         series: change_since_response.data
     });
 
+
+
+
+    let stock_bond_corr_response = JSON.parse("{{stock_bond_corr_response|escapejs}}")
+
+    const stockBondCorrChart = Highcharts.chart('stockBondCorr', {
+
+        chart: {
+            type: 'heatmap',
+            marginTop: 40,
+            marginBottom: 80,
+            plotBorderWidth: 1
+        },
+
+
+        title: {
+            text: 'Correlation of SPY to Bond ETF\'s'
+        },
+
+        xAxis: {
+            categories: stock_bond_corr_response.columns
+        },
+
+        yAxis: {
+            categories: stock_bond_corr_response.rows,
+            title: null,
+            reversed: true
+        },
+
+        accessibility: {
+            point: {
+                descriptionFormatter: function (point) {
+                    var ix = point.index + 1,
+                        xName = getPointCategoryName(point, 'x'),
+                        yName = getPointCategoryName(point, 'y'),
+                        val = point.value;
+                    return ix + '. ' + xName + ' sales ' + yName + ', ' + val + '.';
+                }
+            }
+        },
+
+        colorAxis: {
+            min: -1,
+            max: 1,
+            // minColor: '#ff6961', //Highcharts.getOptions().colors[3], //'#A2C5EB',
+            // maxColor: '#647F9C' //Highcharts.getOptions().colors[0] //Highcharts.getOptions().colors[3] //'#A2C5EB'; 
+            stops: [
+                [0, '#B33949'],
+                [0.125, '#F9665E'],
+                [0.25, '#FEC9C9'],
+                [0.375, '#ffcccb'],
+                [0.5, '#ffffff'],
+                [0.625, '#AFC7D0'],
+                [0.75, '#95B4CC'],
+                [0.875, '#799FCB'],
+                [1, '#26355E']
+            ]
+        },
+
+        legend: {
+            align: 'right',
+            layout: 'vertical',
+            margin: 0,
+            verticalAlign: 'top',
+            y: 25,
+            symbolHeight: 280
+        },
+
+        tooltip: {
+            formatter: function () {
+                return '<b>' + getPointCategoryName(this.point, 'x') + '</b> changed by <br><b>' +
+                    this.point.value + '</b> on <br><b>' + getPointCategoryName(this.point, 'y') + ' bps</b>';
+            }
+        },
+
+        series: [{
+            name: 'Treasury Rates',
+            borderWidth: 1,
+            borderColor: 'black',
+            data: stock_bond_corr_response.data,
+            dataLabels: {
+                enabled: true,
+                color: '#000000',
+                shadow: false,
+                style: {
+                    textOutline: false,
+                },
+
+            },
+        }],
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    yAxis: {
+                        labels: {
+                            formatter: function () {
+                                return this.value.charAt(0);
+                            }
+                        }
+                    }
+                }
+            }]
+        }
+
+    });
+
+
+
+
+
+    let stock_ust_corr_response = JSON.parse("{{stock_ust_corr_response|escapejs}}")
+
+    const stockUstCorrChart = Highcharts.chart('stockUstCorr', {
+
+        chart: {
+            type: 'heatmap',
+            marginTop: 40,
+            marginBottom: 80,
+            plotBorderWidth: 1
+        },
+
+
+        title: {
+            text: 'Correlation of SPY to US Treasuries'
+        },
+
+        xAxis: {
+            categories: stock_ust_corr_response.columns
+        },
+
+        yAxis: {
+            categories: stock_ust_corr_response.rows,
+            title: null,
+            reversed: true
+        },
+
+        accessibility: {
+            point: {
+                descriptionFormatter: function (point) {
+                    var ix = point.index + 1,
+                        xName = getPointCategoryName(point, 'x'),
+                        yName = getPointCategoryName(point, 'y'),
+                        val = point.value;
+                    return ix + '. ' + xName + ' sales ' + yName + ', ' + val + '.';
+                }
+            }
+        },
+
+        colorAxis: {
+            min: -1,
+            max: 1,
+            // minColor: '#ff6961', //Highcharts.getOptions().colors[3], //'#A2C5EB',
+            // maxColor: '#647F9C' //Highcharts.getOptions().colors[0] //Highcharts.getOptions().colors[3] //'#A2C5EB'; 
+            stops: [
+                [0, '#B33949'],
+                [0.125, '#F9665E'],
+                [0.25, '#FEC9C9'],
+                [0.375, '#ffcccb'],
+                [0.5, '#ffffff'],
+                [0.625, '#AFC7D0'],
+                [0.75, '#95B4CC'],
+                [0.875, '#799FCB'],
+                [1, '#26355E']
+            ]
+        },
+
+        legend: {
+            align: 'right',
+            layout: 'vertical',
+            margin: 0,
+            verticalAlign: 'top',
+            y: 25,
+            symbolHeight: 280
+        },
+
+        tooltip: {
+            formatter: function () {
+                return '<b>' + getPointCategoryName(this.point, 'x') + '</b> changed by <br><b>' +
+                    this.point.value + '</b> on <br><b>' + getPointCategoryName(this.point, 'y') + ' bps</b>';
+            }
+        },
+
+        series: [{
+            name: 'Treasury Rates',
+            borderWidth: 1,
+            borderColor: 'black',
+            data: stock_ust_corr_response.data,
+            dataLabels: {
+                enabled: true,
+                color: '#000000',
+                shadow: false,
+                style: {
+                    textOutline: false,
+                },
+
+            },
+        }],
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    yAxis: {
+                        labels: {
+                            formatter: function () {
+                                return this.value.charAt(0);
+                            }
+                        }
+                    }
+                }
+            }]
+        }
+
+    });
+
+
+
+    let tens_twos_response = JSON.parse("{{tens_twos_response|escapejs}}")
+    let date_start = new Date(tens_twos_response.rows[0]).getFullYear();
+    console.log(date_start)
+
+    const tensTwosChart = Highcharts.chart('tensTwos', {
+
+        title: {
+            text: 'Tens Twos Spread'
+        },
+
+        subtitle: {
+            text: ''
+        },
+
+        yAxis: {
+            title: {
+                text: 'Yield (%)'
+            },
+            plotLines: [{
+                value: 0,
+                width: 4,
+                color: '#aaa',
+                zIndex: 10
+            }],
+        },
+
+        xAxis: {
+            categories: tens_twos_response.rows
+        },
+
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+                // pointStart: date_start
+            }
+        },
+
+        series: tens_twos_response.data,
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
+
+    });
 
 </script>
 {% endblock js %}
