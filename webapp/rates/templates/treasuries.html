@@ -6,15 +6,20 @@
 
 <h1>Treasury Rates</h1>
 
+<div style="clear:both;"></div>
 
-<figure class="highcharts-figure">
-    <div id="recent_rates"></div>
-</figure>
 
-<figure class="highcharts-figure">
-    <div id="recent_rates_change"></div>
-</figure>
+<div id="body-content" style="padding-top:1%;">
 
+    <figure class="highcharts-figure">
+        <div id="recent_rates"></div>
+    </figure>
+
+    <figure class="highcharts-figure">
+        <div id="recent_rates_change"></div>
+    </figure>
+
+</div>
 
 {% endblock content %}
 
@@ -24,6 +29,14 @@
 
 <script>
 
+    $(document).ready(function () {
+        document.body.style.zoom = "80%";
+
+        recentRatesChart.reflow(); // Auto resize chart absent a div or window resizing event; needed due to the body zoom settings
+        recentRatesChange.reflow();
+
+    });
+
     $(function () {
         // Sidebar toggle behavior
         $('#sidebarCollapse').on('click', function () {
@@ -31,7 +44,7 @@
             $('#body-content').toggleClass('active');
 
         });
-        });
+    });
 
     function getPointCategoryName(point, dimension) {
         var series = point.series,
@@ -63,7 +76,7 @@
 
     let min_recent_rates_value = getMinimumValue(recent_rates_response.data)
 
-    Highcharts.chart('recent_rates', {
+    const recentRatesChart = Highcharts.chart('recent_rates', {
 
         chart: {
             type: 'heatmap',
@@ -104,15 +117,15 @@
             // minColor: '#B33949', //'#ffffff',
             // maxColor: '#26355E' //Highcharts.getOptions().colors[3] //'#A2C5EB'
             stops: [
-            [0, '#B33949'],
-            [0.125, '#F9665E'],
-            [0.25, '#FEC9C9'],
-            [0.375, '#ffcccb'],
-            [0.5, '#ffffff'],
-            [0.625, '#AFC7D0'],
-            [0.75, '#95B4CC'],
-            [0.875, '#799FCB'],
-            [1, '#26355E']
+                [0, '#B33949'],
+                [0.125, '#F9665E'],
+                [0.25, '#FEC9C9'],
+                [0.375, '#ffcccb'],
+                [0.5, '#ffffff'],
+                [0.625, '#AFC7D0'],
+                [0.75, '#95B4CC'],
+                [0.875, '#799FCB'],
+                [1, '#26355E']
             ]
         },
 
@@ -171,7 +184,7 @@
     let min_recent_rates_change_value = getMinimumValue(recent_rates_change_response.data)
     let max_recent_rates_change_value = getMaximumValue(recent_rates_change_response.data)
 
-    Highcharts.chart('recent_rates_change', {
+    const recentRatesChange = Highcharts.chart('recent_rates_change', {
 
         chart: {
             type: 'heatmap',
@@ -213,15 +226,15 @@
             // minColor: '#ff6961', //Highcharts.getOptions().colors[3], //'#A2C5EB',
             // maxColor: '#647F9C' //Highcharts.getOptions().colors[0] //Highcharts.getOptions().colors[3] //'#A2C5EB'; 
             stops: [
-            [0, '#B33949'],
-            [0.125, '#F9665E'],
-            [0.25, '#FEC9C9'],
-            [0.375, '#ffcccb'],
-            [0.5, '#ffffff'],
-            [0.625, '#AFC7D0'],
-            [0.75, '#95B4CC'],
-            [0.875, '#799FCB'],
-            [1, '#26355E']
+                [0, '#B33949'],
+                [0.125, '#F9665E'],
+                [0.25, '#FEC9C9'],
+                [0.375, '#ffcccb'],
+                [0.5, '#ffffff'],
+                [0.625, '#AFC7D0'],
+                [0.75, '#95B4CC'],
+                [0.875, '#799FCB'],
+                [1, '#26355E']
             ]
         },
 
