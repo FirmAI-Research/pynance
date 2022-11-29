@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<h1>Fixed Income Benchmarks</h1>
+
+<div style="clear:both;"></div>
+
+<div id="body-content" style="padding-top:1%;">
+
+    <div class='table-div'>
+        <h2>Benchmarks</h2>
+        <table id="benchmarks" class="display" width="100%"></table>
+    </div>
+
+</div>
+{% endblock content %}
+
+
+
+{% block js %}
+<script>
+    $(document).ready(function () {
+
+        document.body.style.zoom = "80%";
+
+        // Auto resize chart absent a div or window resizing event; needed due to the body zoom settings
+
+
+
+    });
+
+
+    let benchmarks_response = JSON.parse("{{benchmarks_response|escapejs}}");
+    $('#benchmarks').DataTable({
+        data: benchmarks_response.data,
+        columns: benchmarks_response.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+            {
+                "orderable": false,
+                "render": $.fn.dataTable.render.number(',', '.', 2, '', ''),
+                "targets": [1, 2, 3, 4, 5],
+            }
+        ],
+        createdRow: function (row, data, index) {
+            if (['revenue', 'gp', 'opinc', 'netinc', 'ebitda'].includes(data[0])) {
+                $('td', row).addClass('major');
+                //   } else if (['cogs', 'opex', 'intexp', 'taxexp'].includes(data[0])) {
+                //     $('td', row).eq(0).addClass('mid');
+                //   } else if (['depamor', 'sgna', 'rnd'].includes(data[0])) {
+                //     $('td', row).eq(0).addClass('minor');
+            }
+        },
+
+    });
+
+
+
+
+    $(function () {
+        // Sidebar toggle behavior
+        $('#sidebarCollapse').on('click', function () {
+            $('#sidebar, #content').toggleClass('active');
+            $('#body-content').toggleClass('active');
+
+        });
+    });
+</script>
+{% endblock js %}

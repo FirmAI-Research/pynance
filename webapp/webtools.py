@@ -67,8 +67,6 @@ def df_to_highcharts_clustered_bar(df):
 
 def df_to_highcharts_linechart(df):
 
-    print(df)
-
     df = df.round(2)
 
     columns = df.columns.tolist()
@@ -89,7 +87,5 @@ def df_to_highcharts_linechart(df):
     json_data = {'rows':rows, 'columns':columns, 'data':data}
 
     response = json.dumps(json_data)
-
-    print(response)
 
     return response

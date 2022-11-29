@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<h1>Inflation</h1>
+
+<div style="clear:both;"></div>
+
+<div id="body-content" style="padding-top:1%;">
+
+    <figure class="highcharts-figure">
+        <div id="breakeven"></div>
+    </figure>
+
+    <br>
+
+    <figure class="highcharts-figure">
+        <div id="expectedInflation"></div>
+    </figure>
+
+
+
+</div>
+{% endblock content %}
+
+
+
+{% block js %}
+<script>
+    $(document).ready(function () {
+
+        document.body.style.zoom = "80%";
+
+        // Auto resize chart absent a div or window resizing event; needed due to the body zoom settings
+
+        breakevenChart.reflow();
+        expectedInflationChart.reflow()
+
+
+    });
+
+    let breakeven_response = JSON.parse("{{breakeven_response|escapejs}}")
+    let date_start = new Date(breakeven_response.rows[0]).getFullYear();
+    console.log(date_start)
+
+    const breakevenChart = Highcharts.chart('breakeven', {
+
+        title: {
+            text: 'Breakeven'
+        },
+
+        subtitle: {
+            text: ''
+        },
+
+        yAxis: {
+            title: {
+                text: 'Yield (%)'
+            },
+            plotLines: [{
+                value: 0,
+                width: 4,
+                color: '#aaa',
+                zIndex: 10
+            }],
+        },
+
+        xAxis: {
+            categories: breakeven_response.rows
+        },
+
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+                // pointStart: date_start
+            }
+        },
+
+        series: breakeven_response.data,
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
+
+    });
+
+
+
+    let expected_inflation_response = JSON.parse("{{expected_inflation_response|escapejs}}")
+
+    const expectedInflationChart = Highcharts.chart('expectedInflation', {
+
+        title: {
+            text: 'Expected Inflation'
+        },
+
+        subtitle: {
+            text: ''
+        },
+
+        yAxis: {
+            title: {
+                text: 'Yield (%)'
+            },
+            plotLines: [{
+                value: 0,
+                width: 4,
+                color: '#aaa',
+                zIndex: 10
+            }],
+        },
+
+        xAxis: {
+            categories: expected_inflation_response.rows
+        },
+
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+                // pointStart: date_start
+            }
+        },
+
+        series: expected_inflation_response.data,
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
+
+    });
+
+
+
+
+
+
+    $(function () {
+        // Sidebar toggle behavior
+        $('#sidebarCollapse').on('click', function () {
+            $('#sidebar, #content').toggleClass('active');
+            $('#body-content').toggleClass('active');
+
+        });
+    });
+</script>
+{% endblock js %}

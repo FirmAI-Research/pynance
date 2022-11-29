@@ -250,28 +250,6 @@ class Treasuries:
         return spread
 
     
-    def breakeven_inflation(self):
-        fred = fredapi.Fred(api_key=fred_api_key)
-        data = fred.get_series('T10YIE').to_frame().rename(columns={0:'10Y Breakeven'})
-        # data.plot(title='10 Year Breakeven Inflation Rate')
-        return data
-
-    
-
-    def expected_inflation(self):
-
-        # Moodys seasoned bond yields
-        fred = fredapi.Fred(api_key=fred_api_key)
-        data = fred.get_series('T20YIEM').to_frame().rename(columns={0:'20Y Breakeven'}).reset_index()
-        data2 = fred.get_series('T7YIEM').to_frame().rename(columns={0:'7Y Breakeven'}).reset_index()
-
-        g = sns.lineplot(data=data, x = 'index', y = '20Y Breakeven', color = 'grey')
-
-        ax2 = plt.twinx()
-        sns.lineplot(data=data2, x = 'index', y = '7Y Breakeven', color="b", ax=ax2)
-
-        plt.title('Expected Inflation')
-
         
     def credit_spreads(self):
         # Moodys seasoned bond yields

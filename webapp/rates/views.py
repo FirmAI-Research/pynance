@@ -14,12 +14,18 @@ import calendar_dates
 cal = calendar_dates.Calendar()
 
 from interest_rates import Treasuries
+import inflation_rates
+
+import wsj_bond_benchmarks
+import pandas as pd
+
 import webtools
 
 fp_ajax = os.path.join( Path(__file__).resolve().parent, 'ajax')
 
+
+
 def treasuries(request):
-    print(os.path.join(proj_root, 'lib', 'fixed_income'))
 
     ust = Treasuries(years = ['2022'])
     print(ust.df)
@@ -43,7 +49,6 @@ def treasuries(request):
     tens_twos = ust.tens_twos_spread()
     tens_twos_response = webtools.df_to_highcharts_linechart(tens_twos)
 
-
     context = {
 
         'recent_rates_response':recent_rates_response,
@@ -56,3 +61,43 @@ def treasuries(request):
     }
 
     return render(request, 'treasuries.html', context)
+
+
+
+def inflation(request):
+
+    breakeven = inflation_rates.breakeven_inflation()
+    breakeven_response = webtools.df_to_highcharts_linechart(breakeven)
+
+    expected_inflation = inflation_rates.expected_inflation()
+    expected_inflation_response = webtools.df_to_highcharts_linechart(expected_inflation)
+    print(expected_inflation_response)
+
+
+
+
+
+    context = {
+        'breakeven_response':breakeven_response,
+        'expected_inflation_response':expected_inflation_response
+    }
+
+    return render(request, 'inflation.html', context)
+
+
+
+def fixed_income(request):
+
+    bbm = wsj_bond_benchmarks.BondBenchmarks()
+    bbm.get().parse()
+    print(bbm.df)
+
+    fp = os.path.join(fp_ajax, 'bond_benchmarks.json')
+    benchmarks_response = webtools.df_to_dt(bbm.df.fillna('-').replace('n.a.', '-'), fp)
+
+
+    context = {
+        'benchmarks_response':benchmarks_response,
+    }
+
+    return render(request, 'fixed_income.html', context)
