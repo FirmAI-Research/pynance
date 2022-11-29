@@ -177,10 +177,36 @@ class Fundamentals:
 
 
     def quarter_over_quarter_change(self):
-        # use self.data to get extended history and calculate qtr over qtr change for all qtrs shown in the display
-        df = self.df.fillna(0)
-        self.qq_change =  ((df.iloc[-1] / df.iloc[0]) -1).reset_index(level=[0,1]).reset_index(drop=False).drop(columns = ['ticker', 'index'])
-        self.qq_change.columns = ['level_0','MRQ']
+
+        tmp_data = self.data.copy()[::-1]
+        
+        tmp_data.drop(columns = ['ticker','dimension', 'datekey', 'lastupdated','reportperiod'], inplace = True)
+        
+        tmp_data.set_index('calendardate', inplace = True)
+
+        for c in tmp_data.columns:
+            tmp_data[c] = pd.to_numeric(tmp_data[c])
+
+        current = tmp_data.iloc[4:].fillna(np.nan).replace(0, np.nan)
+        
+        shift = tmp_data.shift(4).dropna(how='all', axis=0).fillna(np.nan).replace(0, np.nan)
+
+        res = (pd.DataFrame(current.values / shift.values) - 1)
+
+        res.columns = current.columns
+
+        res.index = current.index
+
+        res = res.iloc[-5:].T.reset_index()
+
+        res.index.name = None
+
+        res.columns.name = None
+
+        print(res)
+   
+        self.qq_change = res
+
 
 
     def describe(self):
