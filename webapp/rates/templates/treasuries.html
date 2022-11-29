@@ -19,6 +19,12 @@
         <div id="recent_rates_change"></div>
     </figure>
 
+
+    <figure class="highcharts-figure">
+        <div id="container"></div>
+    </figure>
+    
+
 </div>
 
 {% endblock content %}
@@ -34,6 +40,7 @@
 
         recentRatesChart.reflow(); // Auto resize chart absent a div or window resizing event; needed due to the body zoom settings
         recentRatesChange.reflow();
+        changeSinceChart.reflow();
 
     });
 
@@ -195,7 +202,7 @@
 
 
         title: {
-            text: 'Rate Change'
+            text: 'Daily Rate Change'
         },
 
         xAxis: {
@@ -284,5 +291,52 @@
         }
 
     });
+
+
+    let change_since_response = JSON.parse("{{change_since_response|escapejs}}")
+
+    let min_change_since_value = getMinimumValue(change_since_response.data)
+    let max_change_since_value = getMaximumValue(change_since_response.data)
+
+    const changeSinceChart = Highcharts.chart('container', {
+
+        chart: {
+            type: 'column'
+        },
+
+        title: {
+            text: 'Change over Time'
+        },
+
+        xAxis: {
+            categories: change_since_response.rows
+        },
+
+        yAxis: {
+            allowDecimals: false,
+            min: min_change_since_value,
+            max:max_change_since_value,
+            title: {
+                text: 'Change'
+            }
+        },
+
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.x + '</b><br/>' +
+                    this.series.name + ': ' + this.y + '<br/>' 
+            }
+        },
+
+        plotOptions: {
+            column: {
+                stacking: 'normal'
+            }
+        },
+
+        series: change_since_response.data
+    });
+
+
 </script>
 {% endblock js %}

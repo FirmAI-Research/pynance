@@ -118,18 +118,24 @@ class Treasuries:
         cmap = sns.diverging_palette(20, 230, as_cmap=True)
         sns.heatmap(self.df.iloc[-10:].diff(axis=0), cmap = cmap, annot=True)
 
-    def change_since(self):
-        import pandas as pd
-        delta = pd.DataFrame()
-        delta['5 days'] = self.df.iloc[-1] - self.df.iloc[-5]
-        delta['10 days'] = self.df.iloc[-1] - self.df.iloc[-10]
-        delta['20 days'] = self.df.iloc[-1] - self.df.iloc[-20]
-        delta['60 days'] = self.df.iloc[-1] - self.df.iloc[-60]
-        delta = delta.T[::-1]
-        delta.index.name = 'Change Since'
 
-        melt = delta.reset_index().melt(id_vars = ['Change Since'])
-        sns.barplot(data = melt, hue = 'Change Since', x = 'variable', y='value')
+    def change_since(self):
+        delta = pd.DataFrame()
+        
+        delta['5 days'] = self.df.iloc[-1] - self.df.iloc[-5]
+        
+        delta['10 days'] = self.df.iloc[-1] - self.df.iloc[-10]
+        
+        delta['20 days'] = self.df.iloc[-1] - self.df.iloc[-20]
+        
+        delta['60 days'] = self.df.iloc[-1] - self.df.iloc[-60]
+        
+        delta = delta.T#[::-1]
+        
+        # delta.index.name = 'Change Since'
+
+        # melt = delta.reset_index().melt(id_vars = ['Change Since'])
+        # sns.barplot(data = melt, hue = 'Change Since', x = 'variable', y='value')
         
         return delta
 

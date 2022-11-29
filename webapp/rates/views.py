@@ -26,12 +26,17 @@ def treasuries(request):
     recent_rates_change = ust.df.iloc[-10:].diff(axis=0).dropna(axis=0).round(2)
     recent_rates_change_response = webtools.df_to_highcharts_heatmap(recent_rates_change)
 
+    
+    change_since = ust.change_since()
+    change_since_response = webtools.df_to_highcharts_clustered_bar(change_since)
+
 
 
     context = {
 
         'recent_rates_response':recent_rates_response,
-        'recent_rates_change_response':recent_rates_change_response
+        'recent_rates_change_response':recent_rates_change_response,
+        'change_since_response':change_since_response
 
     }
 
