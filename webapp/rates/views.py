@@ -15,6 +15,7 @@ cal = calendar_dates.Calendar()
 
 from interest_rates import Treasuries
 import inflation_rates
+import credit_spreads
 
 import wsj_bond_benchmarks
 import pandas as pd
@@ -96,8 +97,13 @@ def fixed_income(request):
     benchmarks_response = webtools.df_to_dt(bbm.df.fillna('-').replace('n.a.', '-'), fp)
 
 
+    credit_spread = credit_spreads.get_credit_spreads()
+    credit_spread_response = webtools.df_to_highcharts_linechart(credit_spread)
+
+
     context = {
         'benchmarks_response':benchmarks_response,
+        'credit_spread_response':credit_spread_response,
     }
 
     return render(request, 'fixed_income.html', context)

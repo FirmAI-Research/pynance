@@ -15,6 +15,11 @@
         <table id="benchmarks" class="display" width="100%"></table>
     </div>
 
+
+    <figure class="highcharts-figure">
+        <div id="credit_spread"></div>
+    </figure>
+
 </div>
 {% endblock content %}
 
@@ -27,6 +32,7 @@
         document.body.style.zoom = "80%";
 
         // Auto resize chart absent a div or window resizing event; needed due to the body zoom settings
+        credit_spread_responseChart.reflow()
 
 
 
@@ -55,6 +61,70 @@
                 //     $('td', row).eq(0).addClass('minor');
             }
         },
+
+    });
+
+
+
+    let credit_spread_response = JSON.parse("{{credit_spread_response|escapejs}}")
+
+    const credit_spread_responseChart = Highcharts.chart('credit_spread', {
+
+        title: {
+            text: 'Credit Spreads'
+        },
+
+        subtitle: {
+            text: ''
+        },
+
+        yAxis: {
+            title: {
+                text: 'Yield (%)'
+            },
+            plotLines: [{
+                value: 0,
+                width: 4,
+                color: '#aaa',
+                zIndex: 10
+            }],
+        },
+
+        xAxis: {
+            categories: credit_spread_response.rows
+        },
+
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+                // pointStart: date_start
+            }
+        },
+
+        series: credit_spread_response.data,
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
 
     });
 

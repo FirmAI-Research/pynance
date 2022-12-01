@@ -14,6 +14,10 @@ import webtools
 
 fp_ajax = os.path.join( Path(__file__).resolve().parent, 'ajax')
 
+from sqlalchemy import create_engine
+
+import pandas as pd
+
 
 def fundamentals(request):
 
@@ -142,3 +146,20 @@ def fundamentals(request):
 
     return render(request, 'fundamentals.html', context)
 
+
+
+def sector_performance(request):
+
+    engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+    cnxn = engine.connect()
+    data = pd.read_sql(f"select * from EqSectorIxPerf", cnxn)
+    print(data)
+
+    context = {}
+
+    return render(request, "sector_performance.html", context)
+
+
+
+def attribution(request):
+    pass

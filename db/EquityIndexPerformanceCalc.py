@@ -57,9 +57,8 @@ prev_bd = cal.previous_market_day(cal.today()).strftime('%Y-%m-%d')
 
 prices = nasdaqdatalink.get_table(Sharadar.PRICES.value, date = '2022-01-03', paginate=True) 
 
-
 tick = nasdaq.Tickers()
-df_prof = tick.full_export(curl = False) # Set curl = True if data should be refreshed
+df_prof = tick.full_export(curl = False) #
 
 df = prices.set_index('ticker') \
     .merge(df_prof.set_index('ticker'), how='inner', left_index=True, right_index=True) \
@@ -69,9 +68,6 @@ df = df[['ticker','date','open','closeadj','sector','industry','sharesbas']]
 
 
 # # Construct Initial Index (Determine Index Divisor)
-
-# In[3]:
-
 
 def construct_initial_index(df, sector):
     # Market Cap Weighted Index
@@ -97,8 +93,6 @@ def construct_initial_index(df, sector):
     
     return indexDivisor, df
 
-
-# In[4]:
 
 
 # Skip if recalc not needed

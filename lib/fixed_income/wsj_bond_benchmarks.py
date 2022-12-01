@@ -15,13 +15,22 @@ class BondBenchmarks:
         "X-Requested-With": "XMLHttpRequest"
         }
 
-        r = requests.get(url, headers=header)
+        def request_response():
+            r = requests.get(url, headers=header)
 
-        dfs = pd.read_html(r.text)
+            dfs = pd.read_html(r.text)
 
-        self.data = dfs[0]
+            self.data = dfs[0]
 
-        self.data.columns = ['benchmark', 'close', 'pct_change', 'ytd_total_ret', '52-Wk pct_change', 'yield', 'yield_low', 'yield_high','spread', 'spread_low','spread_high']
+            self.data.columns = ['benchmark', 'close', 'pct_change', 'ytd_total_ret', '52-Wk pct_change', 'yield', 'yield_low', 'yield_high','spread', 'spread_low','spread_high']
+
+        try:
+            request_response()
+        
+        except Exception as e:
+            print('Tying Again')
+            
+            request_response()
 
         return self
 

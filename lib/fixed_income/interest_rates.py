@@ -251,17 +251,3 @@ class Treasuries:
 
     
         
-    def credit_spreads(self):
-        # Moodys seasoned bond yields
-        fred = fredapi.Fred(api_key=fred_api_key)
-        credit_spreads = fred.get_series('AAA').to_frame().rename(columns={0:'AAA'}).merge( 
-            fred.get_series('BAA').to_frame().rename(columns={0:'BAA'}), left_index=True, right_index=True).merge(
-            fred.get_series('BAMLH0A0HYM2EY').to_frame().rename(columns={0:'HY'}), left_index=True, right_index=True)
-        credit_spreads.tail()
-
-        melt = credit_spreads.reset_index().melt(id_vars=['index'])
-        plt.figure(figsize = (20,5))
-
-        g = sns.lineplot(data=melt, x = 'index', y = 'value', hue = 'variable')
-        plt.xticks(rotation=45)
-        None
