@@ -152,9 +152,22 @@ def sector_performance(request):
 
     engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
     cnxn = engine.connect()
-    data = pd.read_sql(f"select * from EqSectorIxPerf", cnxn)
+    data = pd.read_sql(f"select * from EqSectorIxPerf", cnxn).set_index('index')
+    data = data.loc[~(data==0).all(axis=1)]
     print(data)
 
+    one_day = ( data.iloc[-1] / data.iloc[-2]) - 1
+    one_week = ( data.iloc[-1] / data.iloc[-5]) - 1
+    one_month = ( data.iloc[-1] / data.iloc[-20]) - 1
+    two_months = ( data.iloc[-1] / data.iloc[-40]) - 1
+    # three_months = ( data.iloc[-1] / data.iloc[-60]) - 1
+    # one_year = ( data.iloc[-1] / data.iloc[-252]) - 1
+
+    df = pd.concat([one_day, one_week, one_month, two_months], axis = 1).T
+    print(df)
+
+    df.index = ['1D', '1W', '1M','2M',]
+    
     context = {}
 
     return render(request, "sector_performance.html", context)

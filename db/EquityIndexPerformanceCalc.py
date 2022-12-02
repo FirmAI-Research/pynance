@@ -15,17 +15,18 @@ import pandas as pd
 import numpy as np
 from scipy.stats.mstats import gmean
 from sqlalchemy import create_engine
+from pathlib import Path
 
-proj_root = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(''))), 'pynance')
-print(proj_root)
-sys.path.append(proj_root)
+proj_root = Path(__file__).resolve().parent.parent
+sys.path.append(os.path.join(proj_root, 'lib'))
+sys.path.append(os.path.join(proj_root, 'lib', 'equity'))
 
 import nasdaq_data_link as nasdaq
 from nasdaq_data_link import Sharadar
 from numeric import custom_formatting
 
 from calendar_dates import Calendar
-from lib.equity.fundamentals import Fundamentals, Columns
+from fundamentals import Fundamentals, Columns
 cal = Calendar()
 
 import warnings
@@ -154,9 +155,9 @@ print(sectors)
 
 frames = []
 
-# dates = [x.strftime('%Y-%m-%d') for x in pd.date_range(start='10/01/2022', end='11/03/2022')]
+dates = [x.strftime('%Y-%m-%d') for x in pd.date_range(start='11/03/2022', end='12/01/2022')]
 
-dates = [prev_bd]
+# dates = [prev_bd]
 
 for date in dates:
     perfDict = {}

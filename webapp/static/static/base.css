@@ -36,17 +36,21 @@ body {
   margin-top:15px;
   width:49%;
   display:inline-block;
+  zoom:80%;
 
 }
 
 .zoomSmall {
-  zoom: 75%;
+  zoom: 75% !important;
 }
 .zoomNormal {
   zoom: normal;
 }
 .zoomBig {
   zoom: 2.5;
+}
+.scaleSmall {
+  transform: scale(0.8) !important;
 }
 
 .center-div{
@@ -57,10 +61,10 @@ body {
 
 h1 {
   color:#3C4754;
-  border-radius: 10px;
+  border-radius: 2px;
   text-align:center;
   margin: auto;
-  padding: 10px;
+  padding: 2px;
   width: 25%;
 }
 
@@ -85,11 +89,11 @@ p {
 }
 
 .nav-link {
-  font-size: 18px;
+  font-size: 14px;
 }
 
 .dropdown-item {
-  font-size: 18px;
+  font-size: 14px;
 }
 
 #navbarDropdown{

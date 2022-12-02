@@ -266,7 +266,9 @@
 
     $(document).ready(function () {
 
-      document.body.style.zoom = "80%";
+      // document.body.style.zoom = "80%";
+      // document.getElementById("balance_sheet").style.zoom = "80%"
+
 
       let income_statement = JSON.parse("{{inc_json|escapejs}}");
       $('#income_statement').DataTable({
