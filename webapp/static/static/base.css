@@ -39,6 +39,21 @@ body {
 
 }
 
+.zoomSmall {
+  zoom: 75%;
+}
+.zoomNormal {
+  zoom: normal;
+}
+.zoomBig {
+  zoom: 2.5;
+}
+
+.center-div{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} 
 
 h1 {
   color:#3C4754;

@@ -87,7 +87,7 @@ def inflation(request):
 
 
 
-def fixed_income(request):
+def bonds(request):
 
     bbm = wsj_bond_benchmarks.BondBenchmarks()
     bbm.get().parse()
@@ -106,4 +106,4 @@ def fixed_income(request):
         'credit_spread_response':credit_spread_response,
     }
 
-    return render(request, 'fixed_income.html', context)
+    return render(request, 'bonds.html', context)

@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'equity',
-    'rates'
+    'fixed_income'
 
 
     
