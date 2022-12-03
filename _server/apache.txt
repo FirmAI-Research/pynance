@@ -1,0 +1,30 @@
+scp -i sandsmichael.pem  "C:\dev\pynance\secrets.json" "ubuntu@ec2-34-207-78-246.compute-1.amazonaws.com:/home/ubuntu/prod/pynance2.0/pynance/secrets.json"
+scp -i sandsmichael.pem  "C:\data\industry_fundamentals.db" "ubuntu@ec2-34-207-78-246.compute-1.amazonaws.com:/home/ubuntu/prod/pynance2.0/pynance/secrets.json"
+
+
+/etc/apache2/apache2  --> sites enabled
+
+[/etc/apache2/sites-available/000-default.conf] <VirtualHost *:80>
+
+    ProxyRequests Off
+    <Proxy *>
+      Order deny,allow
+      Allow from all
+    </Proxy>
+    
+    ProxyPass / http://0.0.0.0:8000/
+    ProxyPassReverse / http://0.0.0.0:8000/
+
+    <Location />
+      Order allow,deny
+      Allow from all
+    </Location>
+
+apachectl configtest
+
+
+nohup python manage.py runserver 0.0.0.0:8000
+
+& top kill pid --##-- re run nohup
+
+sudo apt install tree
