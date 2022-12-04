@@ -20,6 +20,8 @@ from sqlalchemy import create_engine
 import pandas as pd
 import webtools
 
+from sys import platform
+
 
 def fundamentals(request):
 
@@ -152,7 +154,11 @@ def fundamentals(request):
 
 def sector_performance(request):
 
-    engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+    if platform == "linux" or platform == "linux2":
+        engine = create_engine('sqlite:////home/ubuntu/prod/pynance2.0/industry_fundamentals.db', echo=False)
+    else: #win32
+        engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+
     cnxn = engine.connect()
     data = pd.read_sql(f"select * from EqSectorIxPerf", cnxn).set_index('index')
     data = data.loc[~(data==0).all(axis=1)]

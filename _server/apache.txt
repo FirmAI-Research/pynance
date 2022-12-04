@@ -1,5 +1,8 @@
 scp -i sandsmichael.pem  "C:\dev\pynance\secrets.json" "ubuntu@ec2-34-207-78-246.compute-1.amazonaws.com:/home/ubuntu/prod/pynance2.0/pynance/secrets.json"
-scp -i sandsmichael.pem  "C:\data\industry_fundamentals.db" "ubuntu@ec2-34-207-78-246.compute-1.amazonaws.com:/home/ubuntu/prod/pynance2.0/pynance/secrets.json"
+
+scp -i sandsmichael.pem  "C:\dev\pynance\nasdaq_data_link.json" "ubuntu@ec2-34-207-78-246.compute-1.amazonaws.com:/home/ubuntu/prod/pynance2.0/pynance/nasdaq_data_link.json"
+
+scp -i sandsmichael.pem  "C:\data\industry_fundamentals.db" "ubuntu@ec2-34-207-78-246.compute-1.amazonaws.com:/home/ubuntu/prod/pynance2.0/industry_fundamentals.db"
 
 
 /etc/apache2/apache2  --> sites enabled
@@ -25,6 +28,7 @@ apachectl configtest
 
 nohup python manage.py runserver 0.0.0.0:8000
 
-& top kill pid --##-- re run nohup
+top 
+kill pid 
 
 sudo apt install tree

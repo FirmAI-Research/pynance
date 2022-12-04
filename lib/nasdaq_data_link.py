@@ -18,6 +18,7 @@ proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from calendar_dates import Calendar
 cal = Calendar()
 
+from sys import platform
 
 class Sharadar(Enum):
   
@@ -75,7 +76,11 @@ class Tickers(Nasdaq):
   def full_export(self, curl = False):
     if curl:
       df = nasdaqdatalink.get_table(Sharadar.TICKERS.value,  paginate=True) #qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
-      df.to_csv(r'C:\data\tickers.csv')
+      if platform == "linux" or platform == "linux2":
+          df.to_csv(r'/home/ubuntu/prod/pynance2.0/tickers.csv')
+      else: #win32
+        df.to_csv(r'C:\data\tickers.csv')
+
     
     self.df =  pd.read_csv(r'C:\data\tickers.csv')
     self.df = self.df[self.df.table == 'SF1']
