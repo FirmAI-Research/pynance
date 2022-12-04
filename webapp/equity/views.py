@@ -10,6 +10,7 @@ sys.path.append(os.path.join(proj_root, 'lib'))
 sys.path.append(os.path.join(proj_root, 'lib', 'equity'))
 
 from fundamentals import Fundamentals, Ranks, DCF, Columns
+from attribution import Attribution, FammaFrench
 import webtools
 
 fp_ajax = os.path.join( Path(__file__).resolve().parent, 'ajax')
@@ -189,6 +190,25 @@ def sector_performance(request):
     return render(request, "sector_performance.html", context)
 
 
-
+from django.views.decorators.csrf import csrf_protect 
+@csrf_protect 
 def attribution(request):
-    pass
+
+    ticker = str(request.POST.get("tickers"))
+    print(ticker)
+    ticker = 'XLF' if ticker in ['None', None, ['None']] else ticker
+
+    atr = Attribution()
+    holdings = atr.get_holdings(ticker) # ETF's
+    returns = atr.get_portfolio_returns()
+    portf_returns = returns.resample('M').sum()
+
+    ff = FammaFrench(model = 'ThreeFactors', portf_rets = portf_returns)
+    print(ff.summary)
+
+    context = {
+        "model_summary": ff.summary.as_html().replace('<table class="simpletable">', '').replace('</table>', '',),
+        'ticker': ticker,
+
+    }
+    return render(request, "attribution.html", context)

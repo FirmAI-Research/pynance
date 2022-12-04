@@ -24,6 +24,15 @@ import webtools
 
 fp_ajax = os.path.join( Path(__file__).resolve().parent, 'ajax')
 
+import fredapi
+
+fp = os.path.join(proj_root, 'secrets.json')
+print(fp)
+with open(fp) as f:
+    data = json.load(f)
+fred_api_key = data['fred_api_key'] 
+
+from ast import literal_eval
 
 
 def treasuries(request):
@@ -74,10 +83,6 @@ def inflation(request):
     expected_inflation_response = webtools.df_to_highcharts_linechart(expected_inflation)
     print(expected_inflation_response)
 
-
-
-
-
     context = {
         'breakeven_response':breakeven_response,
         'expected_inflation_response':expected_inflation_response
@@ -107,3 +112,56 @@ def bonds(request):
     }
 
     return render(request, 'bonds.html', context)
+
+
+
+def fred_view(request):
+
+    queryDict = request.POST.dict()
+    print(queryDict)
+
+    usr_selection = []
+
+    if len(queryDict) == 0:
+        usr_selection.append('UNRATE')
+
+    if queryDict is not None:
+        for k,v in queryDict.items():
+            if v == 'on':
+                usr_selection.append(k)
+
+    fred = fredapi.Fred(api_key=fred_api_key)
+    
+    frames = []
+    for id in usr_selection:
+        tmp = fred.get_series(id).to_frame()
+        tmp.columns = [id]
+        frames.append(tmp)
+    
+    if len(frames) > 1:
+        data = pd.concat(frames, axis=1)
+    else:
+        data = frames[0]
+    
+    data.reset_index(inplace = True)
+
+    data.rename(columns = {'index':'date'}, inplace = True)
+
+    data['date'] = data['date'].astype(str)
+    
+    data.set_index('date', inplace = True)
+    
+    data.dropna(axis=0, how = 'any', inplace = True)
+
+    data = data.iloc[-100:]
+
+    fred_response = webtools.df_to_highcharts_linechart(data)
+
+
+    print(data)
+
+    context = {
+        'fred_response':fred_response
+
+    }
+    return render(request, 'fred_view.html', context)

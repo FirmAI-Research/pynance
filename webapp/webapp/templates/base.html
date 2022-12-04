@@ -51,8 +51,10 @@
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" type="button"
                                         href="{% url 'fundamentals' %}">Fundamentals</a></li>
-                                <li><a class="dropdown-item" type="button"
-                                        href="{% url 'sector_performance' %}">Sector Performance</a></li>
+                                <li><a class="dropdown-item" type="button" href="{% url 'sector_performance' %}">Sector
+                                        Performance</a></li>
+                                <li><a class="dropdown-item" type="button" href="{% url 'attribution' %}">
+                                        Attribution</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
@@ -65,18 +67,38 @@
                                 </li>
                                 <li><a class="dropdown-item" type="button" href="{% url 'inflation' %}">Inflation</a>
                                 </li>
-                                <li><a class="dropdown-item" type="button" href="{% url 'bonds' %}">Fixed Income Benchmarks</a></li>
+                                <li><a class="dropdown-item" type="button" href="{% url 'bonds' %}">Fixed Income
+                                        Benchmarks</a></li>
                             </ul>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Derivatives
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" type="button" href="">Options</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                FRED
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" type="button" href="{% url 'fred_view' %}">View</a>
+                                </li>
+                            </ul>
+                        </li>                        
                 </div>
-
 
 
                 <div class="collapse navbar-collapse justify-content-end" id="navbarCollapse">
                     <ul class="navbar-nav">
                         <li class="nav-item ">
                             <button id="sidebarCollapse" type="button"
-                                class="btn btn-light bg-white rounded-pill shadow-sm" style = "height:2rem;"><small
+                                class="btn btn-light bg-white rounded-pill shadow-sm" style="height:2rem;"><small
                                     class="text-uppercase font-weight-bold">Toggle NavBar</small></button>
                         </li>
                     </ul>
@@ -177,7 +199,7 @@
 
     <script>
 
- 
+
 
 
     </script>

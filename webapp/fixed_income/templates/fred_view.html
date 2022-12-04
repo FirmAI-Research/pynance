@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<h1>FRED View</h1>
+
+<div style="clear:both;"></div>
+
+
+<div id="body-content" style="padding-top:1%;">
+
+
+    <div class='container'>
+        <div class='row'>
+            <div class='col-sm'>
+
+                <p>Unemployment</p>
+
+            </div>
+            <div class='col-sm'>
+                <p>Consumers</p>
+            </div>
+
+            <div class='col-sm'>
+                <p>Manufacturing</p>
+            </div>
+        </div>
+
+
+        <form action="" method="POST">
+            {% csrf_token %}
+
+            <div class='row'>
+                <div class='col-sm'>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="UNRATE" id="UNRATE">
+                        <label class="form-check-label" for="UNRATE">
+                            UNRATE
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="ICSA" id="ICSA">
+                        <label class="form-check-label" for="ICSA">
+                            ICSA
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="CCSA" id="CCSA">
+                        <label class="form-check-label" for="CCSA">
+                            CCSA
+                        </label>
+                    </div>
+                </div>
+                <div class='col-sm'>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="UMCSENT" id="UMCSENT">
+                        <label class="form-check-label" for="UMCSENT">
+                            UMCSENT
+                        </label>
+                    </div>
+                </div>
+                <div class='col-sm'>
+                    <div class='col-sm'>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="INDPRO" id="INDPRO">
+                            <label class="form-check-label" for="INDPRO">
+                                INDPRO
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class='row'>
+                <button type='submit' name='submit'
+                    style="margin-left:auto; margin-right: auto;width:30%;background-color: #3C4754; color:white;"
+                    onClick="invoke">Submit</button>
+            </div>
+        </form>
+        <div class='row'>
+
+            <figure class="highcharts-figure">
+                <div id="fredChart"></div>
+            </figure>
+
+
+        </div>
+
+        <div class="row" style='background-color: yellow;'>
+            <p>
+                Table Space
+            </p>
+        </div>
+    </div>
+
+
+
+
+</div>
+
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+
+    let fred_response = JSON.parse("{{fred_response|escapejs}}")
+
+    const fredChart = Highcharts.chart('fredChart', {
+
+        title: {
+            text: 'Fred'
+        },
+
+        subtitle: {
+            text: ''
+        },
+
+        yAxis: {
+            title: {
+                text: 'Yield (%)'
+            },
+            plotLines: [{
+                value: 0,
+                width: 4,
+                color: '#aaa',
+                zIndex: 10
+            }],
+        },
+
+        xAxis: {
+            categories: fred_response.rows
+        },
+
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+                // pointStart: date_start
+            }
+        },
+
+        series: fred_response.data,
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
+
+    });
+
+
+    invoke = (event) => {
+        let handleClick = this[event.target.name];
+        var unrate = document.getElementById('UNRATE').checked
+        // let arg1 = event.target.getAttribute('data-arg1');
+        window[handleClick](unrate)
+    
+    }
+
+
+    function handleClick(myRadio) {
+        sessionStorage.setItem("data", JSON.stringify({ myRadio: "checked" }));
+    }
+    var data = sessionStorage.getItem('data');
+    if (JSON.parse(data).UNRATE == 'checked') {
+        document.getElementById("UNRATE").checked = true;
+    }
+
+
+    $(function () {
+        // Sidebar toggle behavior
+        $('#sidebarCollapse').on('click', function () {
+            $('#sidebar, #content').toggleClass('active');
+            $('#body-content').toggleClass('active');
+        });
+    });
+
+
+
+
+
+</script>
+{% endblock %}
