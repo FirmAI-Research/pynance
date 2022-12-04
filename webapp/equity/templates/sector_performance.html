@@ -8,18 +8,322 @@
 
 <div style="clear:both;"></div>
 
+<br>
 
+<div id="body-content" style="padding-top:1%;">
+
+    <p class="highcharts-description">
+        Sector performance is calculated using a custom market cap weighted index. Constituent weightings are determined
+        using a market capitalization based on shares outstanding reported in the quarterly report. Prices are updated daily. The index constituents include all tickers with in a sector. Shares
+        in the index are assigned based on the proportion of a companies market capitalization to the entire index's
+        market capitalization.
+        The Index was intially constructed using data from January 1, 2022 and needs to be adjusted by recalculating
+        the index divisor as constituent companies with in each sector change over time.
+    </p>
+
+
+    <p>Most recent data as of December 2, 2022</p>
+
+    <h2>1D</h2>
+    <figure class="highcharts-figure">
+        <div id="chart1d"></div>
+    </figure>
+
+
+    <h2>1W</h2>
+    <figure class="highcharts-figure">
+        <div id="chart1w"></div>
+    </figure>
+
+    <h2>1M</h2>
+    <figure class="highcharts-figure">
+        <div id="chart1m"></div>
+    </figure>
+
+
+    <h2>3M</h2>
+    <figure class="highcharts-figure">
+        <div id="chart3m"></div>
+    </figure>
+
+
+    <h2>YTD</h2>
+    <figure class="highcharts-figure">
+        <div id="chartYtd"></div>
+    </figure>
+
+</div>
 {% endblock %}
 
 
 {% block js %}
 
 <script>
-    $(document).ready(function(){
+
+    $(document).ready(function () {
 
         // document.body.style.zoom = "80%";
 
 
+    });
+
+
+    function getMinimumValue(array_or_arrays) {
+        var min = array_or_arrays[0][2]
+        for (var i = 0; i < array_or_arrays.length; i++) {
+            if (array_or_arrays[i][2] < min)
+                min = array_or_arrays[i][2]
+        }
+        return min
+    }
+
+    function getMaximumValue(array_or_arrays) {
+        var max = array_or_arrays[0][2]
+        for (var i = 0; i < array_or_arrays.length; i++) {
+            if (array_or_arrays[i][2] > max)
+                max = array_or_arrays[i][2]
+        }
+        return max
+    }
+
+
+    let sector_performance_response = JSON.parse("{{sector_performance1d|escapejs}}")
+
+    let min_sector_performance_value = getMinimumValue(sector_performance_response.data)
+    let max_sector_performance_value = getMaximumValue(sector_performance_response.data)
+
+    const changeSinceChart = Highcharts.chart('chart1d', {
+
+        chart: {
+            type: 'column'
+        },
+
+        title: {
+            text: 'Performance'
+        },
+
+        xAxis: {
+            categories: sector_performance_response.rows
+        },
+
+        yAxis: {
+            allowDecimals: false,
+            min: min_sector_performance_value,
+            max: max_sector_performance_value,
+            title: {
+                text: 'Change'
+            }
+        },
+
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.x + '</b><br/>' +
+                    this.series.name + ': ' + this.y + '%' + '<br/>'
+            }
+        },
+
+        plotOptions: {
+            column: {
+                stacking: 'normal'
+            }
+        },
+
+        series: sector_performance_response.data
+    });
+
+
+
+    let sector_performance_response1w = JSON.parse("{{sector_performance1w|escapejs}}")
+
+    let min_sector_performance1w_value = getMinimumValue(sector_performance_response1w.data)
+    let max_sector_performance1w_value = getMaximumValue(sector_performance_response1w.data)
+
+    const changeSinceChart1w = Highcharts.chart('chart1w', {
+
+        chart: {
+            type: 'column'
+        },
+
+        title: {
+            text: 'Performance'
+        },
+
+        xAxis: {
+            categories: sector_performance_response1w.rows
+        },
+
+        yAxis: {
+            allowDecimals: false,
+            min: min_sector_performance1w_value,
+            max: max_sector_performance1w_value,
+            title: {
+                text: 'Change'
+            }
+        },
+
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.x + '</b><br/>' +
+                    this.series.name + ': ' + this.y + '%' + '<br/>'
+            }
+        },
+
+        plotOptions: {
+            column: {
+                stacking: 'normal'
+            }
+        },
+
+        series: sector_performance_response1w.data
+    });
+
+
+
+    let sector_performance_response1m = JSON.parse("{{sector_performance1m|escapejs}}")
+
+    let min_sector_performance1m_value = getMinimumValue(sector_performance_response1m.data)
+    let max_sector_performance1m_value = getMaximumValue(sector_performance_response1m.data)
+
+    const changeSinceChart1m = Highcharts.chart('chart1m', {
+
+        chart: {
+            type: 'column'
+        },
+
+        title: {
+            text: 'Performance'
+        },
+
+        xAxis: {
+            categories: sector_performance_response1m.rows
+        },
+
+        yAxis: {
+            allowDecimals: false,
+            min: min_sector_performance1m_value,
+            max: max_sector_performance1m_value,
+            title: {
+                text: 'Change'
+            }
+        },
+
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.x + '</b><br/>' +
+                    this.series.name + ': ' + this.y + '%' + '<br/>'
+            }
+        },
+
+        plotOptions: {
+            column: {
+                stacking: 'normal'
+            }
+        },
+
+        series: sector_performance_response1m.data
+    });
+
+
+
+
+    let sector_performance_response3m = JSON.parse("{{sector_performance3m|escapejs}}")
+
+    let min_sector_performance3m_value = getMinimumValue(sector_performance_response3m.data)
+    let max_sector_performance3m_value = getMaximumValue(sector_performance_response3m.data)
+
+    const changeSinceChart3m = Highcharts.chart('chart3m', {
+
+        chart: {
+            type: 'column'
+        },
+
+        title: {
+            text: 'Performance'
+        },
+
+        xAxis: {
+            categories: sector_performance_response3m.rows
+        },
+
+        yAxis: {
+            allowDecimals: false,
+            min: min_sector_performance3m_value,
+            max: max_sector_performance3m_value,
+            title: {
+                text: 'Change'
+            }
+        },
+
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.x + '</b><br/>' +
+                    this.series.name + ': ' + this.y + '%' + '<br/>'
+            }
+        },
+
+        plotOptions: {
+            column: {
+                stacking: 'normal'
+            }
+        },
+
+        series: sector_performance_response3m.data
+    });
+
+
+
+    let sector_performance_responseYtd = JSON.parse("{{sector_performanceYtd|escapejs}}")
+
+    let min_sector_performanceYtd_value = getMinimumValue(sector_performance_responseYtd.data)
+    let max_sector_performanceYtd_value = getMaximumValue(sector_performance_responseYtd.data)
+
+    const changeSinceChartYtd = Highcharts.chart('chartYtd', {
+
+        chart: {
+            type: 'column'
+        },
+
+        title: {
+            text: 'Performance'
+        },
+
+        xAxis: {
+            categories: sector_performance_responseYtd.rows
+        },
+
+        yAxis: {
+            allowDecimals: false,
+            min: min_sector_performanceYtd_value,
+            max: max_sector_performanceYtd_value,
+            title: {
+                text: 'Change'
+            }
+        },
+
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.x + '</b><br/>' +
+                    this.series.name + ': ' + this.y + '%' + '<br/>'
+            }
+        },
+
+        plotOptions: {
+            column: {
+                stacking: 'normal'
+            }
+        },
+
+        series: sector_performance_responseYtd.data
+    });
+
+
+    $(function () {
+        // Sidebar toggle behavior
+        $('#sidebarCollapse').on('click', function () {
+            $('#sidebar, #content').toggleClass('active');
+            $('#body-content').toggleClass('active');
+
+        });
     });
 
 

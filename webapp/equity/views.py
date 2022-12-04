@@ -17,6 +17,7 @@ fp_ajax = os.path.join( Path(__file__).resolve().parent, 'ajax')
 from sqlalchemy import create_engine
 
 import pandas as pd
+import webtools
 
 
 def fundamentals(request):
@@ -150,25 +151,40 @@ def fundamentals(request):
 
 def sector_performance(request):
 
-    # engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
-    # cnxn = engine.connect()
-    # data = pd.read_sql(f"select * from EqSectorIxPerf", cnxn).set_index('index')
-    # data = data.loc[~(data==0).all(axis=1)]
-    # print(data)
+    engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+    cnxn = engine.connect()
+    data = pd.read_sql(f"select * from EqSectorIxPerf", cnxn).set_index('index')
+    data = data.loc[~(data==0).all(axis=1)]
+    print(data)
 
-    # one_day = ( data.iloc[-1] / data.iloc[-2]) - 1
-    # one_week = ( data.iloc[-1] / data.iloc[-5]) - 1
-    # one_month = ( data.iloc[-1] / data.iloc[-20]) - 1
-    # two_months = ( data.iloc[-1] / data.iloc[-40]) - 1
-    # # three_months = ( data.iloc[-1] / data.iloc[-60]) - 1
-    # # one_year = ( data.iloc[-1] / data.iloc[-252]) - 1
+    one_day = ( data.iloc[-1] / data.iloc[-2]) - 1
+    one_week = ( data.iloc[-1] / data.iloc[-7]) - 1
+    one_month = ( data.iloc[-1] / data.iloc[-30]) - 1
+    two_months = ( data.iloc[-1] / data.iloc[-40]) - 1
+    three_months = ( data.iloc[-1] / data.iloc[-60]) - 1
+    ytd = ( data.iloc[-1] / data.iloc[0]) - 1  # 252
 
-    # df = pd.concat([one_day, one_week, one_month, two_months], axis = 1).T
-    # print(df)
-
-    # df.index = ['1D', '1W', '1M','2M',]
+    df = pd.concat([one_day, one_week, one_month, two_months, three_months, ytd], axis = 1).T
+    df.index = ['1D', '1W', '1M','2M', '3M', 'YTD']
+    df = df.multiply(100)
     
-    context = {}
+    print(df)
+
+    sector_performance1d = webtools.df_to_highcharts_clustered_bar(df.loc['1D'].to_frame())
+    sector_performance1w = webtools.df_to_highcharts_clustered_bar(df.loc['1W'].to_frame())
+    sector_performance1m = webtools.df_to_highcharts_clustered_bar(df.loc['1M'].to_frame())
+    sector_performance3m = webtools.df_to_highcharts_clustered_bar(df.loc['3M'].to_frame())
+    sector_performanceYtd = webtools.df_to_highcharts_clustered_bar(df.loc['YTD'].to_frame())
+
+    context = {
+
+        'sector_performance1d':sector_performance1d,
+        'sector_performance1w':sector_performance1w,
+        'sector_performance1m':sector_performance1m,
+        'sector_performance3m':sector_performance3m,
+        'sector_performanceYtd':sector_performanceYtd,
+        
+    }
 
     return render(request, "sector_performance.html", context)
 
