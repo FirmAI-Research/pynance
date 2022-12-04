@@ -77,12 +77,15 @@ class Tickers(Nasdaq):
     if curl:
       df = nasdaqdatalink.get_table(Sharadar.TICKERS.value,  paginate=True) #qopts={"columns":"compnumber"}, date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
       if platform == "linux" or platform == "linux2":
-          df.to_csv(r'/home/ubuntu/prod/pynance2.0/tickers.csv')
+        df.to_csv(r'/home/ubuntu/prod/pynance2.0/tickers.csv')
       else: #win32
         df.to_csv(r'C:\data\tickers.csv')
 
     
-    self.df =  pd.read_csv(r'C:\data\tickers.csv')
+      if platform == "linux" or platform == "linux2":
+        self.df =  pd.read_csv(r'/home/ubuntu/prod/pynance2.0/tickers.csv')
+      else: #win32
+        self.df =  pd.read_csv(r'C:\data\tickers.csv')
     self.df = self.df[self.df.table == 'SF1']
     self.df = self.df[['ticker', 'name', 'exchange','sector', 'industry','scalemarketcap', 'scalerevenue','famasector','famaindustry','lastupdated', 'currency']]
     self.df = self.df[self.df.currency == 'USD']
