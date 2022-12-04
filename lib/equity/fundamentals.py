@@ -25,6 +25,8 @@ import calendar_dates
 
 cal = calendar_dates.Calendar()
 
+from sys import platform
+
 
 class Fundamentals:
     ''' Retreive equity fundamental's.
@@ -240,7 +242,11 @@ class Fundamentals:
         print(industry)
 
         from sqlalchemy import create_engine
-        engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+
+        if platform == "linux" or platform == "linux2":
+            engine = create_engine('sqlite:////home/ubuntu/prod/pynance2.0/industry_fundamentals.db', echo=False)
+        else: #win32
+            engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
         
         self.cnxn = engine.connect()
         
@@ -292,7 +298,11 @@ class Fundamentals:
 
 
     def plot_box_plot(self, cols):
-        engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+
+        if platform == "linux" or platform == "linux2":
+            engine = create_engine('sqlite:////home/ubuntu/prod/pynance2.0/industry_fundamentals.db', echo=False)
+        else: #win32
+            engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
         
         cnxn = engine.connect()
         
@@ -404,7 +414,13 @@ class Ranks:
 
         self.ticker = ticker
 
-        engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+
+        if platform == "linux" or platform == "linux2":
+            engine = create_engine('sqlite:////home/ubuntu/prod/pynance2.0/industry_fundamentals.db', echo=False)
+        else: #win32
+            engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+
+
         self.cnxn = engine.connect()
 
 
@@ -447,7 +463,11 @@ class Ranks:
     def plot_dual_axis_ranks(self, fun_obj, cols):
         ''' Plots a time series of fundamental values for an individual metric and company on one axis; With the % rank vs peer group on the second axis
         '''
-        engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
+
+        if platform == "linux" or platform == "linux2":
+            engine = create_engine('sqlite:////home/ubuntu/prod/pynance2.0/industry_fundamentals.db', echo=False)
+        else: #win32
+            engine = create_engine('sqlite:///C:\data\industry_fundamentals.db', echo=False)
 
         cnxn = engine.connect()
 

@@ -4,6 +4,11 @@ scp -i sandsmichael.pem  "C:\dev\pynance\nasdaq_data_link.json" "ubuntu@ec2-34-2
 
 scp -i sandsmichael.pem  "C:\data\industry_fundamentals.db" "ubuntu@ec2-34-207-78-246.compute-1.amazonaws.com:/home/ubuntu/prod/pynance2.0/industry_fundamentals.db"
 
+scp -i sandsmichael.pem  "C:\data\tickers.csv" "ubuntu@ec2-34-207-78-246.compute-1.amazonaws.com:/home/ubuntu/prod/pynance2.0/tickers.csv"
+
+
+
+
 
 /etc/apache2/apache2  --> sites enabled
 
