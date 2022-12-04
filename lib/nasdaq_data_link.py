@@ -82,10 +82,10 @@ class Tickers(Nasdaq):
         df.to_csv(r'C:\data\tickers.csv')
 
     
-      if platform == "linux" or platform == "linux2":
-        self.df =  pd.read_csv(r'/home/ubuntu/prod/pynance2.0/tickers.csv')
-      else: #win32
-        self.df =  pd.read_csv(r'C:\data\tickers.csv')
+    if platform == "linux" or platform == "linux2":
+      self.df =  pd.read_csv(r'/home/ubuntu/prod/pynance2.0/tickers.csv')
+    else: #win32
+      self.df =  pd.read_csv(r'C:\data\tickers.csv')
     self.df = self.df[self.df.table == 'SF1']
     self.df = self.df[['ticker', 'name', 'exchange','sector', 'industry','scalemarketcap', 'scalerevenue','famasector','famaindustry','lastupdated', 'currency']]
     self.df = self.df[self.df.currency == 'USD']
