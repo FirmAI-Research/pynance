@@ -53,6 +53,10 @@
             <figure class="highcharts-figure">
                 <div id="change_since"></div>
             </figure>
+            <h2>Points in Time</h2>
+            <figure class="highcharts-figure">
+                <div id="pointsInTime"></div>
+            </figure>            
         </div>
 
 
@@ -103,6 +107,8 @@
         recentRatesChart.reflow();
 
         recentRatesChange.reflow();
+
+        pointsInTimeChart.reflow();
 
         changeSinceChart.reflow();
 
@@ -366,6 +372,73 @@
         }
 
     });
+
+    
+    let points_in_time_response = JSON.parse("{{points_in_time_response|escapejs}}")
+    let pit_date_start = new Date(points_in_time_response.rows[0]).getFullYear();
+    console.log(pit_date_start)
+
+    const pointsInTimeChart = Highcharts.chart('pointsInTime', {
+
+        title: {
+            text: 'Points in Time'
+        },
+
+        subtitle: {
+            text: ''
+        },
+
+        yAxis: {
+            title: {
+                text: 'Yield (%)'
+            },
+            plotLines: [{
+                value: 0,
+                width: 4,
+                color: '#aaa',
+                zIndex: 10
+            }],
+        },
+
+        xAxis: {
+            categories: points_in_time_response.rows
+        },
+
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+                // pointStart: date_start
+            }
+        },
+
+        series: points_in_time_response.data,
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
+
+    });
+
+
 
 
     let change_since_response = JSON.parse("{{change_since_response|escapejs}}")
@@ -707,6 +780,8 @@
         recentRatesChart.reflow();
 
         recentRatesChange.reflow();
+
+        pointsInTimeChart.reflow();
 
         changeSinceChart.reflow();
 

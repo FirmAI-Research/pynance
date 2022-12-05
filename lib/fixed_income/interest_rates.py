@@ -141,6 +141,25 @@ class Treasuries:
         return delta
 
 
+    def points_in_time(self):
+        
+        data = self.df.reset_index()
+
+        x = data.loc[data.date == cal.closest_market_day(datetime( cal.today().year, 1, 2)).strftime('%Y-%m-%d') ]
+        y = data.loc[data.date == cal.closest_market_day(cal.previous_month_end(offset=-2)).strftime('%Y-%m-%d')]
+        z = data.loc[data.date == cal.closest_market_day(cal.previous_month_end(offset=-1)).strftime('%Y-%m-%d')]
+        # w = data.loc[data.date == cal.closest_market_day(cal.previous_month_end()).strftime('%Y-%m-%d')]
+        t = pd.DataFrame(data.iloc[-1]).T
+
+        df = pd.concat([x, y,z, t], axis=0).set_index('date').transpose()#.dropna(how='any', axis=0)
+        print(df)
+
+        return df
+
+
+
+
+
     def market_correlations(self, df, title, key="SPY"):
         import numpy as np
         fig, axes = plt.subplots(1, 4)

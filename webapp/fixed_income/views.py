@@ -46,6 +46,9 @@ def treasuries(request):
     recent_rates_change = ust.df.iloc[-10:].diff(axis=0).dropna(axis=0).round(2)
     recent_rates_change_response = webtools.df_to_highcharts_heatmap(recent_rates_change)
 
+    points_in_time = ust.points_in_time()
+    points_in_time_response = webtools.df_to_highcharts_linechart(points_in_time)
+
     change_since = ust.change_since()
     change_since_response = webtools.df_to_highcharts_clustered_bar(change_since)
 
@@ -63,6 +66,7 @@ def treasuries(request):
 
         'recent_rates_response':recent_rates_response,
         'recent_rates_change_response':recent_rates_change_response,
+        'points_in_time_response':points_in_time_response,
         'change_since_response':change_since_response,
         'stock_bond_corr_response':stock_bond_corr_response,
         'stock_ust_corr_response':stock_ust_corr_response,
@@ -81,11 +85,15 @@ def inflation(request):
 
     expected_inflation = inflation_rates.expected_inflation()
     expected_inflation_response = webtools.df_to_highcharts_linechart(expected_inflation)
-    print(expected_inflation_response)
+
+    
+    expected_inflation_10Y = inflation_rates.expected_inflation_10Y()
+    expected_inflation_10Y_response = webtools.df_to_highcharts_linechart(expected_inflation_10Y)
 
     context = {
         'breakeven_response':breakeven_response,
-        'expected_inflation_response':expected_inflation_response
+        'expected_inflation_response':expected_inflation_response,
+        'expected_inflation_10Y_response':expected_inflation_10Y_response
     }
 
     return render(request, 'inflation.html', context)

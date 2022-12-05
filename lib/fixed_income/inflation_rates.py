@@ -59,7 +59,6 @@ def expected_inflation():
 
     df = pd.concat([data, data2], axis=1).reset_index()
 
-
     df['index'] = df['index'].astype(str)
     df.set_index('index', inplace = True)
     df.dropna(axis=0, how = 'any', inplace = True)
@@ -72,3 +71,21 @@ def expected_inflation():
     print(df)
 
     return df
+
+
+
+def expected_inflation_10Y():
+    fred = fredapi.Fred(api_key=fred_api_key)
+
+    data = fred.get_series('T10YIE').to_frame().rename(columns={0:'10Y Breakeven'})
+    data2 = fred.get_series('DGS10').to_frame().rename(columns={0:'10Y Yield'})
+
+    df = pd.concat([data, data2], axis=1).reset_index()
+
+    df['index'] = df['index'].astype(str)
+    df.set_index('index', inplace = True)
+    df.dropna(axis=0, how = 'any', inplace = True)
+    
+    print(df)
+
+    return df    

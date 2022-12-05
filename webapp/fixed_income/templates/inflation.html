@@ -11,6 +11,11 @@
 <div id="body-content" style="padding-top:1%;">
 
     <figure class="highcharts-figure">
+        <div id="expectedInflation10Y"></div>
+    </figure>
+
+
+    <figure class="highcharts-figure">
         <div id="breakeven"></div>
     </figure>
 
@@ -175,6 +180,68 @@
 
 
 
+
+    let expected_inflation_10Y_response = JSON.parse("{{expected_inflation_10Y_response|escapejs}}")
+
+    const expectedInflation10YChart = Highcharts.chart('expectedInflation10Y', {
+
+        title: {
+            text: 'Expected Inflation'
+        },
+
+        subtitle: {
+            text: ''
+        },
+
+        yAxis: {
+            title: {
+                text: 'Yield (%)'
+            },
+            plotLines: [{
+                value: 0,
+                width: 4,
+                color: '#aaa',
+                zIndex: 10
+            }],
+        },
+
+        xAxis: {
+            categories: expected_inflation_10Y_response.rows
+        },
+
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+                // pointStart: date_start
+            }
+        },
+
+        series: expected_inflation_10Y_response.data,
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
+
+    });
 
 
 
