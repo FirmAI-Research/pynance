@@ -40,7 +40,7 @@ def treasuries(request):
     ust = Treasuries(years = ['2022'])
     print(ust.df)
 
-    rates_table = ust.df.copy().reset_index()
+    rates_table = ust.df.copy().reset_index().iloc[-20:, :]
     fp = os.path.join(fp_ajax, 'ratesTable.json')
     rates_table_response = webtools.df_to_dt(rates_table, fp)
 
