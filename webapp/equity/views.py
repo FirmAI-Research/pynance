@@ -11,6 +11,7 @@ sys.path.append(os.path.join(proj_root, 'lib', 'equity'))
 
 from fundamentals import Fundamentals, Ranks, DCF, Columns
 from attribution import Attribution, FammaFrench
+import etf_sectors as etf
 import webtools
 
 fp_ajax = os.path.join( Path(__file__).resolve().parent, 'ajax')
@@ -196,13 +197,51 @@ def sector_performance(request):
     return render(request, "sector_performance.html", context)
 
 
+def etf_sector_performance(request):
+    
+    df = etf.get_sector_etf_performance(start_date = '2022-01-01')
+
+    df = df.multiply(100)
+
+    print(df)
+
+    df.index = ['1D', '1W', '1M','3M', '6M', 'YTD']
+    
+    print(df)
+
+    sector_performance1d = webtools.df_to_highcharts_clustered_bar(df.loc['1D'].to_frame(), colors = True, single_series=True)
+    sector_performance1w = webtools.df_to_highcharts_clustered_bar(df.loc['1W'].to_frame(), colors = True, single_series=True)
+    sector_performance1m = webtools.df_to_highcharts_clustered_bar(df.loc['1M'].to_frame(), colors = True, single_series=True)
+    sector_performance3m = webtools.df_to_highcharts_clustered_bar(df.loc['3M'].to_frame(), colors = True, single_series=True)
+    sector_performanceYtd = webtools.df_to_highcharts_clustered_bar(df.loc['YTD'].to_frame(), colors = True, single_series=True)
+
+    context = {
+
+        'sector_performance1d':sector_performance1d,
+        'sector_performance1w':sector_performance1w,
+        'sector_performance1m':sector_performance1m,
+        'sector_performance3m':sector_performance3m,
+        'sector_performanceYtd':sector_performanceYtd,
+        
+    }
+
+
+    return render(request, "etf_sector_performance.html", context)
+
+
+
+
+
+
+
 from django.views.decorators.csrf import csrf_protect 
 @csrf_protect 
 def attribution(request):
 
-    ticker = str(request.POST.get("tickers"))
+    usr_input = str(request.POST.get("tickers"))
+    print(usr_input)
+    ticker = 'XLF' if usr_input in ['None', None, ['None']] else usr_input
     print(ticker)
-    ticker = 'XLF' if ticker in ['None', None, ['None']] else ticker
 
     atr = Attribution()
     holdings = atr.get_holdings(ticker) # ETF's
@@ -214,7 +253,7 @@ def attribution(request):
 
     context = {
         "model_summary": ff.summary.as_html().replace('<table class="simpletable">', '').replace('</table>', '',),
-        'ticker': ticker,
+        'ticker': ticker.upper(),
 
     }
     return render(request, "attribution.html", context)

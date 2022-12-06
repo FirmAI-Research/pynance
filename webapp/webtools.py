@@ -38,7 +38,15 @@ def df_to_highcharts_heatmap(df):
     return response
 
 
-def df_to_highcharts_clustered_bar(df):
+def df_to_highcharts_clustered_bar(df, colors=False, single_series = False):
+
+    color_set = ['#2f7ed8', '#0d233a', '#8bbc21', '#910000', '#1aadce',
+        '#492970', '#f28f43', '#77a1e5', '#c42525', '#a6c96a', '#B5CA92']
+
+    import seaborn as sns
+    palette = sns.color_palette("Set2", 20).as_hex()
+    print(palette)
+
 
     df = df.round(2)
 
@@ -49,16 +57,33 @@ def df_to_highcharts_clustered_bar(df):
     for ixcol, col in enumerate(columns):
         values = []
 
-        for ixrow, row in enumerate(rows):
-            values.append(df.iloc[ixrow, ixcol])
+        if single_series:
+            for ixrow, row in enumerate(rows):
+                values.append({
+                    "y":df.iloc[ixrow, ixcol],
+                    "color":palette[ixrow]
+                })
+   
+        else:
+            for ixrow, row in enumerate(rows):
+                values.append(df.iloc[ixrow, ixcol])
 
-        data.append({
-            "name": df.columns[ixcol],
-            "data": values,
-            "stack": ixcol
-        })
-    
+        if colors:
+            data.append({
+                "name": df.columns[ixcol],
+                "data": values,
+                "stack": ixcol,
+                "color":color_set[ixcol]
+            })
+        else:
+            data.append({
+                "name": df.columns[ixcol],
+                "data": values,
+                "stack": ixcol
+            })
+        
     json_data = {'rows':rows, 'columns':columns, 'data':data}
+
 
     response = json.dumps(json_data)
 

@@ -12,42 +12,30 @@
 
 <div id="body-content" style="padding-top:1%;">
 
-    <p class="highcharts-description">
-        Sector performance is calculated using a custom market cap weighted index. Constituent weightings are determined
-        using a market capitalization based on shares outstanding reported in the most recent quarterly report. Prices are updated daily. The index constituents include all tickers with in a sector. Shares
-        in the index are assigned based on the proportion of a companies market capitalization to the entire index's
-        market capitalization.
-        The Index was intially constructed using data from January 1, 2022 and needs to be adjusted by recalculating
-        the index divisor as constituent companies with in each sector change over time.
-    </p>
 
-
-    <p>Most recent data as of December 2, 2022</p>
-
-    <h2>1D</h2>
     <figure class="highcharts-figure">
         <div id="chart1d"></div>
     </figure>
 
 
-    <h2>1W</h2>
     <figure class="highcharts-figure">
         <div id="chart1w"></div>
     </figure>
 
-    <h2>1M</h2>
     <figure class="highcharts-figure">
         <div id="chart1m"></div>
     </figure>
 
 
-    <h2>3M</h2>
     <figure class="highcharts-figure">
         <div id="chart3m"></div>
     </figure>
 
+    <figure class="highcharts-figure">
+        <div id="chart6m"></div>
+    </figure>
 
-    <h2>YTD</h2>
+
     <figure class="highcharts-figure">
         <div id="chartYtd"></div>
     </figure>
@@ -99,12 +87,13 @@
         },
 
         title: {
-            text: 'Performance'
+            text: '1 Day'
         },
 
         xAxis: {
             categories: sector_performance_response.rows
         },
+        legend:{ enabled:false },
 
         yAxis: {
             allowDecimals: false,
@@ -125,7 +114,8 @@
         plotOptions: {
             column: {
                 stacking: 'normal'
-            }
+            },
+            
         },
 
         series: sector_performance_response.data
@@ -145,12 +135,13 @@
         },
 
         title: {
-            text: 'Performance'
+            text: '1 Week'
         },
 
         xAxis: {
             categories: sector_performance_response1w.rows
         },
+        legend:{ enabled:false },
 
         yAxis: {
             allowDecimals: false,
@@ -191,12 +182,13 @@
         },
 
         title: {
-            text: 'Performance'
+            text: '1 Month'
         },
 
         xAxis: {
             categories: sector_performance_response1m.rows
         },
+        legend:{ enabled:false },
 
         yAxis: {
             allowDecimals: false,
@@ -238,12 +230,13 @@
         },
 
         title: {
-            text: 'Performance'
+            text: '3 Months'
         },
 
         xAxis: {
             categories: sector_performance_response3m.rows
         },
+        legend:{ enabled:false },
 
         yAxis: {
             allowDecimals: false,
@@ -272,6 +265,55 @@
 
 
 
+    
+    let sector_performance_response6m = JSON.parse("{{sector_performance3m|escapejs}}")
+
+    let min_sector_performance6m_value = getMinimumValue(sector_performance_response6m.data)
+    let max_sector_performance6m_value = getMaximumValue(sector_performance_response6m.data)
+
+    const changeSinceChart6m = Highcharts.chart('chart6m', {
+
+        chart: {
+            type: 'column'
+        },
+
+        title: {
+            text: '6 Months'
+        },
+
+        xAxis: {
+            categories: sector_performance_response6m.rows
+        },
+        legend:{ enabled:false },
+
+        yAxis: {
+            allowDecimals: false,
+            min: min_sector_performance6m_value,
+            max: max_sector_performance6m_value,
+            title: {
+                text: 'Change'
+            }
+        },
+
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.x + '</b><br/>' +
+                    this.series.name + ': ' + this.y + '%' + '<br/>'
+            }
+        },
+
+        plotOptions: {
+            column: {
+                stacking: 'normal'
+            }
+        },
+
+        series: sector_performance_response6m.data
+    });
+
+
+
+
     let sector_performance_responseYtd = JSON.parse("{{sector_performanceYtd|escapejs}}")
 
     let min_sector_performanceYtd_value = getMinimumValue(sector_performance_responseYtd.data)
@@ -284,12 +326,13 @@
         },
 
         title: {
-            text: 'Performance'
+            text: 'Year to Date'
         },
 
         xAxis: {
             categories: sector_performance_responseYtd.rows
         },
+        legend:{ enabled:false },
 
         yAxis: {
             allowDecimals: false,
@@ -327,13 +370,6 @@
     });
 
 
-    let dropdowns = document.querySelectorAll('.dropdown-toggle')
-        dropdowns.forEach((dd) => {
-            dd.addEventListener('click', function (e) {
-                var el = this.nextElementSibling
-                el.style.display = el.style.display === 'block' ? 'none' : 'block'
-            })
-        })
 </script>
 
 

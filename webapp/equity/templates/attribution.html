@@ -4,28 +4,52 @@
 
 {% block content %}
 <h1>Performance Attribution</h1>
+<br><br>
 
 <form action="" method="POST">
     {% csrf_token %}
 
     <div style="display:block">
 
-        <div class="form-group" style="width:15%; float:left">
-            <div style="display:inline">
-                
-                <div style = "display:inline-blocl;float:left">
-                    <input type="radio" name="gender" value="male"> ETF
-                    <input type="radio" name="gender" value="female"> Custom
-                </div>
-                
-                
-                <input class="form-control" name='tickers' id="tickers" placeholder="ETF">
-                <label for="tickers" style = "color:#3C4754">Enter a ticker for an ETF, or select the "Custom" radio button to load a portfolio of equity tickers and weights via excel. </label>
-                <button type="submit" name="submit" class="btn btn-sm btn-block"
-                    style="padding-top:1%;float:left;border-color: #3C4754;color:#3C4754; ">Run</button>
-                    <div class="card-header">
-                        {{ticker}}
+        <div class="container">
+
+            <div class='row'>
+
+                <div class='col-6 col-md-4'>
+
+                    <div class="form-group" style="">
+                        <div style="display:inline">
+
+                            <div style="">
+                                <input type="radio" name="gender" value="male"> ETF
+                                <input type="radio" name="gender" value="female"> Custom
+                            </div>
+
+
+                            <input class="form-control" name='tickers' id="tickers" placeholder="ETF">
+                            <label for="tickers" style="color:#3C4754">Enter a ticker for an ETF, or select the "Custom"
+                                radio
+                                button to load a portfolio of equity tickers and weights via excel. </label>
+                            <button type="submit" name="submit" class="btn btn-sm btn-block"
+                                style="padding-top:1%;float:left;border-color: #3C4754;color:#3C4754; ">Run</button>
+
+                            <div class="card-body">
+                            <p>Selected: {{ticker}}</p>
+                            </div>
+                        </div>
                     </div>
+                </div>
+
+                <div class='col-12 col-md-8'>
+                    <div style="">
+                        <!--text-align: center; ; font-size:100%;margin-left: auto; margin-right: auto;  -->
+                        <h3 style="text-align: center;">OLS Regression Results</h3>
+                        <table style='font-family:monospace;'>
+                            {{model_summary|safe }}
+                        </table>
+                    </div>
+
+                </div>
 
             </div>
         </div>
@@ -115,12 +139,6 @@
 
 <div id="ff" class="tab-pane fade active show">
 
-    <div style="text-align: center; ">
-        <h3>OLS Regression Results</h3>
-        <table style='font-family:monospace;width:50%; font-size:100%;margin-left: auto; margin-right: auto;'>
-            {{model_summary|safe }}
-        </table>
-    </div>
 
     <!-- <div>
         <img src='{% static "img/ff_performance_attribution.png" %}' alt="My image" width=100%
@@ -138,14 +156,6 @@
 
     <script>
 
-        // Data Picker Initialization
-        $('.datepicker_strt').datepicker({
-            // inline: true
-        });
-
-        $('.datepicker_end').datepicker({
-            // inline: true
-        });
 
         $(function () {
             // Sidebar toggle behavior
