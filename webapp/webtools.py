@@ -65,7 +65,7 @@ def df_to_highcharts_clustered_bar(df):
     return response
 
 
-def df_to_highcharts_linechart(df):
+def df_to_highcharts_linechart(df, dualAxis=False):
 
     df = df.round(2)
 
@@ -79,11 +79,18 @@ def df_to_highcharts_linechart(df):
         for ixrow, row in enumerate(rows):
             values.append(df.iloc[ixrow, ixcol])
 
-        data.append({
-            "name": df.columns[ixcol],
-            "data": values,
-        })
-    
+        if dualAxis and ixcol == 0:
+            data.append({
+                "name": df.columns[ixcol],
+                "data": values,
+                "yAxis":1
+            })
+        else:
+            data.append({
+                "name": df.columns[ixcol],
+                "data": values,
+            })
+            
     json_data = {'rows':rows, 'columns':columns, 'data':data}
 
     response = json.dumps(json_data)

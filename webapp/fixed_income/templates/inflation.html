@@ -10,6 +10,7 @@
 
 <div id="body-content" style="padding-top:1%;">
 
+
     <figure class="highcharts-figure">
         <div id="expectedInflation10Y"></div>
     </figure>
@@ -26,10 +27,14 @@
     </figure>
 
 
+    <div class='table-div'>
+        <h2>YoY Percent Change</h2>
+        <table id="yoyPercentChange" class="display" width="100%"></table>
+    </div>
+
 
 </div>
 {% endblock content %}
-
 
 
 {% block js %}
@@ -193,17 +198,34 @@
             text: ''
         },
 
-        yAxis: {
-            title: {
-                text: 'Yield (%)'
+        yAxis: [{ // Primary yAxis
+            labels: {
+                format: '{value}%',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
             },
-            plotLines: [{
-                value: 0,
-                width: 4,
-                color: '#aaa',
-                zIndex: 10
-            }],
-        },
+            title: {
+                text: 'Nominal',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            }
+        }, { // Secondary yAxis
+            title: {
+                text: 'Breakeven',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            labels: {
+                format: '{value}%',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            opposite: true
+        }],
 
         xAxis: {
             categories: expected_inflation_10Y_response.rows
@@ -244,6 +266,23 @@
     });
 
 
+    let percent_change_YoY_response = JSON.parse("{{percent_change_YoY_response|escapejs}}");
+      $('#yoyPercentChange').DataTable({
+        data: percent_change_YoY_response.data,
+        columns: percent_change_YoY_response.columns,
+        order: [],
+        pageLength: 20,
+        columnDefs: [
+          {
+            "orderable": false,
+            "render": $.fn.dataTable.render.number(',', '.', 2, '', '%'),
+            "targets": [1, 2, 3, 4],
+          }
+        ],
+      });
+
+
+
 
     $(function () {
         // Sidebar toggle behavior
@@ -254,6 +293,6 @@
         });
     });
 
-    
+
 </script>
 {% endblock js %}

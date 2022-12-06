@@ -88,12 +88,19 @@ def inflation(request):
 
     
     expected_inflation_10Y = inflation_rates.expected_inflation_10Y()
-    expected_inflation_10Y_response = webtools.df_to_highcharts_linechart(expected_inflation_10Y)
+    expected_inflation_10Y_response = webtools.df_to_highcharts_linechart(expected_inflation_10Y, dualAxis=True)
+
+
+    percent_change_YoY = inflation_rates.percent_change_YoY()
+    fp = os.path.join(fp_ajax, 'yoyPercentChange.json')
+    percent_change_YoY_response = webtools.df_to_dt(percent_change_YoY, fp)
+
 
     context = {
         'breakeven_response':breakeven_response,
         'expected_inflation_response':expected_inflation_response,
-        'expected_inflation_10Y_response':expected_inflation_10Y_response
+        'expected_inflation_10Y_response':expected_inflation_10Y_response,
+        'percent_change_YoY_response':percent_change_YoY_response
     }
 
     return render(request, 'inflation.html', context)

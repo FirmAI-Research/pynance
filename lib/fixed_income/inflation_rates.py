@@ -89,3 +89,30 @@ def expected_inflation_10Y():
     print(df)
 
     return df    
+
+
+def percent_change_YoY():
+    fred = fredapi.Fred(api_key=fred_api_key)
+
+    inflation = fred.get_series('PCE').to_frame().rename(columns={0:'PCE'}).merge( 
+    fred.get_series('PCEPILFE').to_frame().rename(columns={0:'PCEPILFE'}), left_index=True, right_index=True).merge( # Core PCE 
+    fred.get_series('CPIAUCSL').to_frame().rename(columns={0:'CPIAUCSL'}), left_index=True, right_index=True).merge( # CPI 
+    fred.get_series('CPILFESL').to_frame().rename(columns={0:'CPILFESL'}), left_index=True, right_index=True) # Core CPI
+
+    inflation_yoy = (inflation / inflation.shift(12)) -1
+
+    inflation_yoy = inflation_yoy.iloc[-10:]
+
+    inflation_yoy = inflation_yoy.multiply(100)
+
+    inflation_yoy.reset_index(inplace = True)
+
+    inflation_yoy['index'] = inflation_yoy['index'].astype(str)
+
+    # inflation_yoy.set_index('index', inplace = True)
+
+    print(inflation_yoy)
+    return inflation_yoy
+
+
+
