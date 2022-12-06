@@ -44,6 +44,13 @@
             <figure class="highcharts-figure">
                 <div id="recent_rates_change"></div>
             </figure>
+
+
+            <div class='table-div' style = "width:100%; margin-left:auto; margin-right: auto;">
+                <table id="rates_table" class="display" style="width:100%">
+                </table>
+            </div>
+
         </div>
 
 
@@ -56,7 +63,7 @@
             <h2>Points in Time</h2>
             <figure class="highcharts-figure">
                 <div id="pointsInTime"></div>
-            </figure>            
+            </figure>
         </div>
 
 
@@ -373,7 +380,7 @@
 
     });
 
-    
+
     let points_in_time_response = JSON.parse("{{points_in_time_response|escapejs}}")
     let pit_date_start = new Date(points_in_time_response.rows[0]).getFullYear();
     console.log(pit_date_start)
@@ -483,6 +490,42 @@
         },
 
         series: change_since_response.data
+    });
+
+
+    let rates_table_response = JSON.parse("{{rates_table_response|escapejs}}");
+    var table = $('#rates_table').DataTable({
+        data: rates_table_response.data,
+        columns: rates_table_response.columns,
+        order: [[0, "asc"]],
+        paging: false,
+        stateSave: true,
+        searching: false,        
+        pageLength: 20,
+        columnDefs: [
+            {
+                "orderable": false,
+                "render": $.fn.dataTable.render.number(',', '.', 2, '', ''),
+                "targets": [1, 2, 3, 4, 5],
+            }
+        ],
+        // rowCallback only has the current row data with in context. custom function to save each row's data on callback iteration and reference it for comparison in the next row
+        rowCallback: function (row, data, index) {
+            if (typeof previousRowData === 'undefined') {
+                previousRowData = data                                    // the previousRowData variable will not exist until the end of the first iteration of the rowCallback function
+            }
+            else {
+                for (let i = 1; i < data.length + 1; i++) {                      // iterate through each column in the row (data) array excluding the date index
+                    if (data[i] > previousRowData[i]) {
+                        $(row).find(`td:eq(${i})`).css('color', 'green'); // string literal uses backtick key
+                    }
+                    else if (data[i] < previousRowData[i]) {
+                        $(row).find(`td:eq(${i})`).css('color', 'red');
+                    }
+                }
+                previousRowData = data  // set previous rows data eq to the row that was just iterated through
+            }
+        }
     });
 
 

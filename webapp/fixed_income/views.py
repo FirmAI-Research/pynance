@@ -40,6 +40,10 @@ def treasuries(request):
     ust = Treasuries(years = ['2022'])
     print(ust.df)
 
+    rates_table = ust.df.copy().reset_index()
+    fp = os.path.join(fp_ajax, 'ratesTable.json')
+    rates_table_response = webtools.df_to_dt(rates_table, fp)
+
     recent_rates = ust.df.iloc[-10:]
     recent_rates_response = webtools.df_to_highcharts_heatmap(recent_rates)
     
@@ -64,6 +68,7 @@ def treasuries(request):
 
     context = {
 
+        'rates_table_response':rates_table_response,
         'recent_rates_response':recent_rates_response,
         'recent_rates_change_response':recent_rates_change_response,
         'points_in_time_response':points_in_time_response,
